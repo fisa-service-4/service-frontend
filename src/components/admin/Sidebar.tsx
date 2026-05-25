@@ -2,25 +2,30 @@
 
 import { useState } from 'react';
 import { X, ChevronDown, ChevronUp } from 'lucide-react';
+import type { NavItem } from '@/types/admin';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  onNavChange: (nav: NavItem) => void;
 }
 
 interface MenuItem {
   label: string;
+  nav?: NavItem;
   subItems?: string[];
 }
 
 const menuItems: MenuItem[] = [
-  { label: '대시보드' },
+  { label: '대시보드', nav: 'dashboard' },
   {
     label: '회원 관리',
+    nav: 'users',
     subItems: ['전체 사용자 목록', '사용자 상세 정보'],
   },
   {
     label: '로그 관리',
+    nav: 'logs',
     subItems: [
       '로그인 이력 조회',
       '거래 이력 조회',
@@ -30,10 +35,10 @@ const menuItems: MenuItem[] = [
       'API 호출 이력 조회',
     ],
   },
-  { label: '설정' },
+  { label: '설정', nav: 'settings' },
 ];
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onNavChange }: SidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
     '회원 관리': false,
     '로그 관리': false,
@@ -80,7 +85,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {menuItems.map((item) => (
             <div key={item.label}>
               <button
-                onClick={() => item.subItems && toggleMenu(item.label)}
+                onClick={() => {
+                  if (item.subItems) {
+                    toggleMenu(item.label);
+                  } else if (item.nav) {
+                    onNavChange(item.nav);
+                    onClose();
+                  }
+                }}
                 className="w-full px-6 py-3 text-left text-white hover:bg-slate-800 transition-colors flex items-center justify-between"
               >
                 <span>{item.label}</span>
@@ -95,6 +107,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                   {item.subItems.map((subItem) => (
                     <button
                       key={subItem}
+                      onClick={() => { item.nav && onNavChange(item.nav); onClose(); }}
                       className="w-full px-12 py-2.5 text-left text-slate-300 hover:bg-slate-800 transition-colors text-sm"
                     >
                       {subItem}
