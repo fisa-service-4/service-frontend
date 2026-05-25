@@ -5,21 +5,31 @@ import { Menu, User } from 'lucide-react';
 import Sidebar from '@/components/admin/Sidebar';
 import DashboardView from '@/components/admin/DashboardView';
 import LogsView from '@/components/admin/LogsView';
+import LoginLogView from '@/components/admin/LoginLogView';
+import AiAgentLogView from '@/components/admin/AiAgentLogView';
+import UsersView from '@/components/admin/UsersView';
+import SettingsView from '@/components/admin/SettingsView';
 import BottomNav from '@/components/admin/BottomNav';
 import type { NavItem } from '@/types/admin';
 
+type LogSubView = 'login' | 'ai' | 'transaction' | 'notification' | 'error' | 'api' | null;
+
 export default function AdminPage() {
-  const [selectedDate, setSelectedDate] = useState('2026-05-24');
+  const [selectedDate]                  = useState('2026-05-24');
   const [activeNav, setActiveNav]       = useState<NavItem>('dashboard');
   const [sidebarOpen, setSidebarOpen]   = useState(false);
+  const [logSubView, setLogSubView]     = useState<LogSubView>(null);
 
-  void setSelectedDate;
+  const handleNavChange = (nav: NavItem) => {
+    setActiveNav(nav);
+    setLogSubView(null);
+  };
 
   return (
     <div className="size-full bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 flex items-center justify-center">
       <div className="relative w-[393px] h-[852px] bg-white shadow-2xl overflow-hidden flex flex-col">
 
-        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onNavChange={handleNavChange} />
 
         {/* 헤더 */}
         <div className="px-5 py-4 shrink-0 bg-gradient-to-r from-slate-800 to-slate-900">
@@ -38,19 +48,26 @@ export default function AdminPage() {
 
         {/* 메인 콘텐츠 */}
         {activeNav === 'dashboard' && <DashboardView selectedDate={selectedDate} />}
-        {activeNav === 'logs'      && <LogsView />}
-        {activeNav === 'users'     && (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-500">사용자 관리 페이지 (준비 중)</p>
-          </div>
+
+        {activeNav === 'logs' && logSubView === null && (
+          <LogsView onSelect={(key) => setLogSubView(key)} />
         )}
-        {activeNav === 'settings'  && (
+        {activeNav === 'logs' && logSubView === 'login' && (
+          <LoginLogView onBack={() => setLogSubView(null)} />
+        )}
+        {activeNav === 'logs' && logSubView === 'ai' && (
+          <AiAgentLogView onBack={() => setLogSubView(null)} />
+        )}
+        {activeNav === 'logs' && logSubView !== null && logSubView !== 'login' && logSubView !== 'ai' && (
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-500">설정 페이지 (준비 중)</p>
+            <p className="text-gray-500">준비 중</p>
           </div>
         )}
 
-        <BottomNav activeNav={activeNav} onNavChange={setActiveNav} />
+        {activeNav === 'users' && <UsersView />}
+        {activeNav === 'settings' && <SettingsView />}
+
+        <BottomNav activeNav={activeNav} onNavChange={handleNavChange} />
       </div>
     </div>
   );
