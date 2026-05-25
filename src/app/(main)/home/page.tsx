@@ -5,6 +5,7 @@ import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
+import ChatBotView from '@/components/main/ChatBotView';
 
 /* ── 캘린더 데이터 (2026년 5월 기준) ── */
 // 5월 1일 = 목요일(4) → 앞에 일~수 4칸은 4월 말
@@ -33,6 +34,20 @@ export default function HomePage() {
   const [activeNav, setActiveNav]       = useState<MainNavItem>('home');
   const [month, setMonth]               = useState(5);
   const [showRegister, setShowRegister] = useState(false);
+  const [showChat, setShowChat]         = useState(false);
+
+  if (showChat) {
+    return (
+      <ChatBotView
+        onClose={() => setShowChat(false)}
+        activeNav={activeNav}
+        onNavChange={(nav) => {
+          setActiveNav(nav);
+          setShowChat(false);
+        }}
+      />
+    );
+  }
 
   if (showRegister) {
     return (
@@ -43,8 +58,20 @@ export default function HomePage() {
     );
   }
 
+  if (activeNav !== 'home') {
+    const labels: Record<string, string> = { assets: '자산', stocks: '증권', mypage: '마이페이지' };
+    return (
+      <div className="flex flex-col h-screen bg-white">
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-400 text-sm">{labels[activeNav]} 준비 중</p>
+        </div>
+        <BottomNav activeNav={activeNav} onNavChange={setActiveNav} />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-white relative">
 
       {/* 헤더 */}
       <div className="flex items-center justify-between px-5 py-4 shrink-0">
@@ -57,7 +84,7 @@ export default function HomePage() {
       </div>
 
       {/* 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-4 relative">
 
         {/* 가상 월급 카드 */}
         <div className="bg-white border-2 border-sky-500 rounded-2xl p-5">
@@ -217,6 +244,36 @@ export default function HomePage() {
         </div>
 
       </div>
+
+      {/* AI 상담사 플로팅 버튼 */}
+      <button onClick={() => setShowChat(true)} className="absolute bottom-20 right-5 z-10 flex flex-col items-center drop-shadow-xl">
+        {/* 헤드셋 */}
+        <div className="relative w-9 h-4 mb-[-3px]">
+          {/* 헤드밴드 */}
+          <div className="absolute inset-x-1 top-0 h-3 border-t-[2px] border-l-[2px] border-r-[2px] border-sky-400 rounded-t-full" />
+          {/* 왼쪽 귀걸이 */}
+          <div className="absolute left-0 top-2 w-1.5 h-2 bg-sky-400 rounded-sm" />
+          {/* 오른쪽 귀걸이 */}
+          <div className="absolute right-0 top-2 w-1.5 h-2 bg-sky-400 rounded-sm" />
+        </div>
+
+        {/* 얼굴 */}
+        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex flex-col items-center justify-center shadow-lg">
+          {/* 눈 */}
+          <div className="flex gap-2 mb-1">
+            <div className="w-1 h-1.5 bg-white rounded-full" />
+            <div className="w-1 h-1.5 bg-white rounded-full" />
+          </div>
+          {/* 입 */}
+          <div className="w-4 h-2 border-b-2 border-white rounded-b-full" />
+        </div>
+
+        {/* 마이크 붐 */}
+        <div className="self-end mr-1 mt-[-5px] flex items-center gap-0.5">
+          <div className="w-3 h-[2px] bg-sky-400 rounded-full" />
+          <div className="w-1.5 h-1.5 rounded-full bg-sky-400" />
+        </div>
+      </button>
 
       {/* 하단 탭 */}
       <BottomNav activeNav={activeNav} onNavChange={setActiveNav} />
