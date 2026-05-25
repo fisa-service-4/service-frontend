@@ -8,7 +8,7 @@ interface BottomNavProps {
 
 const navItems = [
   { key: 'dashboard' as NavItem, label: '대시보드',    icon: LayoutDashboard },
-  { key: 'users'     as NavItem, label: '사용자 관리', icon: UserCog         },
+  { key: 'users'     as NavItem, label: '회원 관리',   icon: UserCog         },
   { key: 'logs'      as NavItem, label: '로그 관리',   icon: FileText        },
   { key: 'settings'  as NavItem, label: '설정',        icon: Settings        },
 ];

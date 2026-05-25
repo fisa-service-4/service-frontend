@@ -7,6 +7,7 @@ import DashboardView from '@/components/admin/DashboardView';
 import LogsView from '@/components/admin/LogsView';
 import LoginLogView from '@/components/admin/LoginLogView';
 import AiAgentLogView from '@/components/admin/AiAgentLogView';
+import UsersView from '@/components/admin/UsersView';
 import BottomNav from '@/components/admin/BottomNav';
 import type { NavItem } from '@/types/admin';
 
@@ -62,11 +63,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {activeNav === 'users' && (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-gray-500">사용자 관리 페이지 (준비 중)</p>
-          </div>
-        )}
+        {activeNav === 'users' && <UsersView />}
         {activeNav === 'settings' && (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-gray-500">설정 페이지 (준비 중)</p>
