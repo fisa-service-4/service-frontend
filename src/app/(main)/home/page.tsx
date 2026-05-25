@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
+import ContractRegisterView from '@/components/main/ContractRegisterView';
 
 /* ── 캘린더 데이터 (2026년 5월 기준) ── */
 // 5월 1일 = 목요일(4) → 앞에 일~수 4칸은 4월 말
@@ -29,8 +30,18 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export default function HomePage() {
-  const [activeNav, setActiveNav] = useState<MainNavItem>('home');
-  const [month, setMonth]         = useState(5);
+  const [activeNav, setActiveNav]       = useState<MainNavItem>('home');
+  const [month, setMonth]               = useState(5);
+  const [showRegister, setShowRegister] = useState(false);
+
+  if (showRegister) {
+    return (
+      <ContractRegisterView
+        onBack={() => setShowRegister(false)}
+        onSubmit={() => setShowRegister(false)}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -77,7 +88,10 @@ export default function HomePage() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-bold text-gray-900">실수령액 캘린더</h2>
-            <button className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg">
+            <button
+              onClick={() => setShowRegister(true)}
+              className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg"
+            >
               + 등록
             </button>
           </div>
