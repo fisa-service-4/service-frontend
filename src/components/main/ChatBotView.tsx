@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Menu, ArrowRight, PlusCircle } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
+import { apiRequest } from '@/utils/apiClient';
 
 interface Message {
   id: number;
@@ -11,10 +12,11 @@ interface Message {
   content: string;
 }
 
-interface ChatSession {
-  id: number;
+interface SessionSummary {
+  sessionId: number;
   title: string;
-  messages: Message[];
+  status: string;
+  createdAt: string;
 }
 
 const GREETING: Message = {
@@ -30,54 +32,73 @@ interface ChatBotViewProps {
 }
 
 export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBotViewProps) {
-  const [messages, setMessages]     = useState<Message[]>([GREETING]);
-  const [input, setInput]           = useState('');
-  const [sidebarOpen, setSidebar]   = useState(false);
-  const [sessions, setSessions]     = useState<ChatSession[]>([]);
-  const [sessionId, setSessionId]   = useState(Date.now());
-  const bottomRef                   = useRef<HTMLDivElement>(null);
+  const [messages, setMessages]               = useState<Message[]>([GREETING]);
+  const [input, setInput]                     = useState('');
+  const [sidebarOpen, setSidebar]             = useState(false);
+  const [sessions, setSessions]               = useState<SessionSummary[]>([]);
+  const [currentSessionId, setCurrentSession] = useState<number | null>(null);
+  const [isSending, setIsSending]             = useState(false);
+  const bottomRef                             = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const saveCurrentSession = (msgs: Message[]) => {
-    const userMsg = msgs.find((m) => m.role === 'user');
-    if (!userMsg) return;
-    setSessions((prev) => {
-      const exists = prev.find((s) => s.id === sessionId);
-      if (exists) {
-        return prev.map((s) => s.id === sessionId ? { ...s, messages: msgs } : s);
-      }
-      return [{ id: sessionId, title: userMsg.content.slice(0, 20), messages: msgs }, ...prev];
+  const loadSessions = useCallback(async () => {
+    try {
+      const data = await apiRequest<{ content: SessionSummary[] }>('/ai/chat/sessions');
+      setSessions(data.content ?? []);
+    } catch {
+      // sidebar just stays empty on failure
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSessions();
+  }, [loadSessions]);
+
+  const ensureSession = async (): Promise<number> => {
+    if (currentSessionId !== null) return currentSessionId;
+    const data = await apiRequest<{ sessionId: number; status: string }>('/ai/chat/sessions', {
+      method: 'POST',
+      body: JSON.stringify({}),
     });
+    setCurrentSession(data.sessionId);
+    return data.sessionId;
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const text = input.trim();
-    if (!text) return;
+    if (!text || isSending) return;
 
     const userMsg: Message = { id: Date.now(), role: 'user', content: text };
-    const next = [...messages, userMsg];
-    setMessages(next);
-    saveCurrentSession(next);
+    setMessages((prev) => [...prev, userMsg]);
     setInput('');
-    // textarea 높이 초기화
     const ta = document.querySelector('textarea');
-    if (ta) { ta.style.height = 'auto'; }
+    if (ta) ta.style.height = 'auto';
+    setIsSending(true);
 
-    setTimeout(() => {
-      const aiMsg: Message = {
-        id: Date.now() + 1,
-        role: 'ai',
-        content: '죄송해요, 현재 AI 응답 기능은 준비 중이에요.\n곧 연결될 예정이에요!',
-      };
-      setMessages((prev) => {
-        const updated = [...prev, aiMsg];
-        saveCurrentSession(updated);
-        return updated;
+    try {
+      const sessionId = await ensureSession();
+      const data = await apiRequest<{
+        messageId: number;
+        role: string;
+        content: string;
+        actionRequired: boolean;
+      }>('/ai/chat/messages', {
+        method: 'POST',
+        body: JSON.stringify({ sessionId, message: text }),
       });
-    }, 600);
+      setMessages((prev) => [...prev, { id: data.messageId, role: 'ai', content: data.content }]);
+      loadSessions();
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now(), role: 'ai', content: 'AI 응답 생성에 실패했습니다. 잠시 후 다시 시도해주세요.' },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -88,16 +109,28 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
   };
 
   const startNewChat = () => {
-    setSessionId(Date.now());
+    setCurrentSession(null);
     setMessages([GREETING]);
     setInput('');
     setSidebar(false);
   };
 
-  const loadSession = (session: ChatSession) => {
-    setSessionId(session.id);
-    setMessages(session.messages);
+  const loadSession = async (session: SessionSummary) => {
     setSidebar(false);
+    setCurrentSession(session.sessionId);
+    try {
+      const data = await apiRequest<{
+        content: Array<{ messageId: number; role: string; content: string }>;
+      }>(`/ai/chat/sessions/messages?sessionId=${session.sessionId}`);
+      const msgs: Message[] = (data.content ?? []).map((m) => ({
+        id: m.messageId,
+        role: m.role === 'USER' ? 'user' : 'ai',
+        content: m.content,
+      }));
+      setMessages(msgs.length > 0 ? msgs : [GREETING]);
+    } catch {
+      setMessages([GREETING]);
+    }
   };
 
   return (
@@ -132,7 +165,7 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
                   <div className="space-y-1 overflow-y-auto">
                     {sessions.map((s) => (
                       <button
-                        key={s.id}
+                        key={s.sessionId}
                         onClick={() => loadSession(s)}
                         className="w-full text-left text-sm text-slate-200 py-2 px-2 rounded-lg hover:bg-slate-800 transition-colors truncate"
                       >
@@ -178,6 +211,13 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
               </div>
             </div>
           ))}
+          {isSending && (
+            <div className="flex justify-start">
+              <div className="bg-gray-200 text-gray-400 rounded-3xl rounded-bl-sm px-4 py-3 text-sm">
+                ...
+              </div>
+            </div>
+          )}
           <div ref={bottomRef} />
         </div>
 
@@ -199,7 +239,8 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
             />
             <button
               onClick={handleSend}
-              className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center shrink-0"
+              disabled={isSending}
+              className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center shrink-0 disabled:opacity-50"
             >
               <ArrowRight size={16} className="text-white" />
             </button>
