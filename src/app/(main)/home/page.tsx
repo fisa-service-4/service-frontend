@@ -6,6 +6,7 @@ import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
 import ChatBotView from '@/components/main/ChatBotView';
+import AssetsView from '@/components/main/AssetsView';
 
 /* ── 캘린더 데이터 (2026년 5월 기준) ── */
 // 5월 1일 = 목요일(4) → 앞에 일~수 4칸은 4월 말
@@ -58,8 +59,12 @@ export default function HomePage() {
     );
   }
 
+  if (activeNav === 'assets') {
+    return <AssetsView activeNav={activeNav} onNavChange={setActiveNav} />;
+  }
+
   if (activeNav !== 'home') {
-    const labels: Record<string, string> = { assets: '자산', stocks: '증권', mypage: '마이페이지' };
+    const labels: Record<string, string> = { stocks: '증권', mypage: '마이페이지' };
     return (
       <div className="flex flex-col h-screen bg-white">
         <div className="flex-1 flex items-center justify-center">
