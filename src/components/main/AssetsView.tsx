@@ -1,36 +1,37 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, ArrowLeft } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
 import { getAccounts } from '@/api/bank';
-import { getMyStockAccounts, getMyPortfolio } from '@/api/mydata';
-import type { BankAccount, Portfolio } from '@/types/bank';
+import { getAssetDashboard, connectMyData } from '@/api/mydata';
+import type { AssetDashboard } from '@/api/mydata';
+import type { BankAccount } from '@/types/bank';
 import TransferView from '@/components/main/TransferView';
 
 type AssetTab = 'all' | 'bank' | 'stock';
+type SubView = 'overview' | 'transfer' | 'connect';
 
 interface AssetsViewProps {
   activeNav: MainNavItem;
   onNavChange: (nav: MainNavItem) => void;
 }
 
-const BANK_NAME: Record<string, string> = {
-  '004': 'KB국민은행',
-  '011': 'NH농협은행',
-  '020': '우리은행',
-  '023': 'SC제일은행',
-  '027': '씨티은행',
-  '032': '부산은행',
-  '039': '경남은행',
-  '045': '새마을금고',
-  '071': '우체국',
-  '081': '하나은행',
-  '088': '신한은행',
-  '090': '카카오뱅크',
-  '092': '토스뱅크',
-};
+const INSTITUTIONS = [
+  { code: '004', name: 'KB국민은행' },
+  { code: '011', name: 'NH농협은행' },
+  { code: '020', name: '우리은행' },
+  { code: '023', name: 'SC제일은행' },
+  { code: '081', name: '하나은행' },
+  { code: '088', name: '신한은행' },
+  { code: '090', name: '카카오뱅크' },
+  { code: '092', name: '토스뱅크' },
+];
+
+const BANK_NAME: Record<string, string> = Object.fromEntries(
+  INSTITUTIONS.map((i) => [i.code, i.name])
+);
 
 const ACCOUNT_ROLE_LABEL: Record<string, string> = {
   DEPOSIT:   '입출금',
@@ -48,23 +49,37 @@ function SkeletonCard({ className = '' }: { className?: string }) {
 }
 
 export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) {
-  const [subView, setSubView]           = useState<'overview' | 'transfer'>('overview');
-  const [activeTab, setActiveTab]       = useState<AssetTab>('all');
-  const [accounts, setAccounts]         = useState<BankAccount[]>([]);
-  const [portfolio, setPortfolio]       = useState<Portfolio | null>(null);
-  const [loading, setLoading]           = useState(true);
+  const [subView, setSubView]         = useState<SubView>('overview');
+  const [activeTab, setActiveTab]     = useState<AssetTab>('all');
+  const [accounts, setAccounts]       = useState<BankAccount[]>([]);
+  const [dashboard, setDashboard]     = useState<AssetDashboard | null>(null);
+  const [loading, setLoading]         = useState(true);
+
+  const [connectLoading, setConnectLoading] = useState(false);
+  const [connectError, setConnectError]     = useState('');
 
   useEffect(() => {
-    Promise.all([getAccounts(), getMyStockAccounts()])
-      .then(([accs, { content: stockAccounts }]) => {
-        setAccounts(accs);
-        if (stockAccounts.length === 0) return;
-        return getMyPortfolio(stockAccounts[0].accountId);
-      })
-      .then((port) => { if (port) setPortfolio(port); })
-      .catch(() => { setAccounts([]); setPortfolio(null); })
+    Promise.all([getAccounts(), getAssetDashboard()])
+      .then(([accs, dash]) => { setAccounts(accs); setDashboard(dash); })
+      .catch(() => { setAccounts([]); setDashboard(null); })
       .finally(() => setLoading(false));
   }, []);
+
+  async function handleConnect(provider: string) {
+    setConnectLoading(true);
+    setConnectError('');
+    try {
+      await connectMyData(provider);
+      const [accs, dash] = await Promise.all([getAccounts(), getAssetDashboard()]);
+      setAccounts(accs);
+      setDashboard(dash);
+      setSubView('overview');
+    } catch (err) {
+      setConnectError(err instanceof Error ? err.message : '연동 중 오류가 발생했습니다.');
+    } finally {
+      setConnectLoading(false);
+    }
+  }
 
   if (subView === 'transfer') {
     return (
@@ -77,6 +92,43 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
     );
   }
 
+  if (subView === 'connect') {
+    return (
+      <div className="flex flex-col h-screen bg-white">
+        <div className="flex items-center px-5 py-4 shrink-0 border-b border-gray-100">
+          <button onClick={() => { setSubView('overview'); setConnectError(''); }} className="mr-3">
+            <ArrowLeft size={22} className="text-gray-800" />
+          </button>
+          <h1 className="text-base font-bold text-gray-900">계좌 연결</h1>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-5">
+          <p className="text-sm text-gray-500 mb-5">연결할 금융기관을 선택해 주세요.</p>
+          <div className="grid grid-cols-2 gap-3">
+            {INSTITUTIONS.map((inst) => (
+              <button
+                key={inst.code}
+                onClick={() => handleConnect(inst.code)}
+                disabled={connectLoading}
+                className="py-4 bg-white border-2 border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 active:border-sky-500 active:text-sky-600 disabled:opacity-50 transition-colors"
+              >
+                {inst.name}
+              </button>
+            ))}
+          </div>
+          {connectError && (
+            <p className="text-xs text-red-500 mt-4 text-center">{connectError}</p>
+          )}
+          {connectLoading && (
+            <p className="text-xs text-gray-400 mt-4 text-center">연동 중...</p>
+          )}
+        </div>
+
+        <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+      </div>
+    );
+  }
+
   const displayAccounts =
     activeTab === 'bank'
       ? accounts.filter((a) => a.accountRole !== 'STOCK')
@@ -85,8 +137,8 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
       : accounts;
 
   const hasAccounts = accounts.length > 0;
-  const bankRatio   = portfolio?.assetRatio.cash  ?? 0;
-  const stockRatio  = portfolio?.assetRatio.stock ?? 0;
+  const bankRatio   = dashboard ? Math.round(100 - dashboard.investmentRatio) : 0;
+  const stockRatio  = dashboard ? Math.round(dashboard.investmentRatio) : 0;
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -118,7 +170,7 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
             <>
               <p className="text-xs text-gray-400 mb-1">총 자산</p>
               <p className="text-3xl font-bold text-gray-900 mb-2">
-                {formatKRW(portfolio?.totalAsset ?? 0)}
+                {formatKRW(dashboard?.totalAssetAmount ?? 0)}
               </p>
               <span className="inline-flex items-center gap-1 bg-sky-50 text-sky-600 text-xs font-bold px-2.5 py-1 rounded-lg border border-sky-200 mb-4">
                 지난달 대비 -
@@ -127,13 +179,13 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
                 <div className="flex-1 bg-sky-50 border border-sky-100 rounded-xl p-3">
                   <p className="text-xs text-gray-400 mb-1">은행 잔액</p>
                   <p className="text-sm font-bold text-gray-900">
-                    {formatKRW(portfolio?.cashAsset ?? 0)}
+                    {formatKRW(dashboard?.totalBankAssetAmount ?? 0)}
                   </p>
                 </div>
                 <div className="flex-1 bg-sky-50 border border-sky-100 rounded-xl p-3">
                   <p className="text-xs text-gray-400 mb-1">증권 평가 금액</p>
                   <p className="text-sm font-bold text-gray-900">
-                    {formatKRW(portfolio?.stockAsset ?? 0)}
+                    {formatKRW(dashboard?.totalStockAssetAmount ?? 0)}
                   </p>
                 </div>
               </div>
@@ -145,7 +197,6 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
         <div>
           <h2 className="text-base font-bold text-gray-900 mb-3">자산 구성</h2>
           <div className="bg-white border-2 border-sky-500 rounded-2xl p-5 space-y-4">
-
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" />
               <span className="text-sm text-gray-700 w-8 shrink-0">은행</span>
@@ -159,7 +210,6 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
                 {bankRatio}%
               </span>
             </div>
-
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-sky-200 shrink-0" />
               <span className="text-sm text-gray-700 w-8 shrink-0">증권</span>
@@ -173,7 +223,6 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
                 {stockRatio}%
               </span>
             </div>
-
           </div>
         </div>
 
@@ -210,7 +259,10 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
                 전체 주식 보기
               </button>
             ) : (
-              <button className="bg-sky-50 text-sky-600 text-xs font-bold px-3 py-1.5 rounded-lg border border-sky-200">
+              <button
+                onClick={() => setSubView('connect')}
+                className="bg-sky-50 text-sky-600 text-xs font-bold px-3 py-1.5 rounded-lg border border-sky-200"
+              >
                 + 계좌 추가
               </button>
             )}
@@ -250,7 +302,6 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
               )}
             </div>
           ) : (
-            /* 빈 상태 */
             <div className="bg-white border-2 border-sky-500 rounded-2xl p-8 flex flex-col items-center text-center">
               <div className="w-14 h-14 bg-sky-50 border-2 border-sky-500 rounded-full flex items-center justify-center mb-4">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
@@ -269,7 +320,10 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
                 <br />
                 한눈에 볼 수 있어요
               </p>
-              <button className="w-full py-3 bg-sky-500 text-white rounded-2xl text-sm font-semibold">
+              <button
+                onClick={() => setSubView('connect')}
+                className="w-full py-3 bg-sky-500 text-white rounded-2xl text-sm font-semibold"
+              >
                 + 계좌 연결하기
               </button>
             </div>

@@ -1,20 +1,20 @@
 import type { ApiResponse } from '@/types/auth';
-
-function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('accessToken');
-}
+import { tokenUtils } from '@/utils/token';
 
 export async function mydataRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  if (typeof window === 'undefined') throw new Error('클라이언트에서만 호출 가능합니다.');
+
   const { headers: customHeaders, ...fetchOptions } = options;
-  const token = getAccessToken();
+  const token = tokenUtils.getAccessToken();
+  const userId = tokenUtils.getUserId();
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(userId ? { 'X-User-Id': String(userId) } : {}),
     ...(customHeaders as Record<string, string> ?? {}),
   };
 

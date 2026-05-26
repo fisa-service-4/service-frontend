@@ -1,16 +1,26 @@
 import { mydataRequest } from '@/utils/mydataClient';
-import type { Portfolio } from '@/types/bank';
 
-export interface MyStockAccount {
-  accountId: number;
-  accountNumber: string;
-  accountName: string;
-  bankCode: string;
+export interface AssetDashboard {
+  totalAssetAmount: number;
+  totalBankAssetAmount: number;
+  totalStockAssetAmount: number;
+  investmentRatio: number;
+  bankAccountCount: number;
+  holdingCount: number;
+  totalProfitRate: number;
 }
 
-export const getMyStockAccounts = () =>
-  mydataRequest<{ content: MyStockAccount[] }>('/stock/accounts');
+export interface MyDataConnection {
+  connected: boolean;
+  bankLinked: boolean;
+  stockLinked: boolean;
+}
 
-export const getMyPortfolio = (accountId: number) =>
-  mydataRequest<{ portfolio: Portfolio }>(`/stock/accounts/${accountId}/portfolio`)
-    .then((res) => res.portfolio);
+export const getAssetDashboard = () =>
+  mydataRequest<AssetDashboard>('/assets/dashboard');
+
+export const connectMyData = (provider: string) =>
+  mydataRequest<MyDataConnection>('/connect', {
+    method: 'POST',
+    body: JSON.stringify({ provider }),
+  });

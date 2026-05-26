@@ -23,6 +23,7 @@ export default function LoginPage() {
     try {
       const res = await authApi.login({ email: email.trim(), password });
       tokenUtils.setTokens(res.accessToken, res.refreshToken);
+      tokenUtils.setUserId(res.userId);
       router.push('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : '아이디 또는 비밀번호를 확인해주세요.');
