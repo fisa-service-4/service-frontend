@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
-import ChatBotView from '@/components/main/ChatBotView';
 
 /* ── 캘린더 데이터 (2026년 5월 기준) ── */
 // 5월 1일 = 목요일(4) → 앞에 일~수 4칸은 4월 말
@@ -31,23 +31,10 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export default function HomePage() {
+  const router                          = useRouter();
   const [activeNav, setActiveNav]       = useState<MainNavItem>('home');
   const [month, setMonth]               = useState(5);
   const [showRegister, setShowRegister] = useState(false);
-  const [showChat, setShowChat]         = useState(false);
-
-  if (showChat) {
-    return (
-      <ChatBotView
-        onClose={() => setShowChat(false)}
-        activeNav={activeNav}
-        onNavChange={(nav) => {
-          setActiveNav(nav);
-          setShowChat(false);
-        }}
-      />
-    );
-  }
 
   if (showRegister) {
     return (
@@ -246,7 +233,7 @@ export default function HomePage() {
       </div>
 
       {/* AI 상담사 플로팅 버튼 */}
-      <button onClick={() => setShowChat(true)} className="absolute bottom-20 right-5 z-10 flex flex-col items-center drop-shadow-xl">
+      <button onClick={() => router.push('/chat')} className="absolute bottom-20 right-5 z-10 flex flex-col items-center drop-shadow-xl">
         {/* 헤드셋 */}
         <div className="relative w-9 h-4 mb-[-3px]">
           {/* 헤드밴드 */}
