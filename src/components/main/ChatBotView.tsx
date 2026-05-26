@@ -46,8 +46,8 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
 
   const loadSessions = useCallback(async () => {
     try {
-      const data = await apiRequest<{ content: SessionSummary[] }>('/ai/chat/sessions');
-      setSessions(data.content ?? []);
+      const data = await apiRequest<SessionSummary[]>('/ai/chat/sessions');
+      setSessions(Array.isArray(data) ? data : []);
     } catch {
       // sidebar just stays empty on failure
     }
@@ -57,11 +57,12 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
     loadSessions();
   }, [loadSessions]);
 
-  const ensureSession = async (): Promise<number> => {
+  const ensureSession = async (firstMessage: string): Promise<number> => {
     if (currentSessionId !== null) return currentSessionId;
+    const title = firstMessage.slice(0, 20);
     const data = await apiRequest<{ sessionId: number; status: string }>('/ai/chat/sessions', {
       method: 'POST',
-      body: JSON.stringify({}),
+      body: JSON.stringify({ title }),
     });
     setCurrentSession(data.sessionId);
     return data.sessionId;
@@ -79,7 +80,7 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
     setIsSending(true);
 
     try {
-      const sessionId = await ensureSession();
+      const sessionId = await ensureSession(text);
       const data = await apiRequest<{
         messageId: number;
         role: string;
@@ -120,11 +121,11 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
     setCurrentSession(session.sessionId);
     try {
       const data = await apiRequest<{
-        content: Array<{ messageId: number; role: string; content: string }>;
-      }>(`/ai/chat/sessions/messages?sessionId=${session.sessionId}`);
-      const msgs: Message[] = (data.content ?? []).map((m) => ({
-        id: m.messageId,
-        role: m.role === 'USER' ? 'user' : 'ai',
+        messages: Array<{ role: string; content: string }>;
+      }>(`/ai/chat/sessions/${session.sessionId}/messages`);
+      const msgs: Message[] = (data.messages ?? []).map((m, i) => ({
+        id: i,
+        role: m.role === 'user' ? 'user' : 'ai',
         content: m.content,
       }));
       setMessages(msgs.length > 0 ? msgs : [GREETING]);
