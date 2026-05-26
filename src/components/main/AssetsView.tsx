@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
-// import { getAccounts, getPortfolio } from '@/api/bank'; // TODO: API 연동 시 주석 해제
+import { getAccounts, getPortfolio } from '@/api/bank';
 import type { BankAccount, Portfolio } from '@/types/bank';
 import TransferView from '@/components/main/TransferView';
 
@@ -47,39 +47,17 @@ function SkeletonCard({ className = '' }: { className?: string }) {
 }
 
 export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) {
-  const MOCK_ACCOUNTS: BankAccount[] = [
-    {
-      accountId: 1,
-      bankCode: '020',
-      accountNumber: '110-123-456789',
-      accountName: '실수령액 계좌',
-      balance: 1160400,
-      accountStatus: 'ACTIVE',
-      accountRole: 'SALARY',
-    },
-  ];
-
-  const MOCK_PORTFOLIO: Portfolio = {
-    totalAsset: 2500000,
-    cashAsset: 12450000,
-    stockAsset: 12380000,
-    savingAsset: 0,
-    availableCash: 1160400,
-    assetRatio: { cash: 50, stock: 45, saving: 5 },
-  };
-
-  const [subView, setSubView]       = useState<'overview' | 'transfer'>('overview');
-  const [activeTab, setActiveTab]   = useState<AssetTab>('all');
-  const [accounts]  = useState<BankAccount[]>(MOCK_ACCOUNTS);
-  const [portfolio] = useState<Portfolio | null>(MOCK_PORTFOLIO);
-  const [loading]   = useState(false);
+  const [subView, setSubView]           = useState<'overview' | 'transfer'>('overview');
+  const [activeTab, setActiveTab]       = useState<AssetTab>('all');
+  const [accounts, setAccounts]         = useState<BankAccount[]>([]);
+  const [portfolio, setPortfolio]       = useState<Portfolio | null>(null);
+  const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
-    // TODO: API 연동 시 아래 주석 해제 후 mock 데이터 초기값 제거
-    // Promise.all([getAccounts(), getPortfolio()])
-    //   .then(([accs, port]) => { setAccounts(accs); setPortfolio(port); })
-    //   .catch(() => { setAccounts([]); setPortfolio(null); })
-    //   .finally(() => setLoading(false));
+    Promise.all([getAccounts(), getPortfolio()])
+      .then(([accs, port]) => { setAccounts(accs); setPortfolio(port); })
+      .catch(() => { setAccounts([]); setPortfolio(null); })
+      .finally(() => setLoading(false));
   }, []);
 
   if (subView === 'transfer') {

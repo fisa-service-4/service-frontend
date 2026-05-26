@@ -5,8 +5,8 @@ import { ArrowLeft, ChevronDown, Check, Info } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
 import PinKeypad from '@/components/PinKeypad';
-// import { apiRequest } from '@/utils/apiClient';       // TODO: API 연동 시 주석 해제
-// import { createTransfer, approveTransfer } from '@/api/bank'; // TODO: API 연동 시 주석 해제
+import { apiRequest } from '@/utils/apiClient';
+import { createTransfer, approveTransfer } from '@/api/bank';
 import type { BankAccount } from '@/types/bank';
 
 type Step = 'form' | 'confirm' | 'pin' | 'complete';
@@ -114,25 +114,24 @@ export default function TransferView({
     if (next.length === 6) await executeTransfer(next);
   }
 
-  async function executeTransfer(_enteredPin: string) {
+  async function executeTransfer(enteredPin: string) {
     setPinLoading(true);
     setPinError('');
     try {
-      // TODO: API 연동 시 아래 주석 해제 후 mock 블록 제거
-      // const pinResult = await apiRequest<{ matched: boolean; pinToken: string; lockedYn: boolean }>(
-      //   '/auth/pin/verify', { method: 'POST', body: JSON.stringify({ pin: _enteredPin }) }
-      // );
-      // if (!pinResult.matched) {
-      //   setPinError('PIN이 올바르지 않습니다. 다시 입력해 주세요.');
-      //   setPin(''); return;
-      // }
-      // const created  = await createTransfer({ fromAccountId: fromId, toBankCode, toAccountNumber: toNumber, transferAmount: parsedAmount, requestedBy: 'USER' });
-      // const approved = await approveTransfer(created.transferId);
-      // setCompletedAt(approved.completedAt ?? '');
-
-      // mock: UI 흐름 확인용
-      await new Promise((r) => setTimeout(r, 600));
-      setCompletedAt(new Date().toISOString());
+      const pinResult = await apiRequest<{ matched: boolean; pinToken: string; lockedYn: boolean }>(
+        '/auth/pin/verify', { method: 'POST', body: JSON.stringify({ pin: enteredPin }) }
+      );
+      if (!pinResult.matched) {
+        setPinError('PIN이 올바르지 않습니다. 다시 입력해 주세요.');
+        setPin('');
+        return;
+      }
+      const created = await createTransfer(
+        { fromAccountId: fromId, toBankCode, toAccountNumber: toNumber, transferAmount: parsedAmount, requestedBy: 'USER' },
+        pinResult.pinToken
+      );
+      const approved = await approveTransfer(created.transferId);
+      setCompletedAt(approved.completedAt ?? '');
       setStep('complete');
     } catch (err) {
       setPinError(err instanceof Error ? err.message : '이체 처리 중 오류가 발생했습니다.');

@@ -33,11 +33,14 @@ export const getTransactions = (
 export const getPortfolio = () =>
   apiRequest<Portfolio>('/portfolio');
 
-export const createTransfer = (body: TransferRequest) =>
+export const createTransfer = (body: TransferRequest, pinToken: string) =>
   apiRequest<TransferCreated>('/transfers', {
     method: 'POST',
     body: JSON.stringify(body),
-    headers: { 'Idempotency-Key': crypto.randomUUID() },
+    headers: {
+      'Idempotency-Key': crypto.randomUUID(),
+      'Pin-Token': pinToken,
+    },
   });
 
 export const approveTransfer = (transferId: number) =>
