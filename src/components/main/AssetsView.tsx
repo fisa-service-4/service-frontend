@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
-import { getAccounts, getPortfolio } from '@/api/bank';
+import { getAccounts } from '@/api/bank';
+import { getMyStockAccounts, getMyPortfolio } from '@/api/mydata';
 import type { BankAccount, Portfolio } from '@/types/bank';
 import TransferView from '@/components/main/TransferView';
 
@@ -54,8 +55,13 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
   const [loading, setLoading]           = useState(true);
 
   useEffect(() => {
-    Promise.all([getAccounts(), getPortfolio()])
-      .then(([accs, port]) => { setAccounts(accs); setPortfolio(port); })
+    Promise.all([getAccounts(), getMyStockAccounts()])
+      .then(([accs, { content: stockAccounts }]) => {
+        setAccounts(accs);
+        if (stockAccounts.length === 0) return;
+        return getMyPortfolio(stockAccounts[0].accountId);
+      })
+      .then((port) => { if (port) setPortfolio(port); })
       .catch(() => { setAccounts([]); setPortfolio(null); })
       .finally(() => setLoading(false));
   }, []);
