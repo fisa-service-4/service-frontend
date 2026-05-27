@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import type { MainNavItem } from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
-import AssetsView from '@/components/main/AssetsView';
 
 type CalendarCell = { day: number; prev?: boolean; next?: boolean };
 
@@ -53,7 +51,6 @@ const STATUS_STYLE: Record<string, string> = {
 
 export default function HomePage() {
   const router                          = useRouter();
-  const [activeNav, setActiveNav]       = useState<MainNavItem>('home');
   const [year,  setYear]                = useState(TODAY_YEAR);
   const [month, setMonth]               = useState(TODAY_MONTH);
   const [showRegister, setShowRegister] = useState(false);
@@ -64,22 +61,6 @@ export default function HomePage() {
         onBack={() => setShowRegister(false)}
         onSubmit={() => setShowRegister(false)}
       />
-    );
-  }
-
-  if (activeNav === 'assets') {
-    return <AssetsView activeNav={activeNav} onNavChange={setActiveNav} />;
-  }
-
-  if (activeNav !== 'home') {
-    const labels: Record<string, string> = { stocks: '증권', mypage: '마이페이지' };
-    return (
-      <div className="flex flex-col h-screen bg-white">
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-400 text-sm">{labels[activeNav]} 준비 중</p>
-        </div>
-        <BottomNav activeNav={activeNav} onNavChange={setActiveNav} />
-      </div>
     );
   }
 
@@ -291,7 +272,7 @@ export default function HomePage() {
       </button>
 
       {/* 하단 탭 */}
-      <BottomNav activeNav={activeNav} onNavChange={setActiveNav} />
+      <BottomNav />
     </div>
   );
 }

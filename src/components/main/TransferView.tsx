@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ArrowLeft, ChevronDown, Check, Info } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import type { MainNavItem } from '@/components/main/BottomNav';
 import PinKeypad from '@/components/PinKeypad';
 import { apiRequest } from '@/utils/apiClient';
 import { createTransfer, approveTransfer } from '@/api/bank';
@@ -41,15 +40,11 @@ function formatKRW(n: number) {
 interface TransferViewProps {
   accounts: BankAccount[];
   onBack: () => void;
-  activeNav: MainNavItem;
-  onNavChange: (nav: MainNavItem) => void;
 }
 
 export default function TransferView({
   accounts,
   onBack,
-  activeNav,
-  onNavChange,
 }: TransferViewProps) {
   const [step, setStep]                 = useState<Step>('form');
   const [fromId, setFromId]             = useState(accounts[0]?.accountId ?? 0);
@@ -289,7 +284,7 @@ export default function TransferView({
           </div>
         )}
 
-        <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+        <BottomNav  />
       </div>
     );
   }
@@ -367,7 +362,7 @@ export default function TransferView({
           </button>
         </div>
 
-        <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+        <BottomNav  />
       </div>
     );
   }
@@ -414,7 +409,7 @@ export default function TransferView({
           <PinKeypad onPress={handlePinPress} />
         </div>
 
-        <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+        <BottomNav  />
       </div>
     );
   }
@@ -484,7 +479,7 @@ export default function TransferView({
         </button>
       </div>
 
-      <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+      <BottomNav  />
     </div>
   );
 }
