@@ -57,7 +57,10 @@ export default function MypageView() {
           <div>
             <p className="text-sm font-semibold text-gray-500 mb-2 px-1">계정 관리</p>
             <div className="bg-white rounded-2xl divide-y divide-gray-100">
-              <button className="w-full flex items-center gap-3 px-4 py-4">
+              <button
+                onClick={() => router.push('/mypage/accounts')}
+                className="w-full flex items-center gap-3 px-4 py-4"
+              >
                 <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
                   <span className="text-lg">🏦</span>
                 </div>
