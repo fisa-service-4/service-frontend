@@ -1,22 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, ArrowLeft } from 'lucide-react';
+import { Menu, ArrowLeft, Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import type { MainNavItem } from '@/components/main/BottomNav';
 import { getAccounts } from '@/api/bank';
 import { getAssetDashboard, connectMyData } from '@/api/mydata';
 import type { AssetDashboard } from '@/api/mydata';
 import type { BankAccount } from '@/types/bank';
 import TransferView from '@/components/main/TransferView';
+import NotificationPanel from '@/components/main/NotificationPanel';
 
 type AssetTab = 'all' | 'bank' | 'stock';
 type SubView = 'overview' | 'transfer' | 'connect';
 
-interface AssetsViewProps {
-  activeNav: MainNavItem;
-  onNavChange: (nav: MainNavItem) => void;
-}
 
 const INSTITUTIONS = [
   { code: '004', name: 'KB국민은행' },
@@ -48,12 +44,13 @@ function SkeletonCard({ className = '' }: { className?: string }) {
   return <div className={`bg-sky-100 rounded-xl animate-pulse ${className}`} />;
 }
 
-export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) {
-  const [subView, setSubView]         = useState<SubView>('overview');
-  const [activeTab, setActiveTab]     = useState<AssetTab>('all');
-  const [accounts, setAccounts]       = useState<BankAccount[]>([]);
-  const [dashboard, setDashboard]     = useState<AssetDashboard | null>(null);
-  const [loading, setLoading]         = useState(true);
+export default function AssetsView() {
+  const [subView, setSubView]               = useState<SubView>('overview');
+  const [activeTab, setActiveTab]           = useState<AssetTab>('all');
+  const [accounts, setAccounts]             = useState<BankAccount[]>([]);
+  const [dashboard, setDashboard]           = useState<AssetDashboard | null>(null);
+  const [loading, setLoading]               = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
 
   const [connectLoading, setConnectLoading] = useState(false);
   const [connectError, setConnectError]     = useState('');
@@ -81,13 +78,13 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
     }
   }
 
+
+
   if (subView === 'transfer') {
     return (
       <TransferView
         accounts={accounts}
         onBack={() => setSubView('overview')}
-        activeNav={activeNav}
-        onNavChange={onNavChange}
       />
     );
   }
@@ -124,7 +121,7 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
           )}
         </div>
 
-        <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+        <BottomNav />
       </div>
     );
   }
@@ -143,13 +140,18 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
   return (
     <div className="flex flex-col h-screen bg-white">
 
+      {/* 콘텐츠 영역 (알림 오버레이 포함) */}
+      <div className="flex-1 flex flex-col relative overflow-hidden">
+
       {/* 헤더 */}
       <div className="flex items-center justify-between px-5 py-4 shrink-0">
         <button aria-label="메뉴">
           <Menu size={24} className="text-gray-800" />
         </button>
         <h1 className="text-base font-bold text-gray-900">통합 자산 현황</h1>
-        <div className="w-6" />
+        <button className="p-1" onClick={() => setShowNotification(true)}>
+          <Bell size={22} className="text-gray-800" />
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
@@ -332,7 +334,11 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
 
       </div>
 
-      <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
+
+      </div>{/* 콘텐츠 영역 끝 */}
+
+      <BottomNav />
     </div>
   );
 }
