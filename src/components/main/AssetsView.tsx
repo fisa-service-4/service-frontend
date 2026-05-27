@@ -44,17 +44,12 @@ function SkeletonCard({ className = '' }: { className?: string }) {
 }
 
 export default function AssetsView() {
-  const [subView, setSubView]               = useState<SubView>('overview');
-  const [activeTab, setActiveTab]           = useState<AssetTab>('all');
-  const [accounts, setAccounts]             = useState<BankAccount[]>([]);
-  const [dashboard, setDashboard]           = useState<AssetDashboard | null>(null);
-  const [loading, setLoading]               = useState(true);
+  const [subView, setSubView]                   = useState<SubView>('overview');
+  const [activeTab, setActiveTab]               = useState<AssetTab>('all');
+  const [accounts, setAccounts]                 = useState<BankAccount[]>([]);
+  const [dashboard, setDashboard]               = useState<AssetDashboard | null>(null);
+  const [loading, setLoading]                   = useState(true);
   const [showNotification, setShowNotification] = useState(false);
-  const [subView, setSubView]         = useState<SubView>('overview');
-  const [activeTab, setActiveTab]     = useState<AssetTab>('all');
-  const [accounts, setAccounts]       = useState<BankAccount[]>([]);
-  const [dashboard, setDashboard]     = useState<AssetDashboard | null>(null);
-  const [loading, setLoading]         = useState(true);
 
   const [connectLoading, setConnectLoading] = useState(false);
   const [connectError, setConnectError]     = useState('');
@@ -125,7 +120,6 @@ export default function AssetsView() {
           )}
         </div>
         <BottomNav />
-        <BottomNav  />
       </div>
     );
   }
@@ -338,13 +332,11 @@ export default function AssetsView() {
 
       </div>
 
- feat/notif
       {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
 
-      </div>{/* 콘텐츠 영역 끝 */}
+      </div>
 
       <BottomNav />
-      <BottomNav  />
     </div>
   );
 }

@@ -13,10 +13,10 @@ const navItems = [
 ];
 
 export default function BottomNav() {
+  // 중복 선언되었던 부분을 제거하고 각각 한 번씩만 선언합니다.
   const router = useRouter();
   const pathname = usePathname();
-  const router   = useRouter();
-  const pathname = usePathname();
+  
   const activeNav = (pathname.split('/')[1] as MainNavItem) ?? 'home';
 
   return (

@@ -42,11 +42,8 @@ interface TransferViewProps {
   onBack: () => void;
 }
 
+// 1. 중복 선언되었던 함수 정의 부분을 하나로 병합
 export default function TransferView({ accounts, onBack }: TransferViewProps) {
-export default function TransferView({
-  accounts,
-  onBack,
-}: TransferViewProps) {
   const [step, setStep]                 = useState<Step>('form');
   const [fromId, setFromId]             = useState(accounts[0]?.accountId ?? 0);
   const [toBankCode, setToBankCode]     = useState('');
@@ -265,7 +262,7 @@ export default function TransferView({
               onClick={() => setShowBankSheet(false)}
             />
             <div className="relative bg-white rounded-t-3xl p-5 pb-8">
-              <p className="text-base font-bold text-gray-900 mb-4">은행 선택</p>
+              <p className="text-base font-bold text-gray-900 mb-4">銀行 선택</p>
               <div className="grid grid-cols-3 gap-2">
                 {BANKS.map((b) => (
                   <button
@@ -284,8 +281,8 @@ export default function TransferView({
             </div>
           </div>
         )}
+        {/* 중복을 걷어내고 하나만 배치 */}
         <BottomNav />
-        <BottomNav  />
       </div>
     );
   }
@@ -363,7 +360,6 @@ export default function TransferView({
           </button>
         </div>
         <BottomNav />
-        <BottomNav  />
       </div>
     );
   }
@@ -410,7 +406,6 @@ export default function TransferView({
           <PinKeypad onPress={handlePinPress} />
         </div>
         <BottomNav />
-        <BottomNav  />
       </div>
     );
   }
@@ -480,7 +475,6 @@ export default function TransferView({
         </button>
       </div>
       <BottomNav />
-      <BottomNav  />
     </div>
   );
 }

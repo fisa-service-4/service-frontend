@@ -11,7 +11,7 @@ export const userApi = {
     }),
 
   updateAlarm: (notificationConsentYn: boolean) =>
-    apiRequest<{ notificationConsentYn: boolean }>('/users/me/alarm', {
+    apiRequest<{ notificationConsentYn: boolean }>('/users/me/consent', {
       method: 'PATCH',
       body: JSON.stringify({ notificationConsentYn }),
     }),

@@ -5,10 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Menu, ChevronLeft, ChevronRight, Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
-<<<<<<< feat/notification
+
 import NotificationPanel from '@/components/main/NotificationPanel';
-=======
->>>>>>> develop
+
 
 type CalendarCell = { day: number; prev?: boolean; next?: boolean };
 
@@ -53,18 +52,11 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export default function HomePage() {
-<<<<<<< feat/notification
-  const router                              = useRouter();
-  const [year,  setYear]                    = useState(TODAY_YEAR);
-  const [month, setMonth]                   = useState(TODAY_MONTH);
-  const [showRegister, setShowRegister]     = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-=======
   const router                          = useRouter();
   const [year,  setYear]                = useState(TODAY_YEAR);
   const [month, setMonth]               = useState(TODAY_MONTH);
   const [showRegister, setShowRegister] = useState(false);
->>>>>>> develop
 
   if (showRegister) {
     return (
