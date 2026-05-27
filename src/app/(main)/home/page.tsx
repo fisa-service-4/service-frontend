@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Menu, ChevronLeft, ChevronRight, Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
+<<<<<<< feat/notification
+import NotificationPanel from '@/components/main/NotificationPanel';
+=======
+>>>>>>> develop
 
 type CalendarCell = { day: number; prev?: boolean; next?: boolean };
 
@@ -38,7 +42,6 @@ const TODAY_DAY   = _today.getDate();
 const TODAY_MONTH = _today.getMonth() + 1;
 const TODAY_YEAR  = _today.getFullYear();
 
-/* ── 계약 데이터 ── */
 const CONTRACTS = [
   { id: 1, name: '-', date: '-', deduction: '-', status: '확정',  active: true  },
   { id: 2, name: '-', date: '-', deduction: '-', status: '입금중', active: false },
@@ -50,10 +53,18 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 export default function HomePage() {
+<<<<<<< feat/notification
+  const router                              = useRouter();
+  const [year,  setYear]                    = useState(TODAY_YEAR);
+  const [month, setMonth]                   = useState(TODAY_MONTH);
+  const [showRegister, setShowRegister]     = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
+=======
   const router                          = useRouter();
   const [year,  setYear]                = useState(TODAY_YEAR);
   const [month, setMonth]               = useState(TODAY_MONTH);
   const [showRegister, setShowRegister] = useState(false);
+>>>>>>> develop
 
   if (showRegister) {
     return (
@@ -65,15 +76,18 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white relative">
+    <div className="flex flex-col h-screen bg-white">
+
+      {/* 콘텐츠 영역 (알림 오버레이 포함) */}
+      <div className="flex-1 flex flex-col relative overflow-hidden">
 
       {/* 헤더 */}
       <div className="flex items-center justify-between px-5 py-4 shrink-0">
         <button>
           <Menu size={24} className="text-gray-800" />
         </button>
-        <button className="px-4 py-1.5 bg-gray-200 rounded-full text-sm font-medium text-gray-700">
-          알림
+        <button className="p-1" onClick={() => setShowNotification(true)}>
+          <Bell size={22} className="text-gray-800" />
         </button>
       </div>
 
@@ -243,33 +257,28 @@ export default function HomePage() {
 
       {/* AI 상담사 플로팅 버튼 */}
       <button onClick={() => router.push('/chat')} className="absolute bottom-20 right-5 z-10 flex flex-col items-center drop-shadow-xl">
-        {/* 헤드셋 */}
         <div className="relative w-9 h-4 mb-[-3px]">
-          {/* 헤드밴드 */}
           <div className="absolute inset-x-1 top-0 h-3 border-t-[2px] border-l-[2px] border-r-[2px] border-sky-400 rounded-t-full" />
-          {/* 왼쪽 귀걸이 */}
           <div className="absolute left-0 top-2 w-1.5 h-2 bg-sky-400 rounded-sm" />
-          {/* 오른쪽 귀걸이 */}
           <div className="absolute right-0 top-2 w-1.5 h-2 bg-sky-400 rounded-sm" />
         </div>
-
-        {/* 얼굴 */}
         <div className="w-11 h-11 rounded-full bg-gradient-to-br from-sky-400 to-sky-600 flex flex-col items-center justify-center shadow-lg">
-          {/* 눈 */}
           <div className="flex gap-2 mb-1">
             <div className="w-1 h-1.5 bg-white rounded-full" />
             <div className="w-1 h-1.5 bg-white rounded-full" />
           </div>
-          {/* 입 */}
           <div className="w-4 h-2 border-b-2 border-white rounded-b-full" />
         </div>
-
-        {/* 마이크 붐 */}
         <div className="self-end mr-1 mt-[-5px] flex items-center gap-0.5">
           <div className="w-3 h-[2px] bg-sky-400 rounded-full" />
           <div className="w-1.5 h-1.5 rounded-full bg-sky-400" />
         </div>
       </button>
+
+      {/* 알림 패널 */}
+      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
+
+      </div>{/* 콘텐츠 영역 끝 */}
 
       {/* 하단 탭 */}
       <BottomNav />

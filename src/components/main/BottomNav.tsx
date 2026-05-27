@@ -13,9 +13,10 @@ const navItems = [
 ];
 
 export default function BottomNav() {
+  const router = useRouter();
+  const pathname = usePathname();
   const router   = useRouter();
   const pathname = usePathname();
-
   const activeNav = (pathname.split('/')[1] as MainNavItem) ?? 'home';
 
   return (

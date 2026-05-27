@@ -42,6 +42,7 @@ interface TransferViewProps {
   onBack: () => void;
 }
 
+export default function TransferView({ accounts, onBack }: TransferViewProps) {
 export default function TransferView({
   accounts,
   onBack,
@@ -283,7 +284,7 @@ export default function TransferView({
             </div>
           </div>
         )}
-
+        <BottomNav />
         <BottomNav  />
       </div>
     );
@@ -361,7 +362,7 @@ export default function TransferView({
             이전
           </button>
         </div>
-
+        <BottomNav />
         <BottomNav  />
       </div>
     );
@@ -408,7 +409,7 @@ export default function TransferView({
         <div className="pb-6 shrink-0">
           <PinKeypad onPress={handlePinPress} />
         </div>
-
+        <BottomNav />
         <BottomNav  />
       </div>
     );
@@ -478,7 +479,7 @@ export default function TransferView({
           확인
         </button>
       </div>
-
+      <BottomNav />
       <BottomNav  />
     </div>
   );
