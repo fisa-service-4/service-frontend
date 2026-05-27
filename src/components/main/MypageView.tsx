@@ -5,9 +5,17 @@ import { useRouter } from 'next/navigation';
 import { Menu, ChevronRight, User } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 
+interface UserProfile {
+  name: string;
+  email: string;
+  jobType: string | null;
+  freelancerYn: boolean;
+}
+
 export default function MypageView() {
   const router = useRouter();
   const [alarmOn, setAlarmOn] = useState(false);
+  const user: UserProfile | null = null as UserProfile | null;
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -28,12 +36,18 @@ export default function MypageView() {
           <div className="w-16 h-16 rounded-full bg-slate-700 border-2 border-sky-500 flex items-center justify-center mb-3 mt-2">
             <User size={32} className="text-sky-400" />
           </div>
-          <p className="text-white font-bold text-lg mb-1">김프리</p>
-          <p className="text-slate-400 text-sm mb-3">freelancer@gmail.com</p>
-          <div className="flex gap-2 mb-5">
-            <span className="bg-sky-500/20 text-sky-400 text-xs px-3 py-1 rounded-full border border-sky-500/30">개인 사업자</span>
-            <span className="bg-sky-500/20 text-sky-400 text-xs px-3 py-1 rounded-full border border-sky-500/30">3.3% 적용</span>
-          </div>
+          <p className="text-white font-bold text-lg mb-1">{user?.name ?? '-'}</p>
+          <p className="text-slate-400 text-sm mb-3">{user?.email ?? '-'}</p>
+          {user && (
+            <div className="flex gap-2 mb-5">
+              {user.jobType && (
+                <span className="bg-sky-500/20 text-sky-400 text-xs px-3 py-1 rounded-full border border-sky-500/30">{user.jobType}</span>
+              )}
+              {user.freelancerYn && (
+                <span className="bg-sky-500/20 text-sky-400 text-xs px-3 py-1 rounded-full border border-sky-500/30">3.3% 적용</span>
+              )}
+            </div>
+          )}
           <button className="w-full py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl">
             프로필 편집
           </button>
