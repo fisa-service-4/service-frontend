@@ -10,8 +10,8 @@ export const userApi = {
       body: JSON.stringify(data),
     }),
 
-  updateConsent: (notificationConsentYn: boolean) =>
-    apiRequest<string>('/users/me/consent', {
+  updateAlarm: (notificationConsentYn: boolean) =>
+    apiRequest<{ notificationConsentYn: boolean }>('/users/me/alarm', {
       method: 'PATCH',
       body: JSON.stringify({ notificationConsentYn }),
     }),

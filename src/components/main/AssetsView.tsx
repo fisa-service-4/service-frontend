@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Menu, ArrowLeft } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import type { MainNavItem } from '@/components/main/BottomNav';
 import { getAccounts } from '@/api/bank';
 import { getAssetDashboard, connectMyData } from '@/api/mydata';
 import type { AssetDashboard } from '@/api/mydata';
@@ -12,11 +11,6 @@ import TransferView from '@/components/main/TransferView';
 
 type AssetTab = 'all' | 'bank' | 'stock';
 type SubView = 'overview' | 'transfer' | 'connect';
-
-interface AssetsViewProps {
-  activeNav: MainNavItem;
-  onNavChange: (nav: MainNavItem) => void;
-}
 
 const INSTITUTIONS = [
   { code: '004', name: 'KB국민은행' },
@@ -48,7 +42,7 @@ function SkeletonCard({ className = '' }: { className?: string }) {
   return <div className={`bg-sky-100 rounded-xl animate-pulse ${className}`} />;
 }
 
-export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) {
+export default function AssetsView() {
   const [subView, setSubView]         = useState<SubView>('overview');
   const [activeTab, setActiveTab]     = useState<AssetTab>('all');
   const [accounts, setAccounts]       = useState<BankAccount[]>([]);
@@ -86,8 +80,6 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
       <TransferView
         accounts={accounts}
         onBack={() => setSubView('overview')}
-        activeNav={activeNav}
-        onNavChange={onNavChange}
       />
     );
   }
@@ -124,7 +116,7 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
           )}
         </div>
 
-        <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+        <BottomNav  />
       </div>
     );
   }
@@ -332,7 +324,7 @@ export default function AssetsView({ activeNav, onNavChange }: AssetsViewProps) 
 
       </div>
 
-      <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+      <BottomNav  />
     </div>
   );
 }
