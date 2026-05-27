@@ -7,17 +7,37 @@ import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
 
-/* ── 캘린더 데이터 (2026년 5월 기준) ── */
-// 5월 1일 = 목요일(4) → 앞에 일~수 4칸은 4월 말
-const CALENDAR_ROWS = [
-  [{ day: 27, prev: true }, { day: 28, prev: true }, { day: 29, prev: true }, { day: 30, prev: true }, { day: 1 }, { day: 2 }, { day: 3 }],
-  [{ day: 4 }, { day: 5 }, { day: 6 }, { day: 7 }, { day: 8 }, { day: 9 }, { day: 10 }],
-  [{ day: 11 }, { day: 12 }, { day: 13 }, { day: 14 }, { day: 15 }, { day: 16 }, { day: 17 }],
-  [{ day: 18 }, { day: 19 }, { day: 20 }, { day: 21 }, { day: 22 }, { day: 23 }, { day: 24 }],
-  [{ day: 25 }, { day: 26 }, { day: 27 }, { day: 28 }, { day: 29 }, { day: 30 }, { day: 31 }],
-];
+type CalendarCell = { day: number; prev?: boolean; next?: boolean };
 
-const TODAY = 26;
+function buildCalendarRows(year: number, month: number): CalendarCell[][] {
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const daysInPrevMonth = new Date(year, month - 1, 0).getDate();
+
+  const cells: CalendarCell[] = [];
+
+  for (let i = firstDay - 1; i >= 0; i--) {
+    cells.push({ day: daysInPrevMonth - i, prev: true });
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d });
+  }
+  let next = 1;
+  while (cells.length % 7 !== 0) {
+    cells.push({ day: next++, next: true });
+  }
+
+  const rows: CalendarCell[][] = [];
+  for (let i = 0; i < cells.length; i += 7) {
+    rows.push(cells.slice(i, i + 7));
+  }
+  return rows;
+}
+
+const _today = new Date();
+const TODAY_DAY   = _today.getDate();
+const TODAY_MONTH = _today.getMonth() + 1;
+const TODAY_YEAR  = _today.getFullYear();
 
 /* ── 계약 데이터 ── */
 const CONTRACTS = [
@@ -33,7 +53,8 @@ const STATUS_STYLE: Record<string, string> = {
 export default function HomePage() {
   const router                          = useRouter();
   const [activeNav, setActiveNav]       = useState<MainNavItem>('home');
-  const [month, setMonth]               = useState(5);
+  const [year,  setYear]                = useState(TODAY_YEAR);
+  const [month, setMonth]               = useState(TODAY_MONTH);
   const [showRegister, setShowRegister] = useState(false);
 
   if (showRegister) {
@@ -115,14 +136,14 @@ export default function HomePage() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => setMonth((m) => m - 1)}
+                  onClick={() => { if (month === 1) { setYear((y) => y - 1); setMonth(12); } else { setMonth((m) => m - 1); } }}
                   className="w-7 h-7 bg-sky-50 border border-sky-200 rounded-full flex items-center justify-center text-sky-600"
                 >
                   <ChevronLeft size={14} />
                 </button>
-                <span className="text-base font-bold text-gray-900">{month}월</span>
+                <span className="text-base font-bold text-gray-900">{year}년 {month}월</span>
                 <button
-                  onClick={() => setMonth((m) => m + 1)}
+                  onClick={() => { if (month === 12) { setYear((y) => y + 1); setMonth(1); } else { setMonth((m) => m + 1); } }}
                   className="w-7 h-7 bg-sky-50 border border-sky-200 rounded-full flex items-center justify-center text-sky-600"
                 >
                   <ChevronRight size={14} />
@@ -148,11 +169,13 @@ export default function HomePage() {
             </div>
 
             {/* 날짜 그리드 */}
-            {CALENDAR_ROWS.map((row, ri) => (
+            {buildCalendarRows(year, month).map((row, ri) => (
               <div key={ri} className="grid grid-cols-7 mb-0.5">
-                {row.map((cell, ci) => {
+                {row.map((cell: CalendarCell, ci: number) => {
                   const isPrev  = !!cell.prev;
-                  const isToday = !isPrev && cell.day === TODAY;
+                  const isNext  = !!cell.next;
+                  const isToday = !isPrev && !isNext
+                    && year === TODAY_YEAR && month === TODAY_MONTH && cell.day === TODAY_DAY;
                   const isSun   = ci === 0;
                   const isSat   = ci === 6;
 
@@ -160,9 +183,9 @@ export default function HomePage() {
                     <div key={ci} className="flex flex-col items-center py-0.5">
                       <div
                         className={`w-8 h-8 flex items-center justify-center text-sm rounded-full
-                          ${isPrev   ? 'text-gray-300' : ''}
+                          ${isPrev || isNext ? 'text-gray-300' : ''}
                           ${isToday  ? 'bg-sky-500 text-white font-bold' : ''}
-                          ${!isPrev && !isToday
+                          ${!isPrev && !isNext && !isToday
                             ? isSun ? 'text-red-400' : isSat ? 'text-sky-500' : 'text-gray-800'
                             : ''}
                         `}
@@ -187,7 +210,7 @@ export default function HomePage() {
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-5 h-5 rounded-full bg-sky-500 flex items-center justify-center shrink-0">
-                  <span className="text-[9px] text-white font-bold">26</span>
+                  <span className="text-[9px] text-white font-bold">{TODAY_DAY}</span>
                 </div>
                 <span className="text-xs text-gray-400">오늘</span>
               </div>

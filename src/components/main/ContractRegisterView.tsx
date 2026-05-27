@@ -4,12 +4,10 @@ import { useState } from 'react';
 import BottomNav from '@/components/main/BottomNav';
 import type { MainNavItem } from '@/components/main/BottomNav';
 
-type TaxType = '사업소득' | '기타소득' | '비과세';
+type TaxType = '사업소득';
 
 const TAX_RATE: Record<TaxType, number> = {
   사업소득: 0.033,
-  기타소득: 0.088,
-  비과세:   0,
 };
 
 interface ContractRegisterViewProps {
@@ -22,10 +20,8 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
   const [name, setName]           = useState('');
   const [amount, setAmount]       = useState('');
   const [date, setDate]           = useState('');
-  const [taxType, setTaxType]     = useState<TaxType>('사업소득');
-
   const rawAmount  = Number(amount.replace(/[^0-9]/g, '')) || 0;
-  const deduction  = Math.floor(rawAmount * TAX_RATE[taxType]);
+  const deduction  = Math.floor(rawAmount * TAX_RATE['사업소득']);
   const netAmount  = rawAmount - deduction;
 
   const fmt = (n: number) => n > 0 ? `₩ ${n.toLocaleString()}` : '-';
@@ -106,19 +102,9 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             <div>
               <label className="text-sm text-gray-700 mb-2 block">세금 유형 선택</label>
               <div className="flex gap-2">
-                {(['사업소득', '기타소득', '비과세'] as TaxType[]).map((t) => (
-                  <button
-                    key={t}
-                    onClick={() => setTaxType(t)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      taxType === t
-                        ? 'bg-sky-500 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
+                <button className="px-4 py-2 rounded-full text-sm font-medium bg-sky-500 text-white">
+                  사업소득
+                </button>
               </div>
             </div>
           </div>
@@ -133,7 +119,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
               <span>{fmt(rawAmount)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-300">공제율 ({(TAX_RATE[taxType] * 100).toFixed(1)}%)</span>
+              <span className="text-gray-300">공제율 ({(TAX_RATE['사업소득'] * 100).toFixed(1)}%)</span>
               <span>{deduction > 0 ? `- ₩ ${deduction.toLocaleString()}` : '-'}</span>
             </div>
             <div className="h-px bg-gray-400 my-1" />
