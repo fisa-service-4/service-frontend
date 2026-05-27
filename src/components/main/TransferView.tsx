@@ -43,6 +43,10 @@ interface TransferViewProps {
 }
 
 export default function TransferView({ accounts, onBack }: TransferViewProps) {
+export default function TransferView({
+  accounts,
+  onBack,
+}: TransferViewProps) {
   const [step, setStep]                 = useState<Step>('form');
   const [fromId, setFromId]             = useState(accounts[0]?.accountId ?? 0);
   const [toBankCode, setToBankCode]     = useState('');
@@ -280,8 +284,8 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
             </div>
           </div>
         )}
-
         <BottomNav />
+        <BottomNav  />
       </div>
     );
   }
@@ -358,8 +362,8 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
             이전
           </button>
         </div>
-
         <BottomNav />
+        <BottomNav  />
       </div>
     );
   }
@@ -405,8 +409,8 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
         <div className="pb-6 shrink-0">
           <PinKeypad onPress={handlePinPress} />
         </div>
-
         <BottomNav />
+        <BottomNav  />
       </div>
     );
   }
@@ -475,8 +479,8 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
           확인
         </button>
       </div>
-
       <BottomNav />
+      <BottomNav  />
     </div>
   );
 }

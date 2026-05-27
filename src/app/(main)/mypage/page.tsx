@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -28,4 +29,9 @@ export default function MypagePage() {
       <BottomNav />
     </div>
   );
+import MypageView from '@/components/main/MypageView';
+
+export default function MypagePage() {
+  return <MypageView />;
+>>>>>>> develop
 }
