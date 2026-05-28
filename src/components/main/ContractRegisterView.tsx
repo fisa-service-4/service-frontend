@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import BottomNav from '@/components/main/BottomNav';
-import type { MainNavItem } from '@/components/main/BottomNav';
 
 type TaxType = '사업소득';
 
@@ -16,7 +15,6 @@ interface ContractRegisterViewProps {
 }
 
 export default function ContractRegisterView({ onBack, onSubmit }: ContractRegisterViewProps) {
-  const [activeNav, setActiveNav] = useState<MainNavItem>('home');
   const [name, setName]           = useState('');
   const [amount, setAmount]       = useState('');
   const [date, setDate]           = useState('');
@@ -149,7 +147,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
       </div>
 
       {/* 하단 탭 */}
-      <BottomNav activeNav={activeNav} onNavChange={setActiveNav} />
+      <BottomNav />
     </div>
   );
 }
