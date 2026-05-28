@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Menu, ArrowRight, PlusCircle } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import type { MainNavItem } from '@/components/main/BottomNav';
 import { apiRequest } from '@/utils/apiClient';
 
 interface Message {
@@ -26,12 +25,10 @@ const GREETING: Message = {
 };
 
 interface ChatBotViewProps {
-  onClose:     () => void;
-  activeNav:   MainNavItem;
-  onNavChange: (nav: MainNavItem) => void;
+  onClose: () => void;
 }
 
-export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBotViewProps) {
+export default function ChatBotView({ onClose }: ChatBotViewProps) {
   const [messages, setMessages]               = useState<Message[]>([GREETING]);
   const [input, setInput]                     = useState('');
   const [sidebarOpen, setSidebar]             = useState(false);
@@ -251,7 +248,7 @@ export default function ChatBotView({ onClose, activeNav, onNavChange }: ChatBot
       </div>
 
       {/* 하단 탭 - 사이드바와 무관하게 항상 노출 */}
-      <BottomNav activeNav={activeNav} onNavChange={onNavChange} />
+      <BottomNav />
 
     </div>
   );
