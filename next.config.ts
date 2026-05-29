@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
                 source: "/mydata/:path*",
                 destination: "http://mydata-server:8084/mydata/:path*",
             },
+            {
+                source: "/baas/:path*",
+                destination: "http://transaction-server:8083/baas/:path*",
+            },
         ];
     },
 };

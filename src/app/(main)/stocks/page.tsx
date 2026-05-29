@@ -1,36 +1,353 @@
 'use client';
 
-import { useState } from 'react';
-import { Menu, Bell } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, TrendingUp, TrendingDown } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import NotificationPanel from '@/components/main/NotificationPanel';
+import {
+  getHoldings,
+  getReturns,
+  getOrders,
+  getFavorites,
+  searchStocks,
+  TEMP_ACCOUNT_ID,
+  type Holding,
+  type Returns,
+  type Order,
+  type FavoriteStock,
+  type StockSearchItem,
+} from '@/api/stock';
+
+// Mock 차트 데이터 - TODO: 차트 API 연동 시 교체
+const MOCK_CHART = [40, 42, 41, 43, 44, 45, 44, 46, 47, 48];
+
+const fmtWon = (n: number | null) => {
+  if (n === null || n === undefined) return '-';
+  return '₩' + n.toLocaleString('ko-KR');
+};
+const signWon = (n: number | null) => {
+  if (n === null || n === undefined) return '-';
+  return (n >= 0 ? '+' : '-') + '₩' + Math.abs(n).toLocaleString('ko-KR');
+};
+const signRate = (n: number | null) => {
+  if (n === null || n === undefined) return '-';
+  return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
+};
+
+function Sparkline({ data, up }: { data: number[]; up: boolean }) {
+  const w = 100, h = 24;
+  const min = Math.min(...data), max = Math.max(...data);
+  const range = max - min || 1;
+  const pts = data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * w;
+      const y = h - ((v - min) / range) * h;
+      return `${x},${y}`;
+    })
+    .join(' ');
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="w-full h-12">
+      <polyline
+        points={pts}
+        fill="none"
+        stroke={up ? '#22c55e' : '#ef4444'}
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 export default function StocksPage() {
-  const [showNotification, setShowNotification] = useState(false);
+  const [holdings, setHoldings] = useState<Holding[]>([]);
+  const [returns, setReturns] = useState<Returns>({ dailyReturnRate: 0, monthlyReturnRate: 0, yearlyReturnRate: 0 });
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [tab, setTab] = useState<'holdings' | 'orders' | 'favorites'>('holdings');
+  const [favorites, setFavorites] = useState<FavoriteStock[]>([]);
+  const [query, setQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<StockSearchItem[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [holdingRes, returnsRes] = await Promise.all([
+          getHoldings(TEMP_ACCOUNT_ID),
+          getReturns(TEMP_ACCOUNT_ID),
+        ]);
+        setHoldings(holdingRes.holdings);
+        setReturns(returnsRes);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (tab !== 'orders') return;
+    (async () => {
+      try {
+        const res = await getOrders(TEMP_ACCOUNT_ID);
+        setOrders(res.content);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [tab]);
+
+  useEffect(() => {
+    if (tab !== 'favorites') return;
+    (async () => {
+      try {
+        const res = await getFavorites();
+        setFavorites(res.favorites);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [tab]);
+
+  useEffect(() => {
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const results = await searchStocks(query);
+        setSearchResults(results);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const totalValue = holdings.reduce((sum, h) => sum + (h.evaluationAmount ?? 0), 0);
+  const profitLoss = holdings.reduce((sum, h) => sum + (h.unrealizedProfit ?? 0), 0);
+  const profitUp = profitLoss >= 0;
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      {/* 1. 상단 헤더 영역 */}
-      <div className="flex items-center justify-between px-5 py-4 shrink-0">
-        <button>
-          <Menu size={24} className="text-gray-800" />
-        </button>
-        <span className="text-base font-bold text-gray-900">증권</span>
-        <button className="p-1" onClick={() => setShowNotification(true)}>
-          <Bell size={22} className="text-gray-800" />
-        </button>
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
+
+        <h1 className="text-2xl font-bold text-gray-900 pt-6 pb-4">증권</h1>
+
+        {/* 검색창 */}
+        <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-3 mb-4">
+          <Search size={18} className="text-gray-400 shrink-0" />
+          <input
+            className="flex-1 bg-transparent outline-none text-gray-900 text-sm placeholder:text-gray-400"
+            placeholder="종목명 또는 종목코드 검색"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button onClick={() => setQuery('')} className="text-gray-400 text-xs">✕</button>
+          )}
+        </div>
+
+        {/* 총 평가금액 카드 */}
+        {!query && <div className="bg-white border-2 border-sky-500 rounded-2xl p-5 mb-4">
+          <p className="text-sm text-gray-500 mb-1">총 평가금액</p>
+          <p className="text-3xl font-bold text-gray-900 mb-5">
+            {loading ? '-' : fmtWon(totalValue)}
+          </p>
+          <div className="flex justify-between">
+            <div>
+              <p className="text-xs text-gray-400">평가손익</p>
+              <p className={`text-base font-bold mt-1 ${profitUp ? 'text-green-500' : 'text-red-500'}`}>
+                {loading ? '-' : signWon(profitLoss)}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-400">수익률 (일간)</p>
+              <p className={`text-base font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {returns.dailyReturnRate >= 0
+                  ? <TrendingUp size={14} />
+                  : <TrendingDown size={14} />}
+                {loading ? '-' : signRate(returns.dailyReturnRate)}
+              </p>
+            </div>
+          </div>
+        </div>}
+
+        {/* 검색 결과 */}
+        {query ? (
+          <div>
+            <p className="text-sm font-semibold text-gray-500 mb-3">검색 결과</p>
+            {searching ? (
+              <p className="text-center text-gray-400 text-sm py-10">검색 중...</p>
+            ) : searchResults.length === 0 ? (
+              <p className="text-center text-gray-400 text-sm py-10">검색 결과가 없습니다.</p>
+            ) : (
+              <div className="space-y-2">
+                {searchResults.map((s) => {
+                  const up = s.changeRate >= 0;
+                  return (
+                    <div key={s.stockCode} className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex justify-between items-center">
+                      <div>
+                        <p className="text-sm font-bold text-gray-900">{s.stockName}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{s.stockCode} · {s.market}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                        <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
+                          {signRate(s.changeRate)}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* 탭 */}
+            <div className="flex bg-gray-100 rounded-xl p-1 mb-4">
+              {(['holdings', 'orders', 'favorites'] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTab(t)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                    tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'
+                  }`}
+                >
+                  {t === 'holdings' ? '보유종목' : t === 'orders' ? '주문내역' : '관심종목'}
+                </button>
+              ))}
+            </div>
+
+            {/* 보유종목 */}
+            {tab === 'holdings' && (
+              loading ? (
+                <p className="text-center text-gray-400 text-sm py-10">불러오는 중...</p>
+              ) : holdings.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-10">보유종목이 없습니다.</p>
+              ) : (
+                <div className="space-y-3">
+                  {holdings.map((s) => {
+                    const up = (s.profitRate ?? 0) >= 0;
+                    return (
+                      <div key={s.stockCode} className="bg-white border-2 border-sky-500 rounded-2xl p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <p className="text-base font-bold text-gray-900">{s.stockName}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{s.stockCode}</p>
+                          </div>
+                          <p className="text-base font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                        </div>
+
+                        {/* Mock 스파크라인 - TODO: 차트 API 연동 시 교체 */}
+                        <Sparkline data={MOCK_CHART} up={up} />
+
+                        <div className="flex justify-between mt-3 mb-4">
+                          <div>
+                            <p className="text-xs text-gray-400">보유수량</p>
+                            <p className="text-sm font-bold text-gray-900 mt-1">{s.quantity}주</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-gray-400">평가손익</p>
+                            <p className={`text-sm font-bold mt-1 ${up ? 'text-green-500' : 'text-red-500'}`}>
+                              {signWon(s.unrealizedProfit)} ({signRate(s.profitRate)})
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2">
+                          <button className="flex-1 py-3 rounded-xl bg-sky-500 text-white text-sm font-bold">
+                            매수
+                          </button>
+                          <button className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold">
+                            매도
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            )}
+
+            {/* 관심종목 */}
+            {tab === 'favorites' && (
+              favorites.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-10">관심종목이 없습니다.</p>
+              ) : (
+                <div className="space-y-2">
+                  {favorites.map((s) => {
+                    const up = s.changeRate >= 0;
+                    return (
+                      <div key={s.favoriteId} className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex justify-between items-center">
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">{s.stockName}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{s.stockCode}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                          <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
+                            {signRate(s.changeRate)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
+            )}
+
+            {/* 주문내역 */}
+            {tab === 'orders' && (
+              orders.length === 0 ? (
+                <p className="text-center text-gray-400 text-sm py-10">주문내역이 없습니다.</p>
+              ) : (
+                <div className="space-y-3">
+                  {orders.map((o) => (
+                    <div key={o.orderId} className="bg-white border-2 border-gray-100 rounded-2xl p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <p className="text-base font-bold text-gray-900">{o.stockName}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{o.stockCode}</p>
+                        </div>
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
+                          o.orderType === 'BUY'
+                            ? 'bg-sky-50 text-sky-600 border border-sky-200'
+                            : 'bg-red-50 text-red-500 border border-red-200'
+                        }`}>
+                          {o.orderType === 'BUY' ? '매수' : '매도'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <div>
+                          <p className="text-xs text-gray-400">주문수량</p>
+                          <p className="text-sm font-bold text-gray-900 mt-1">{o.quantity}주</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-xs text-gray-400">주문가격</p>
+                          <p className="text-sm font-bold text-gray-900 mt-1">{fmtWon(o.price)}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-gray-400">상태</p>
+                          <p className="text-sm font-bold text-gray-900 mt-1">{o.status}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+          </>
+        )}
       </div>
 
-      {/* 2. 본문 영역 (가운데 정렬) */}
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-gray-400 text-sm">증권 준비 중</p>
-      </div>
-
-      {/* 3. 하단 네비게이션 바 (두 번째 코드 조각에서 누락되었던 부분 추가) */}
       <BottomNav />
-
-      {/* 4. 알림 패널 오버레이 */}
-      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
     </div>
   );
 }
