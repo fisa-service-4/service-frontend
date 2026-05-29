@@ -118,6 +118,33 @@ export interface FavoriteStockListResponse {
 export const getFavorites = () =>
   apiRequest<FavoriteStockListResponse>('/favorite-stocks');
 
+export interface ChartCandle {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+export interface ChartResponse {
+  content: ChartCandle[];
+}
+
+export const getStockChart = async (
+  stockCode: string,
+  interval: 'DAILY' | 'WEEKLY' | 'MONTHLY' = 'DAILY',
+  fromDate?: string,
+  toDate?: string
+): Promise<ChartCandle[]> => {
+  const params = new URLSearchParams({ interval });
+  if (fromDate) params.set('fromDate', fromDate);
+  if (toDate) params.set('toDate', toDate);
+  const res = await fetch(`/baas/v1/stock/${stockCode}/charts?${params.toString()}`);
+  const json = await res.json();
+  return json.data?.content ?? [];
+};
+
 export const searchStocks = async (keyword: string): Promise<StockSearchItem[]> => {
   const res = await fetch(`/baas/v1/stock/search?keyword=${encodeURIComponent(keyword)}`);
   const json = await res.json();

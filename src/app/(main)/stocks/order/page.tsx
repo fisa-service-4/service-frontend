@@ -7,11 +7,12 @@ import BottomNav from '@/components/main/BottomNav';
 import {
   getCashBalance,
   createOrder,
+  getStockChart,
   TEMP_ACCOUNT_ID,
   type OrderCreateRequest,
+  type ChartCandle,
 } from '@/api/stock';
-
-const MOCK_CHART = [40, 45, 42, 48, 50, 47, 52, 55, 58, 60, 72, 70];
+import StockChart from '@/components/stock/StockChart';
 
 const ORDER_METHODS = [
   { value: 'MARKET', label: '시장가' },
@@ -30,26 +31,6 @@ const fmtWon = (n: number | null) => {
   return '₩' + n.toLocaleString('ko-KR');
 };
 
-function Sparkline({ data, up }: { data: number[]; up: boolean }) {
-  const w = 100, h = 30;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = max - min || 1;
-  const pts = data
-    .map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * h}`)
-    .join(' ');
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="w-full h-16">
-      <polyline
-        points={pts}
-        fill="none"
-        stroke={up ? '#22c55e' : '#ef4444'}
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 export default function StockOrderPage() {
   return (
@@ -74,6 +55,7 @@ function StockOrderContent() {
   const [quantity, setQuantity] = useState(0);
   const [methodOpen, setMethodOpen] = useState(false);
   const [availableBalance, setAvailableBalance] = useState<number | null>(null);
+  const [chartData, setChartData] = useState<ChartCandle[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -82,7 +64,13 @@ function StockOrderContent() {
     getCashBalance(TEMP_ACCOUNT_ID)
       .then((res) => setAvailableBalance(res.availableBalance))
       .catch(console.error);
-  }, []);
+
+    if (stockCode) {
+      getStockChart(stockCode, 'DAILY')
+        .then(setChartData)
+        .catch(console.error);
+    }
+  }, [stockCode]);
 
   const up = changeRate >= 0;
   const estimate = quantity * stockPrice;
@@ -143,7 +131,10 @@ function StockOrderContent() {
               </p>
             </div>
           </div>
-          <Sparkline data={MOCK_CHART} up={up} />
+          {chartData.length > 0
+            ? <StockChart data={chartData} height={180} />
+            : <div className="h-[180px] flex items-center justify-center text-gray-300 text-sm">차트 로딩 중...</div>
+          }
         </div>
 
         {/* 매수 / 매도 토글 */}

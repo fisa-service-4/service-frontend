@@ -1,14 +1,18 @@
 'use client';
 
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, TrendingUp, TrendingDown } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import StockChart from '@/components/stock/StockChart';
 import {
   getHoldings,
   getReturns,
   getOrders,
   getFavorites,
+  getStockChart,
   searchStocks,
   TEMP_ACCOUNT_ID,
   type Holding,
@@ -16,10 +20,8 @@ import {
   type Order,
   type FavoriteStock,
   type StockSearchItem,
+  type ChartCandle,
 } from '@/api/stock';
-
-// Mock 차트 데이터 - TODO: 차트 API 연동 시 교체
-const MOCK_CHART = [40, 42, 41, 43, 44, 45, 44, 46, 47, 48];
 
 const fmtWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
@@ -34,30 +36,6 @@ const signRate = (n: number | null) => {
   return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 };
 
-function Sparkline({ data, up }: { data: number[]; up: boolean }) {
-  const w = 100, h = 24;
-  const min = Math.min(...data), max = Math.max(...data);
-  const range = max - min || 1;
-  const pts = data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * w;
-      const y = h - ((v - min) / range) * h;
-      return `${x},${y}`;
-    })
-    .join(' ');
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="w-full h-12">
-      <polyline
-        points={pts}
-        fill="none"
-        stroke={up ? '#22c55e' : '#ef4444'}
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 export default function StocksPage() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
@@ -69,6 +47,7 @@ export default function StocksPage() {
   const [searchResults, setSearchResults] = useState<StockSearchItem[]>([]);
   const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [chartMap, setChartMap] = useState<Record<string, ChartCandle[]>>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -80,6 +59,13 @@ export default function StocksPage() {
         ]);
         setHoldings(holdingRes.holdings);
         setReturns(returnsRes);
+
+        const charts = await Promise.all(
+          holdingRes.holdings.map((h) => getStockChart(h.stockCode, 'DAILY'))
+        );
+        const map: Record<string, ChartCandle[]> = {};
+        holdingRes.holdings.forEach((h, i) => { map[h.stockCode] = charts[i]; });
+        setChartMap(map);
       } catch (e) {
         console.error(e);
       } finally {
@@ -251,8 +237,10 @@ export default function StocksPage() {
                           <p className="text-base font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
                         </div>
 
-                        {/* Mock 스파크라인 - TODO: 차트 API 연동 시 교체 */}
-                        <Sparkline data={MOCK_CHART} up={up} />
+                        {chartMap[s.stockCode]?.length > 0
+                          ? <StockChart data={chartMap[s.stockCode]} height={100} />
+                          : <div className="h-[100px]" />
+                        }
 
                         <div className="flex justify-between mt-3 mb-4">
                           <div>
