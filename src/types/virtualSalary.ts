@@ -15,7 +15,7 @@ export interface Contract {
   taxType: TaxType;
   expectedPaymentDate: string;
   contractStatus: ContractStatus;
-  settlement: ContractSettlement;
+  settlement: ContractSettlement | null;
   createdAt: string;
 }
 
