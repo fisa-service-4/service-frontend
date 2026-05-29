@@ -1,3 +1,5 @@
+export type AccountRole = 'DEPOSIT' | 'SALARY' | 'EMERGENCY' | 'STOCK' | 'NONE';
+
 export interface BankAccount {
   accountId: number;
   bankCode: string;
@@ -5,7 +7,13 @@ export interface BankAccount {
   accountName: string;
   balance: number;
   accountStatus: string;
-  accountRole?: string;
+  accountRole?: AccountRole;
+}
+
+export interface AccountRoleUpdateResponse {
+  accountId: number;
+  accountRole: AccountRole;
+  updatedAt: string;
 }
 
 export interface AccountBalance {

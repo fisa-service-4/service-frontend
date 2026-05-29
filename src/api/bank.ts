@@ -1,5 +1,7 @@
 import { apiRequest } from '@/utils/apiClient';
 import type {
+  AccountRole,
+  AccountRoleUpdateResponse,
   BankAccount,
   AccountBalance,
   TransactionPage,
@@ -11,6 +13,12 @@ import type {
 
 export const getAccounts = () =>
   apiRequest<BankAccount[]>('/accounts');
+
+export const setAccountRole = (accountId: number, accountRole: AccountRole) =>
+  apiRequest<AccountRoleUpdateResponse>(`/accounts/${accountId}/role`, {
+    method: 'PATCH',
+    body: JSON.stringify({ accountRole }),
+  });
 
 export const getAccountBalance = (accountId: number) =>
   apiRequest<AccountBalance>(`/accounts/${accountId}/balance`);
