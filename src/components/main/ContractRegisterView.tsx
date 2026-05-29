@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import BottomNav from '@/components/main/BottomNav';
+import { createContract } from '@/api/virtualSalary';
+import type { TaxType } from '@/types/virtualSalary';
 
-type TaxType = '사업소득';
-
-const TAX_RATE: Record<TaxType, number> = {
-  사업소득: 0.033,
-};
+const TAX_OPTIONS: { value: TaxType; label: string; rate: number }[] = [
+  { value: 'BUSINESS', label: '사업소득', rate: 0.033 },
+  { value: 'ETC',      label: '기타소득', rate: 0.088 },
+  { value: 'ARTIST',   label: '예술인',   rate: 0.088 },
+];
 
 interface ContractRegisterViewProps {
   onBack:   () => void;
@@ -18,15 +20,41 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
   const [name, setName]           = useState('');
   const [amount, setAmount]       = useState('');
   const [date, setDate]           = useState('');
-  const rawAmount  = Number(amount.replace(/[^0-9]/g, '')) || 0;
-  const deduction  = Math.floor(rawAmount * TAX_RATE['사업소득']);
-  const netAmount  = rawAmount - deduction;
+  const [taxType, setTaxType]     = useState<TaxType>('BUSINESS');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError]         = useState<string | null>(null);
+
+  const rawAmount   = Number(amount.replace(/[^0-9]/g, '')) || 0;
+  const selectedTax = TAX_OPTIONS.find(t => t.value === taxType)!;
+  const deduction   = Math.floor(rawAmount * selectedTax.rate);
+  const netAmount   = rawAmount - deduction;
 
   const fmt = (n: number) => n > 0 ? `₩ ${n.toLocaleString()}` : '-';
 
   const handleAmountChange = (v: string) => {
     const num = v.replace(/[^0-9]/g, '');
     setAmount(num ? Number(num).toLocaleString() : '');
+  };
+
+  const isValid = name.trim().length > 0 && rawAmount > 0 && date.length > 0;
+
+  const handleSubmit = async () => {
+    if (!isValid || submitting) return;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await createContract({
+        clientName: name.trim(),
+        contractAmount: rawAmount,
+        taxType,
+        expectedPaymentDate: date,
+      });
+      onSubmit();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '계약 등록에 실패했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -51,8 +79,8 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
         {/* 계약 정보 입력 */}
         <div>
           <h2 className="text-lg font-bold text-gray-900 mb-4">계약 정보 입력</h2>
-
           <div className="space-y-4">
+
             {/* 거래처 명 */}
             <div>
               <label className="text-sm text-gray-700 mb-1.5 block">
@@ -91,7 +119,6 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                placeholder="2025 - 02 - 11"
                 className="w-full bg-gray-500 text-white placeholder:text-gray-300 rounded-xl px-4 py-3 text-sm outline-none [color-scheme:dark]"
               />
             </div>
@@ -100,9 +127,19 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             <div>
               <label className="text-sm text-gray-700 mb-2 block">세금 유형 선택</label>
               <div className="flex gap-2">
-                <button className="px-4 py-2 rounded-full text-sm font-medium bg-sky-500 text-white">
-                  사업소득
-                </button>
+                {TAX_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setTaxType(opt.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                      taxType === opt.value
+                        ? 'bg-sky-500 text-white'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -117,7 +154,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
               <span>{fmt(rawAmount)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-300">공제율 ({(TAX_RATE['사업소득'] * 100).toFixed(1)}%)</span>
+              <span className="text-gray-300">공제율 ({(selectedTax.rate * 100).toFixed(1)}%)</span>
               <span>{deduction > 0 ? `- ₩ ${deduction.toLocaleString()}` : '-'}</span>
             </div>
             <div className="h-px bg-gray-400 my-1" />
@@ -128,25 +165,33 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
           </div>
         </div>
 
+        {/* 에러 메시지 */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
+            {error}
+          </div>
+        )}
+
         {/* 하단 버튼 */}
         <div className="flex gap-3 pb-2">
           <button
             onClick={onBack}
-            className="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-2xl text-sm"
+            disabled={submitting}
+            className="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-2xl text-sm disabled:opacity-50"
           >
             취소
           </button>
           <button
-            onClick={onSubmit}
-            className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-2xl text-sm"
+            onClick={handleSubmit}
+            disabled={!isValid || submitting}
+            className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-2xl text-sm disabled:opacity-50"
           >
-            등록
+            {submitting ? '등록 중...' : '등록'}
           </button>
         </div>
 
       </div>
 
-      {/* 하단 탭 */}
       <BottomNav />
     </div>
   );
