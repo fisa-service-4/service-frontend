@@ -64,10 +64,16 @@ export default function HomePage() {
             </div>
           )}
 
-          <VirtualSalaryCard
-            dashboard={summary?.dashboard}
-            loading={loading}
-          />
+          {/* 카드 탭 → 가상월급 설정 페이지 */}
+          <div
+            onClick={() => router.push('/mypage/virtual-salary')}
+            className="cursor-pointer"
+          >
+            <VirtualSalaryCard
+              dashboard={summary?.dashboard}
+              loading={loading}
+            />
+          </div>
 
           <IncomeCalendar
             calendarData={summary?.calendarData ?? []}
