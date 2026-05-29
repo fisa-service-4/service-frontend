@@ -55,6 +55,42 @@ export const getReturns = (accountId: number) =>
 export const getOrders = (accountId: number, page = 0, size = 20) =>
   apiRequest<OrderListResponse>(`/orders?accountId=${accountId}&page=${page}&size=${size}`);
 
+export interface CashBalance {
+  cashBalance: number;
+  availableBalance: number;
+}
+
+export interface OrderCreateRequest {
+  stockCode: string;
+  orderType: 'BUY' | 'SELL';
+  orderMethod: 'MARKET' | 'LIMIT';
+  quantity: number;
+  price: number | null;
+}
+
+export interface OrderResponse {
+  orderId: number;
+  stockCode: string;
+  orderType: string;
+  orderMethod: string;
+  quantity: number;
+  price: number;
+  status: string;
+  orderedAt: string;
+}
+
+export const getCashBalance = (accountId: number) =>
+  apiRequest<CashBalance>(`/stocks/cash-balance?accountId=${accountId}`);
+
+export const createOrder = (accountId: number, body: OrderCreateRequest) =>
+  apiRequest<OrderResponse>(`/orders?accountId=${accountId}`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: {
+      'Idempotency-Key': crypto.randomUUID(),
+    },
+  });
+
 export interface StockSearchItem {
   stockCode: string;
   stockName: string;

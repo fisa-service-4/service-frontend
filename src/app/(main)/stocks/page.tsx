@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, TrendingUp, TrendingDown } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import {
@@ -68,6 +69,7 @@ export default function StocksPage() {
   const [searchResults, setSearchResults] = useState<StockSearchItem[]>([]);
   const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -191,7 +193,11 @@ export default function StocksPage() {
                 {searchResults.map((s) => {
                   const up = s.changeRate >= 0;
                   return (
-                    <div key={s.stockCode} className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex justify-between items-center">
+                    <div
+                      key={s.stockCode}
+                      className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex justify-between items-center cursor-pointer active:bg-gray-50"
+                      onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.changeRate}&market=${s.market}`)}
+                    >
                       <div>
                         <p className="text-sm font-bold text-gray-900">{s.stockName}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{s.stockCode} · {s.market}</p>
