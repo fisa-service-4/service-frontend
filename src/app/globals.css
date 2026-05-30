@@ -10,6 +10,31 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Primary */
+  --color-primary-50:  #ecf6ff;
+  --color-primary-100: #d5ebff;
+  --color-primary-300: #81c7ff;
+  --color-primary-500: #1b85ff;
+  --color-primary-700: #0056f8;
+  --color-primary-900: #0b3a94;
+
+  /* 상태 */
+  --color-success: #22C55E;
+  --color-error:   #EF4444;
+
+  /* Gray */
+  --color-gray-50:  #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-400: #94A3B8;
+  --color-gray-500: #64748B;
+  --color-gray-700: #334155;
+  --color-gray-900: #0F172A;
+
+  /* Background */
+  --color-bg:      #F8FAFC;
+  --color-bg-card: #FFFFFF;
 }
 
 @media (prefers-color-scheme: dark) {
