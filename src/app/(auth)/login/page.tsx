@@ -24,6 +24,7 @@ export default function LoginPage() {
       const res = await authApi.login({ email: email.trim(), password });
       tokenUtils.setTokens(res.accessToken, res.refreshToken);
       tokenUtils.setUserId(res.userId);
+      if (res.firebaseUid) tokenUtils.setFirebaseUid(res.firebaseUid);
       router.push('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : '아이디 또는 비밀번호를 확인해주세요.');

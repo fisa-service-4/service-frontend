@@ -120,8 +120,7 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
         return;
       }
       const created = await createTransfer(
-        { fromAccountId: fromId, toBankCode, toAccountNumber: toNumber, transferAmount: parsedAmount, requestedBy: 'USER' },
-        pinResult.pinToken
+        { fromAccountId: fromId, toBankCode, toAccountNumber: toNumber, transferAmount: parsedAmount, requestedBy: 'USER' }
       );
       const approved = await approveTransfer(created.transferId);
       setCompletedAt(approved.completedAt ?? '');

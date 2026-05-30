@@ -1,49 +1,45 @@
-import { apiRequest } from '@/utils/apiClient';
+import { baasRequest } from '@/utils/baasClient';
 import type {
   BankAccount,
   AccountBalance,
   TransactionPage,
-  Portfolio,
   TransferRequest,
   TransferCreated,
   TransferApproved,
 } from '@/types/bank';
 
 export const getAccounts = () =>
-  apiRequest<BankAccount[]>('/accounts');
+  baasRequest<{ content: BankAccount[] }>('/bank/accounts')
+    .then((res) => res.content);
 
 export const getAccountBalance = (accountId: number) =>
-  apiRequest<AccountBalance>(`/accounts/${accountId}/balance`);
+  baasRequest<AccountBalance>(`/bank/accounts/${accountId}/balance`);
 
 export const getTransactions = (
   accountId: number,
   params?: { from?: string; to?: string; page?: number; size?: number }
 ) => {
   const query = new URLSearchParams();
-  if (params?.from) query.set('from', params.from);
-  if (params?.to) query.set('to', params.to);
+  if (params?.from) query.set('fromDate', params.from);
+  if (params?.to) query.set('toDate', params.to);
   if (params?.page !== undefined) query.set('page', String(params.page));
   if (params?.size !== undefined) query.set('size', String(params.size));
   const qs = query.toString();
-  return apiRequest<TransactionPage>(
-    `/accounts/${accountId}/transactions${qs ? `?${qs}` : ''}`
+  return baasRequest<TransactionPage>(
+    `/bank/accounts/${accountId}/transactions${qs ? `?${qs}` : ''}`
   );
 };
 
-export const getPortfolio = () =>
-  apiRequest<Portfolio>('/portfolio');
-
-export const createTransfer = (body: TransferRequest, pinToken: string) =>
-  apiRequest<TransferCreated>('/transfers', {
+export const createTransfer = (body: TransferRequest) =>
+  baasRequest<TransferCreated>('/bank/transfers', {
     method: 'POST',
     body: JSON.stringify(body),
     headers: {
       'Idempotency-Key': crypto.randomUUID(),
-      'Pin-Token': pinToken,
     },
   });
 
 export const approveTransfer = (transferId: number) =>
-  apiRequest<TransferApproved>(`/transfers/${transferId}/approve`, {
+  baasRequest<TransferApproved>(`/bank/transfers/${transferId}/approve`, {
     method: 'POST',
   });
