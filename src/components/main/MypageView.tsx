@@ -134,17 +134,6 @@ export default function MypageView() {
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-4">
                 <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">📈</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-gray-900">투자 성향 설정 변경</p>
-                  <p className="text-xs text-gray-400">안정형/중립형/공격형</p>
-                </div>
-                <span className="text-xs text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full mr-1">1 / 2</span>
-                <ChevronRight size={18} className="text-sky-500" />
-              </button>
-              <button className="w-full flex items-center gap-3 px-4 py-4">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
                   <span className="text-lg">✨</span>
                 </div>
                 <div className="flex-1 text-left">
