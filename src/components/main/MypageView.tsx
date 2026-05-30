@@ -67,18 +67,6 @@ export default function MypageView() {
 
         <div className="px-4 py-5 space-y-5">
 
-          {/* 수입/자산 카드 */}
-          <div className="flex gap-3">
-            <div className="flex-1 bg-white rounded-2xl p-4 border-2 border-sky-500">
-              <p className="text-xs text-gray-400 mb-1">이번달 수입</p>
-              <p className="text-base font-bold text-gray-900">-</p>
-            </div>
-            <div className="flex-1 bg-white rounded-2xl p-4 border-2 border-sky-500">
-              <p className="text-xs text-gray-400 mb-1">총 자산</p>
-              <p className="text-base font-bold text-gray-900">-</p>
-            </div>
-          </div>
-
           {/* 계정 관리 */}
           <div>
             <p className="text-sm font-semibold text-gray-500 mb-2 px-1">계정 관리</p>
