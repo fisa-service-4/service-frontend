@@ -35,7 +35,8 @@ const ACCOUNT_ROLE_LABEL: Record<string, string> = {
   STOCK:     '주식',
 };
 
-function formatKRW(amount: number): string {
+function formatKRW(amount: number | null | undefined): string {
+  if (amount == null) return '₩-';
   return `₩${amount.toLocaleString('ko-KR')}`;
 }
 

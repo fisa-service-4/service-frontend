@@ -14,6 +14,13 @@ const ROLE_CONFIG: { role: AccountRole; label: string }[] = [
   { role: 'EMERGENCY', label: '비상금 통장' },
 ];
 
+const ROLE_ACCOUNT_LABEL: Partial<Record<AccountRole, string>> = {
+  DEPOSIT:   '입출금 통장',
+  SALARY:    '월급 통장',
+  EMERGENCY: '비상금 통장',
+  STOCK:     '계좌',
+};
+
 const BANK_CODE_MAP: Record<string, string> = {
   '001': '한국은행', '002': '산업은행', '003': '기업은행', '004': '국민은행',
   '011': '농협', '020': '우리은행', '023': 'SC제일은행', '027': '씨티은행',
@@ -27,7 +34,8 @@ function bankName(code: string): string {
   return BANK_CODE_MAP[code] ?? code;
 }
 
-function formatKRW(n: number): string {
+function formatKRW(n: number | null | undefined): string {
+  if (n == null) return '₩ -';
   return `₩ ${n.toLocaleString('ko-KR')}`;
 }
 
@@ -169,34 +177,37 @@ export default function AccountManageView() {
             <div className="space-y-5">
               {ROLE_CONFIG.map(({ role, label }) => {
                 const account = accounts.find((a) => a.accountRole === role) ?? null;
+                const isStock = role === 'STOCK';
+                const canEdit = !(isStock && account !== null);
                 return (
                   <div key={role}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="px-4 py-1.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 shadow-sm">
                         {label}
                       </span>
-                      <button
-                        onClick={() => enterEdit(role)}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                        aria-label={`${label} 수정`}
-                      >
-                        <Pencil size={16} className="text-gray-400" />
-                      </button>
+                      {canEdit && (
+                        <button
+                          onClick={() => enterEdit(role)}
+                          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                          aria-label={`${label} 수정`}
+                        >
+                          <Pencil size={16} className="text-gray-400" />
+                        </button>
+                      )}
                     </div>
 
                     {account ? (
-                      <div className="bg-white border-2 border-sky-500 rounded-2xl px-4 py-4 flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-gray-400 mb-0.5">
-                            {bankName(account.bankCode)} · {maskAccountNumber(account.accountNumber)}
-                          </p>
-                          <p className="text-sm font-bold text-gray-900">{account.accountName}</p>
-                        </div>
-                        <p className="text-sm font-bold text-sky-600">{formatKRW(account.balance)}</p>
+                      <div className="bg-white border-2 border-sky-500 rounded-2xl px-4 py-4">
+                        <p className="text-sm font-bold text-gray-900">
+                          {bankName(account.bankCode)} {ROLE_ACCOUNT_LABEL[role]}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {maskAccountNumber(account.accountNumber)}
+                        </p>
                       </div>
                     ) : (
                       <div className="bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl px-4 py-4 flex items-center justify-center">
-                        <p className="text-sm text-gray-400">미설정 — 연필 버튼으로 지정하세요</p>
+                        <p className="text-sm text-gray-400">미설정</p>
                       </div>
                     )}
                   </div>
@@ -210,14 +221,6 @@ export default function AccountManageView() {
       {/* ── 수정 모드 ── */}
       {mode === 'edit' && selectedRole && (
         <div className="flex-1 flex flex-col overflow-hidden">
-
-          {/* 안내 문구 */}
-          <div className="px-4 pt-4 pb-3 bg-sky-50 border-b border-sky-100">
-            <p className="text-sm font-semibold text-sky-700">
-              어떤 계좌를 <span className="text-sky-600">{roleLabelOf(selectedRole)}</span>으로 사용할까요?
-            </p>
-            <p className="text-xs text-sky-500 mt-0.5">이미 다른 역할로 사용 중인 계좌는 선택할 수 없습니다.</p>
-          </div>
 
           {/* 계좌 목록 */}
           <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
@@ -234,7 +237,7 @@ export default function AccountManageView() {
                     key={account.accountId}
                     disabled={isDisabled}
                     onClick={() => setSelectedAccountId(isChecked ? null : account.accountId)}
-                    className={`w-full text-left rounded-2xl px-4 py-4 border-2 transition-all flex items-center justify-between gap-3
+                    className={`w-full text-left rounded-2xl px-4 py-3 border-2 transition-all flex items-center justify-between gap-3
                       ${isDisabled
                         ? 'bg-gray-50 border-gray-100 opacity-50 cursor-not-allowed'
                         : isChecked
@@ -242,9 +245,7 @@ export default function AccountManageView() {
                           : 'bg-white border-gray-200 hover:border-sky-300'
                       }`}
                   >
-                    {/* 계좌 정보 */}
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {/* 체크박스 */}
                       <div
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
                           ${isChecked
@@ -255,16 +256,11 @@ export default function AccountManageView() {
                         {isChecked && <Check size={12} className="text-white" strokeWidth={3} />}
                       </div>
 
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold text-gray-900 truncate">{account.accountName}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {bankName(account.bankCode)} · {maskAccountNumber(account.accountNumber)}
-                        </p>
-                        <p className="text-xs font-semibold text-gray-700 mt-0.5">{formatKRW(account.balance)}</p>
-                      </div>
+                      <p className="text-sm text-gray-800 truncate">
+                        {bankName(account.bankCode)} · {maskAccountNumber(account.accountNumber)}
+                      </p>
                     </div>
 
-                    {/* 다른 역할 사용 중 뱃지 */}
                     {isDisabled && account.accountRole && account.accountRole !== 'NONE' && (
                       <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-lg shrink-0 whitespace-nowrap">
                         {roleLabelOf(account.accountRole)}으로 사용 중

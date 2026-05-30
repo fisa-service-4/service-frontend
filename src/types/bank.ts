@@ -5,7 +5,7 @@ export interface BankAccount {
   bankCode: string;
   accountNumber: string;
   accountName: string;
-  balance: number;
+  balance: number | null;
   accountStatus: string;
   accountRole?: AccountRole;
 }
