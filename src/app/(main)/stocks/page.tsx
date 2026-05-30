@@ -4,7 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, TrendingUp, TrendingDown } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import StockChart from '@/components/stock/StockChart';
 import {
@@ -12,6 +12,8 @@ import {
   getReturns,
   getOrders,
   getFavorites,
+  addFavorite,
+  removeFavorite,
   getStockChart,
   searchStocks,
   TEMP_ACCOUNT_ID,
@@ -46,6 +48,7 @@ export default function StocksPage() {
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<StockSearchItem[]>([]);
   const [searching, setSearching] = useState(false);
+  const [favoriteMap, setFavoriteMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [chartMap, setChartMap] = useState<Record<string, ChartCandle[]>>({});
   const router = useRouter();
@@ -53,19 +56,23 @@ export default function StocksPage() {
   useEffect(() => {
     (async () => {
       try {
-        const [holdingRes, returnsRes] = await Promise.all([
+        const [holdingRes, returnsRes, favRes] = await Promise.all([
           getHoldings(TEMP_ACCOUNT_ID),
           getReturns(TEMP_ACCOUNT_ID),
+          getFavorites(),
         ]);
         setHoldings(holdingRes.holdings);
         setReturns(returnsRes);
+        const map: Record<string, number> = {};
+        favRes.favorites.forEach((f) => { map[f.stockCode] = f.favoriteId; });
+        setFavoriteMap(map);
 
         const charts = await Promise.all(
           holdingRes.holdings.map((h) => getStockChart(h.stockCode, 'DAILY'))
         );
-        const map: Record<string, ChartCandle[]> = {};
-        holdingRes.holdings.forEach((h, i) => { map[h.stockCode] = charts[i]; });
-        setChartMap(map);
+        const chartData: Record<string, ChartCandle[]> = {};
+        holdingRes.holdings.forEach((h, i) => { chartData[h.stockCode] = charts[i]; });
+        setChartMap(chartData);
       } catch (e) {
         console.error(e);
       } finally {
@@ -116,6 +123,21 @@ export default function StocksPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [query]);
+
+  const toggleFavorite = async (stockCode: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      if (favoriteMap[stockCode] !== undefined) {
+        await removeFavorite(favoriteMap[stockCode]);
+        setFavoriteMap((prev) => { const next = { ...prev }; delete next[stockCode]; return next; });
+      } else {
+        const res = await addFavorite(stockCode);
+        setFavoriteMap((prev) => ({ ...prev, [stockCode]: res.favoriteId }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const totalValue = holdings.reduce((sum, h) => sum + (h.evaluationAmount ?? 0), 0);
   const profitLoss = holdings.reduce((sum, h) => sum + (h.unrealizedProfit ?? 0), 0);
@@ -188,11 +210,22 @@ export default function StocksPage() {
                         <p className="text-sm font-bold text-gray-900">{s.stockName}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{s.stockCode} · {s.market}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
-                        <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
-                          {signRate(s.changeRate)}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                          <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
+                            {signRate(s.changeRate)}
+                          </p>
+                        </div>
+                        <button
+                          onClick={(e) => toggleFavorite(s.stockCode, e)}
+                          className="p-1"
+                        >
+                          <Star
+                            size={20}
+                            className={favoriteMap[s.stockCode] !== undefined ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
+                          />
+                        </button>
                       </div>
                     </div>
                   );

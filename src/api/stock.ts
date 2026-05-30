@@ -118,6 +118,17 @@ export interface FavoriteStockListResponse {
 export const getFavorites = () =>
   apiRequest<FavoriteStockListResponse>('/favorite-stocks');
 
+export const addFavorite = (stockCode: string) =>
+  apiRequest<{ favoriteId: number; stockCode: string }>('/favorite-stocks', {
+    method: 'POST',
+    body: JSON.stringify({ stockCode }),
+  });
+
+export const removeFavorite = (favoriteId: number) =>
+  apiRequest<{ deleted: boolean }>(`/favorite-stocks/${favoriteId}`, {
+    method: 'DELETE',
+  });
+
 export interface ChartCandle {
   date: string;
   open: number;
