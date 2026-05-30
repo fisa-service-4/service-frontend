@@ -165,7 +165,7 @@ export default function StocksPage() {
 
         {/* 총 평가금액 카드 */}
         {!query && (
-          <div className="bg-bg-card border-2 border-primary-500 rounded-2xl p-5 mb-4">
+          <div className="bg-bg-card border border-gray-100 shadow-sm rounded-2xl p-5 mb-4">
             <p className="text-sm text-gray-500 mb-1">총 평가금액</p>
             <p className="text-3xl font-bold text-gray-900 mb-5">
               {loading ? '-' : fmtWon(totalValue)}
@@ -260,7 +260,7 @@ export default function StocksPage() {
                   {holdings.map((s) => {
                     const up = (s.profitRate ?? 0) >= 0;
                     return (
-                      <div key={s.stockCode} className="bg-bg-card border-2 border-primary-500 rounded-2xl p-4">
+                      <div key={s.stockCode} className="bg-bg-card border border-gray-100 shadow-sm rounded-2xl p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <p className="text-base font-bold text-gray-900">{s.stockName}</p>
