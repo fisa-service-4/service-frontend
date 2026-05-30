@@ -23,6 +23,7 @@ export interface PaymentMatching {
   matchingId: number;
   contractId: number;
   bankTransactionId: number | null;
+  transactionAmount: number | null;
   matchingStatus: MatchingStatus;
   matchedBy: 'SYSTEM' | 'USER';
   matchedAt: string | null;
