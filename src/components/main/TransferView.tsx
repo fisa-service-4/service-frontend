@@ -33,7 +33,8 @@ const ROLE_LABEL: Record<string, string> = {
   STOCK:     '주식',
 };
 
-function formatKRW(n: number) {
+function formatKRW(n: number | null | undefined) {
+  if (n == null) return '₩-';
   return `₩${n.toLocaleString('ko-KR')}`;
 }
 
