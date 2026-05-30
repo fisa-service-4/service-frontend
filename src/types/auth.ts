@@ -16,6 +16,7 @@ export interface LoginResponse {
   userId: number;
   userName: string;
   role: string;
+  firebaseUid?: string;
 }
 
 export interface SignupRequest {

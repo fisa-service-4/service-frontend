@@ -7,6 +7,8 @@ import { getAccounts } from '@/api/bank';
 import { getAssetDashboard, connectMyData } from '@/api/mydata';
 import type { AssetDashboard } from '@/api/mydata';
 import type { BankAccount } from '@/types/bank';
+import { getStockAccounts, getHoldings, getReturns, TEMP_ACCOUNT_ID } from '@/api/stock';
+import type { Holding, Returns } from '@/api/stock';
 import TransferView from '@/components/main/TransferView';
 import NotificationPanel from '@/components/main/NotificationPanel';
 
@@ -52,6 +54,10 @@ export default function AssetsView() {
   const [loading, setLoading]                   = useState(true);
   const [showNotification, setShowNotification] = useState(false);
 
+  const [holdings, setHoldings]           = useState<Holding[]>([]);
+  const [stockReturns, setStockReturns]   = useState<Returns | null>(null);
+  const [holdingsLoading, setHoldingsLoading] = useState(false);
+
   const [connectLoading, setConnectLoading] = useState(false);
   const [connectError, setConnectError]     = useState('');
 
@@ -61,6 +67,24 @@ export default function AssetsView() {
       .catch(() => { setAccounts([]); setDashboard(null); })
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== 'stock') return;
+    if (holdings.length > 0 || holdingsLoading) return;
+    setHoldingsLoading(true);
+    getStockAccounts()
+      .then((res) => {
+        const accountId = res.accounts?.[0]?.accountId ?? TEMP_ACCOUNT_ID;
+        return Promise.all([getHoldings(accountId), getReturns(accountId)]);
+      })
+      .catch(() => Promise.all([getHoldings(TEMP_ACCOUNT_ID), getReturns(TEMP_ACCOUNT_ID)]))
+      .then(([holdingsRes, returnsRes]) => {
+        setHoldings(holdingsRes.holdings);
+        setStockReturns(returnsRes);
+      })
+      .catch(() => {})
+      .finally(() => setHoldingsLoading(false));
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleConnect(provider: string) {
     setConnectLoading(true);
@@ -244,7 +268,52 @@ export default function AssetsView() {
           ))}
         </div>
 
-        {/* ── 연동 계좌 ── */}
+        {/* ── 증권 탭: 보유 종목 ── */}
+        {activeTab === 'stock' && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-gray-900">보유 종목</h2>
+              {stockReturns && (
+                <span className="text-xs text-gray-500">
+                  일간 <span className={stockReturns.dailyReturnRate >= 0 ? 'text-red-500 font-bold' : 'text-blue-500 font-bold'}>
+                    {stockReturns.dailyReturnRate >= 0 ? '+' : ''}{stockReturns.dailyReturnRate.toFixed(2)}%
+                  </span>
+                </span>
+              )}
+            </div>
+            <div className="bg-gray-600 rounded-2xl p-2 space-y-2">
+              {holdingsLoading ? (
+                <>
+                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
+                </>
+              ) : holdings.length === 0 ? (
+                <p className="text-center text-sm text-gray-300 py-8">보유 종목이 없습니다.</p>
+              ) : (
+                holdings.map((holding) => (
+                  <div
+                    key={holding.stockCode}
+                    className="flex items-center justify-between bg-white rounded-xl px-4 py-3"
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{holding.stockName}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">{holding.quantity}주 · 평균 {formatKRW(holding.averagePrice)}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-gray-900">{formatKRW(holding.evaluationAmount)}</p>
+                      <p className={`text-xs font-semibold mt-0.5 ${holding.profitRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                        {holding.profitRate >= 0 ? '+' : ''}{holding.profitRate.toFixed(2)}%
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── 연동 계좌 (전체/은행 탭) ── */}
+        {activeTab !== 'stock' && (
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-bold text-gray-900">연동 계좌</h2>
@@ -254,10 +323,6 @@ export default function AssetsView() {
                 className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-xl"
               >
                 이체
-              </button>
-            ) : activeTab === 'stock' ? (
-              <button className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-xl">
-                전체 주식 보기
               </button>
             ) : (
               <button
@@ -330,6 +395,7 @@ export default function AssetsView() {
             </div>
           )}
         </div>
+        )}
 
       </div>
 

@@ -1,7 +1,7 @@
 import type { ApiResponse } from '@/types/auth';
 import { tokenUtils } from '@/utils/token';
 
-export async function mydataRequest<T>(
+export async function baasRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
@@ -18,7 +18,7 @@ export async function mydataRequest<T>(
     ...(customHeaders as Record<string, string> ?? {}),
   };
 
-  const response = await fetch(`/mydata/v1${path}`, {
+  const response = await fetch(`/baas/v1${path}`, {
     ...fetchOptions,
     headers,
   });
