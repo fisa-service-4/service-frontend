@@ -19,6 +19,9 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
       width: containerRef.current.clientWidth,
       height,
       attributionLogo: false,
+      localization: {
+        priceFormatter: (price: number) => price.toLocaleString('ko-KR'),
+      },
       layout: {
         background: { color: 'transparent' },
         textColor: '#6b7280',
