@@ -50,7 +50,9 @@ function StockOrderContent() {
   const changeRate = Number(searchParams.get('changeRate') ?? 0);
   const market = searchParams.get('market') ?? '';
 
-  const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
+  const [side, setSide] = useState<'BUY' | 'SELL'>(
+    searchParams.get('side') === 'SELL' ? 'SELL' : 'BUY'
+  );
   const [orderMethod, setOrderMethod] = useState<'MARKET' | 'LIMIT'>('MARKET');
   const [quantity, setQuantity] = useState(0);
   const [methodOpen, setMethodOpen] = useState(false);

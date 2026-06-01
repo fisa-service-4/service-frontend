@@ -312,10 +312,16 @@ function StocksContent() {
                         </div>
 
                         <div className="flex gap-2">
-                          <button className="flex-1 py-3 rounded-xl bg-primary-500 text-white text-sm font-bold">
+                          <button
+                            className="flex-1 py-3 rounded-xl bg-primary-500 text-white text-sm font-bold"
+                            onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=BUY`)}
+                          >
                             매수
                           </button>
-                          <button className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold">
+                          <button
+                            className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold"
+                            onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=SELL`)}
+                          >
                             매도
                           </button>
                         </div>
