@@ -8,7 +8,6 @@ import ContractRegisterView from '@/components/main/ContractRegisterView';
 import NotificationPanel from '@/components/main/NotificationPanel';
 import VirtualSalaryCard from '@/components/home/VirtualSalaryCard';
 import IncomeCalendar from '@/components/home/IncomeCalendar';
-import MonthlyContractList from '@/components/home/MonthlyContractList';
 import { getHomeSummary } from '@/api/virtualSalary';
 import type { HomeSummary } from '@/types/virtualSalary';
 
@@ -76,13 +75,9 @@ export default function HomePage() {
 
           <IncomeCalendar
             calendarData={summary?.calendarData ?? []}
+            contracts={summary?.contracts ?? []}
             dday={summary?.dashboard.dday ?? null}
             onRegisterClick={() => setShowRegister(true)}
-          />
-
-          <MonthlyContractList
-            contracts={summary?.contracts ?? []}
-            loading={loading}
           />
 
         </div>

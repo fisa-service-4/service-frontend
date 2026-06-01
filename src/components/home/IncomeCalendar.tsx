@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getContracts } from '@/api/virtualSalary';
-import type { CalendarEntry, Contract } from '@/types/virtualSalary';
+import type { CalendarEntry, Contract, ContractStatus } from '@/types/virtualSalary';
 
 type CalendarCell = { day: number; prev?: boolean; next?: boolean };
 
@@ -29,19 +29,36 @@ const TODAY_DAY   = _today.getDate();
 const TODAY_MONTH = _today.getMonth() + 1;
 const TODAY_YEAR  = _today.getFullYear();
 
+const STATUS_LABEL: Record<ContractStatus, string> = {
+  PENDING: '입금 예정',
+  PAID: '입금 완료',
+  DELAYED: '미입금',
+  CANCELLED: '취소',
+};
+
+const STATUS_COLOR: Record<ContractStatus, string> = {
+  PENDING: 'text-amber-500',
+  PAID: 'text-sky-500',
+  DELAYED: 'text-red-500',
+  CANCELLED: 'text-gray-400',
+};
+
+const fmt = (n: number | undefined | null) => n != null ? n.toLocaleString() + ' 원' : '-';
+
 interface Props {
   calendarData: CalendarEntry[];
+  contracts: Contract[];
   dday: number | null;
   onRegisterClick: () => void;
 }
 
-export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: Props) {
+export default function IncomeCalendar({ calendarData, contracts, dday, onRegisterClick }: Props) {
   const router = useRouter();
-  const [year,  setYear]  = useState(TODAY_YEAR);
-  const [month, setMonth] = useState(TODAY_MONTH);
+  const [year,         setYear]         = useState(TODAY_YEAR);
+  const [month,        setMonth]        = useState(TODAY_MONTH);
+  const [selectedDay,  setSelectedDay]  = useState<number | null>(null);
   const [otherMonthContracts, setOtherMonthContracts] = useState<Contract[]>([]);
 
-  // 다른 달 이동 시 해당 달 계약 조회
   useEffect(() => {
     if (year === TODAY_YEAR && month === TODAY_MONTH) return;
     let cancelled = false;
@@ -52,7 +69,10 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
     return () => { cancelled = true; };
   }, [year, month]);
 
-  // 입금 예정 마커 집합
+  const currentContracts = year === TODAY_YEAR && month === TODAY_MONTH
+    ? contracts
+    : otherMonthContracts;
+
   const incomeMarkers = useMemo((): Set<number> => {
     if (year === TODAY_YEAR && month === TODAY_MONTH) {
       return new Set(calendarData.map(e => parseInt(e.date.split('-')[2], 10)));
@@ -64,7 +84,6 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
     );
   }, [year, month, calendarData, otherMonthContracts]);
 
-  // 가상월급 지급일 마커 (dday 역산)
   const paydayMarker = useMemo((): number | null => {
     if (dday === null) return null;
     const paydayDate = new Date(_today);
@@ -75,23 +94,43 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
     return null;
   }, [dday, year, month]);
 
-  const prevMonth = () => { if (month === 1) { setYear(y => y - 1); setMonth(12); } else { setMonth(m => m - 1); } };
-  const nextMonth = () => { if (month === 12) { setYear(y => y + 1); setMonth(1); } else { setMonth(m => m + 1); } };
+  const filteredContracts = useMemo(() => {
+    if (selectedDay === null) return currentContracts;
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const dateStr = `${year}-${pad(month)}-${pad(selectedDay)}`;
+    return currentContracts.filter(c => c.expectedPaymentDate === dateStr);
+  }, [selectedDay, currentContracts, year, month]);
+
+  const prevMonth = () => {
+    setSelectedDay(null);
+    if (month === 1) { setYear(y => y - 1); setMonth(12); } else { setMonth(m => m - 1); }
+  };
+  const nextMonth = () => {
+    setSelectedDay(null);
+    if (month === 12) { setYear(y => y + 1); setMonth(1); } else { setMonth(m => m + 1); }
+  };
+
+  const handleDayClick = (day: number) => setSelectedDay(prev => prev === day ? null : day);
+
+  const listTitle = selectedDay !== null
+    ? `${month}월 ${selectedDay}일 계약`
+    : `${month}월 계약 목록`;
 
   return (
     <div>
+      {/* 섹션 헤더 — 제목 + 전체 보기 */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-bold text-gray-900">실수령액 캘린더</h2>
+        <h2 className="text-base font-bold text-gray-900">계약 캘린더</h2>
         <button
-          onClick={onRegisterClick}
+          onClick={() => router.push('/contracts')}
           className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg"
         >
-          + 등록
+          전체 보기
         </button>
       </div>
 
       <div className="bg-white border-2 border-sky-500 rounded-2xl p-4">
-        {/* 월 네비게이션 */}
+        {/* 월 네비게이션 + 등록 버튼 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <button
@@ -100,7 +139,7 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
             >
               <ChevronLeft size={14} />
             </button>
-            <span className="text-base font-bold text-gray-900">{year}년 {month}월</span>
+            <span className="text-base font-bold text-gray-900 w-24 text-center">{year}년 {month}월</span>
             <button
               onClick={nextMonth}
               className="w-7 h-7 bg-sky-50 border border-sky-200 rounded-full flex items-center justify-center text-sky-600"
@@ -109,10 +148,10 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
             </button>
           </div>
           <button
-            onClick={() => router.push('/contracts')}
-            className="text-xs bg-sky-50 text-sky-600 border border-sky-200 px-3 py-1.5 rounded-lg"
+            onClick={onRegisterClick}
+            className="w-7 h-7 bg-sky-500 rounded-full flex items-center justify-center text-white text-lg leading-none"
           >
-            계약 리스트
+            +
           </button>
         </div>
 
@@ -129,26 +168,31 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
         {buildCalendarRows(year, month).map((row, ri) => (
           <div key={ri} className="grid grid-cols-7 mb-0.5">
             {row.map((cell: CalendarCell, ci: number) => {
-              const isPrev   = !!cell.prev;
-              const isNext   = !!cell.next;
-              const isToday  = !isPrev && !isNext && year === TODAY_YEAR && month === TODAY_MONTH && cell.day === TODAY_DAY;
-              const isSun    = ci === 0;
-              const isSat    = ci === 6;
-              const isPayday = !isPrev && !isNext && paydayMarker === cell.day;
-              const isIncome = !isPrev && !isNext && incomeMarkers.has(cell.day);
+              const isPrev      = !!cell.prev;
+              const isNext      = !!cell.next;
+              const isToday     = !isPrev && !isNext && year === TODAY_YEAR && month === TODAY_MONTH && cell.day === TODAY_DAY;
+              const isSun       = ci === 0;
+              const isSat       = ci === 6;
+              const isPayday    = !isPrev && !isNext && paydayMarker === cell.day;
+              const isIncome    = !isPrev && !isNext && incomeMarkers.has(cell.day);
+              const isSelected  = !isPrev && !isNext && selectedDay === cell.day;
 
               return (
-                <div key={ci} className="flex flex-col items-center py-0.5">
+                <div
+                  key={ci}
+                  className={`flex flex-col items-center py-0.5 ${!isPrev && !isNext ? 'cursor-pointer' : ''}`}
+                  onClick={() => { if (!isPrev && !isNext) handleDayClick(cell.day); }}
+                >
                   <div className={`w-8 h-8 flex items-center justify-center text-sm rounded-full
                     ${isPrev || isNext ? 'text-gray-300' : ''}
                     ${isToday ? 'bg-sky-500 text-white font-bold' : ''}
-                    ${!isPrev && !isNext && !isToday
+                    ${isSelected && !isToday ? 'bg-sky-100 text-sky-700 font-bold ring-1 ring-sky-400' : ''}
+                    ${!isPrev && !isNext && !isToday && !isSelected
                       ? isSun ? 'text-red-400' : isSat ? 'text-sky-500' : 'text-gray-800'
                       : ''}
                   `}>
                     {cell.day}
                   </div>
-                  {/* 마커 영역 — 높이 고정으로 레이아웃 안정 */}
                   <div className="h-1.5 flex justify-center mt-0.5">
                     {!isPrev && !isNext && (isPayday || isIncome) && (
                       <div className={`w-1.5 h-1.5 rounded-full ${isPayday ? 'bg-sky-500' : 'bg-sky-200'}`} />
@@ -176,6 +220,46 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
             </div>
             <span className="text-xs text-gray-400">오늘</span>
           </div>
+        </div>
+
+        {/* 캘린더 하단 계약 리스트 */}
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-bold text-gray-900">{listTitle}</h3>
+            {selectedDay !== null && (
+              <button
+                onClick={() => setSelectedDay(null)}
+                className="text-xs text-sky-500"
+              >
+                전체 보기
+              </button>
+            )}
+          </div>
+
+          {filteredContracts.length === 0 ? (
+            <p className="text-xs text-gray-400 text-center py-3">
+              {selectedDay !== null ? '해당 날짜에 계약이 없어요' : '등록된 계약이 없어요'}
+            </p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {filteredContracts.map(c => (
+                <li key={c.contractId} className="flex items-center justify-between py-2.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{c.clientName}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{c.expectedPaymentDate}</p>
+                  </div>
+                  <div className="text-right shrink-0 ml-3">
+                    <p className="text-sm font-semibold text-gray-800">
+                      {c.settlement ? fmt(c.settlement.actualIncome) : fmt(c.contractAmount)}
+                    </p>
+                    <p className={`text-xs font-medium mt-0.5 ${STATUS_COLOR[c.contractStatus]}`}>
+                      {STATUS_LABEL[c.contractStatus]}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
