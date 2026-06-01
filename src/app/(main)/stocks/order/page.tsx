@@ -161,9 +161,8 @@ function StockOrderContent() {
         <div className="bg-gray-100 shadow-md rounded-2xl p-4 mb-4 space-y-4">
 
           {/* 주문 유형 */}
-          <div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">주문 유형</span>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-500">주문 유형</span>
               <div className="relative">
                 <button
                   onClick={() => setMethodOpen((o) => !o)}
@@ -189,10 +188,6 @@ function StockOrderContent() {
                 )}
               </div>
             </div>
-            <p className={`text-xs text-primary-500 text-right mt-1 ${orderMethod === 'MARKET' ? 'visible' : 'invisible'}`}>
-              시장가는 현재가로 즉시 체결됩니다.
-            </p>
-          </div>
 
           {/* 수량 */}
           <div className="flex justify-between items-center">
@@ -239,6 +234,9 @@ function StockOrderContent() {
               <span className="text-sm text-gray-500">예상 금액</span>
               <span className="text-sm font-bold text-gray-900">{fmtWon(estimate)}</span>
             </div>
+            <p className={`text-xs text-primary-500 text-right ${orderMethod === 'MARKET' ? 'visible' : 'invisible'}`}>
+              시장가는 현재가로 즉시 체결됩니다.
+            </p>
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">주문 가능 예수금</span>
               <span className="text-sm font-bold text-gray-900">{fmtWon(availableBalance ?? 0)}</span>
