@@ -63,14 +63,15 @@ Tailwind 클래스로 바로 사용할 수 있으며, 임의의 hex 코드(`#1b8
 
 ### 카드
 
-카드는 `bg-bg-card`(흰색) + `shadow-sm`을 기본으로 합니다. 테두리는 사용하지 않습니다.
+카드는 `bg-bg-card`(흰색) + `shadow-md`를 기본으로 합니다. 테두리는 사용하지 않습니다.
 
 ```tsx
 // 올바른 사용
-<div className="bg-bg-card shadow-sm rounded-2xl p-5">
+<div className="bg-bg-card shadow-md rounded-2xl p-5">
 
 // 사용하지 않음
 <div className="bg-white border-2 border-primary-500 rounded-2xl p-5">
+<div className="bg-white shadow-sm rounded-2xl p-5">
 ```
 
 ### 버튼
@@ -113,4 +114,5 @@ Tailwind 클래스로 바로 사용할 수 있으며, 임의의 hex 코드(`#1b8
 
 - `style={{ color: '#1b85ff' }}` 등 인라인 hex 코드 직접 사용 금지
 - `bg-sky-500`, `bg-blue-500` 등 Tailwind 기본 색상 사용 금지 — 반드시 위 토큰 사용
-- 카드에 컬러 테두리(`border-primary-*`) 사용 금지 — 그림자(`shadow-sm`)로 대체
+- 카드에 컬러 테두리(`border-primary-*`) 사용 금지 — 그림자(`shadow-md`)로 대체
+- `text-green-500`, `text-red-500` 등 Tailwind 기본 색상 사용 금지 — `text-success` / `text-error` 토큰 사용

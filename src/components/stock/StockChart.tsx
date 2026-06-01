@@ -18,8 +18,12 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
     const chart = createChart(containerRef.current, {
       width: containerRef.current.clientWidth,
       height,
+      attributionLogo: false,
+      localization: {
+        priceFormatter: (price: number) => price.toLocaleString('ko-KR'),
+      },
       layout: {
-        background: { color: '#ffffff' },
+        background: { color: 'transparent' },
         textColor: '#6b7280',
       },
       grid: {
