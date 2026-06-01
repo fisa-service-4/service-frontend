@@ -18,6 +18,7 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
     const chart = createChart(containerRef.current, {
       width: containerRef.current.clientWidth,
       height,
+      attributionLogo: false,
       layout: {
         background: { color: '#ffffff' },
         textColor: '#6b7280',
