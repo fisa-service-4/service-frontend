@@ -109,15 +109,18 @@ function StockOrderContent() {
 
   return (
     <div className="flex flex-col h-screen bg-bg">
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
 
-        {/* 헤더 */}
-        <div className="flex items-center gap-3 pt-6 pb-4">
-          <button onClick={() => router.back()} className="text-gray-500">
-            <ArrowLeft size={22} />
-          </button>
-          <h1 className="text-xl font-bold text-gray-900">{stockName} 주문</h1>
-        </div>
+      {/* 헤더 */}
+      <div className="flex items-center px-5 py-4 bg-bg-card shrink-0 relative border-b border-gray-100">
+        <button onClick={() => router.back()}>
+          <ArrowLeft size={22} className="text-gray-800" />
+        </button>
+        <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">
+          {stockName} 주문
+        </span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
 
         {/* 종목 정보 카드 */}
         <div className="bg-bg-card shadow-md rounded-2xl p-4 mb-4">
