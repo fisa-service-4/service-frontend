@@ -105,7 +105,7 @@ function StockOrderContent() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
       <div className="flex-1 overflow-y-auto px-4 pb-4">
 
         {/* 헤더 */}
@@ -117,7 +117,7 @@ function StockOrderContent() {
         </div>
 
         {/* 종목 정보 카드 */}
-        <div className="bg-white border-2 border-sky-500 rounded-2xl p-4 mb-4">
+        <div className="bg-bg-card shadow-md rounded-2xl p-4 mb-4">
           <div className="flex justify-between items-start mb-2">
             <div>
               <p className="text-base font-bold text-gray-900">{stockName}</p>
@@ -125,7 +125,7 @@ function StockOrderContent() {
             </div>
             <div className="text-right">
               <p className="text-base font-bold text-gray-900">{fmtWon(stockPrice)}</p>
-              <p className={`text-xs font-semibold mt-0.5 flex items-center justify-end gap-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
+              <p className={`text-xs font-semibold mt-0.5 flex items-center justify-end gap-0.5 ${up ? 'text-success' : 'text-red-500'}`}>
                 {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {up ? '+' : ''}{changeRate}%
               </p>
@@ -142,7 +142,7 @@ function StockOrderContent() {
           <button
             onClick={() => setSide('BUY')}
             className={`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${
-              side === 'BUY' ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-400'
+              side === 'BUY' ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-400'
             }`}
           >
             매수
@@ -158,7 +158,7 @@ function StockOrderContent() {
         </div>
 
         {/* 주문 폼 */}
-        <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-4 space-y-4">
+        <div className="bg-gray-100 shadow-md rounded-2xl p-4 mb-4 space-y-4">
 
           {/* 주문 유형 */}
           <div className="flex justify-between items-center">
@@ -166,19 +166,19 @@ function StockOrderContent() {
             <div className="relative">
               <button
                 onClick={() => setMethodOpen((o) => !o)}
-                className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900"
+                className="flex items-center gap-2 bg-bg-card border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900"
               >
                 {ORDER_METHODS.find((m) => m.value === orderMethod)?.label}
                 <ChevronDown size={15} />
               </button>
               {methodOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-10 min-w-28 overflow-hidden">
+                <div className="absolute right-0 top-full mt-1 bg-bg-card border border-gray-200 rounded-xl shadow-lg z-10 min-w-28 overflow-hidden">
                   {ORDER_METHODS.map((m) => (
                     <button
                       key={m.value}
                       onClick={() => { setOrderMethod(m.value as 'MARKET' | 'LIMIT'); setMethodOpen(false); }}
                       className={`w-full text-left px-4 py-2.5 text-sm font-medium ${
-                        orderMethod === m.value ? 'text-sky-500' : 'text-gray-700'
+                        orderMethod === m.value ? 'text-primary-500' : 'text-gray-700'
                       }`}
                     >
                       {m.label}
@@ -192,7 +192,7 @@ function StockOrderContent() {
           {/* 수량 */}
           <div className="flex justify-between items-center">
             <span className="text-sm text-gray-500">수량</span>
-            <div className="flex items-center bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <div className="flex items-center bg-bg-card border border-gray-200 rounded-lg overflow-hidden">
               <button
                 onClick={() => setQuantity((q) => Math.max(0, q - 1))}
                 className="w-10 h-10 flex items-center justify-center text-gray-500"
@@ -221,7 +221,7 @@ function StockOrderContent() {
               <button
                 key={r.label}
                 onClick={() => setByRatio(r.value)}
-                className="flex-1 py-2 bg-white border border-gray-200 rounded-lg text-xs font-semibold text-gray-600"
+                className="flex-1 py-2 bg-bg-card border border-gray-200 rounded-lg text-xs font-semibold text-gray-600"
               >
                 {r.label}
               </button>
@@ -243,8 +243,8 @@ function StockOrderContent() {
 
         {/* 시장가 안내 */}
         {orderMethod === 'MARKET' && (
-          <div className="bg-sky-50 border border-sky-200 rounded-xl px-4 py-3 mb-4 text-center">
-            <p className="text-xs text-sky-600">시장가는 현재가로 즉시 체결됩니다.</p>
+          <div className="bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 mb-4 text-center">
+            <p className="text-xs text-primary-700">시장가는 현재가로 즉시 체결됩니다.</p>
           </div>
         )}
 
@@ -267,7 +267,7 @@ function StockOrderContent() {
           onClick={handleSubmit}
           disabled={quantity <= 0 || submitting}
           className={`w-full py-4 rounded-2xl text-white text-base font-bold transition-opacity ${
-            side === 'BUY' ? 'bg-sky-500' : 'bg-red-500'
+            side === 'BUY' ? 'bg-primary-500' : 'bg-red-500'
           } ${quantity <= 0 || submitting ? 'opacity-40' : 'opacity-100'}`}
         >
           {submitting ? '처리 중...' : `${side === 'BUY' ? '매수' : '매도'} 주문`}
