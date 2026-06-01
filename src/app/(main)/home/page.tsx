@@ -88,7 +88,7 @@ export default function HomePage() {
         </div>
 
         {/* AI 상담사 플로팅 버튼 */}
-        <button onClick={() => router.push('/chat')} className="absolute bottom-20 right-5 z-10 flex flex-col items-center drop-shadow-xl">
+        <button onClick={() => router.push('/chat')} className="absolute bottom-6 right-5 z-10 flex flex-col items-center drop-shadow-xl">
           <div className="relative w-9 h-4 -mb-0.75">
             <div className="absolute inset-x-1 top-0 h-3 border-t-2 border-l-2 border-r-2 border-sky-400 rounded-t-full" />
             <div className="absolute left-0 top-2 w-1.5 h-2 bg-sky-400 rounded-sm" />
