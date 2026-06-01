@@ -146,7 +146,7 @@ export default function StocksPage() {
   const profitUp = profitLoss >= 0;
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
       <div className="flex items-center justify-end px-5 py-4 shrink-0">
         <button className="p-1" onClick={() => setShowNotification(true)}>
           <Bell size={22} className="text-gray-800" />
@@ -170,7 +170,7 @@ export default function StocksPage() {
         </div>
 
         {/* 총 평가금액 카드 */}
-        {!query && <div className="bg-white border-2 border-sky-500 rounded-2xl p-5 mb-4">
+        {!query && <div className="bg-white shadow-sm rounded-2xl p-5 mb-4">
           <p className="text-sm text-gray-500 mb-1">총 평가금액</p>
           <p className="text-3xl font-bold text-gray-900 mb-5">
             {loading ? '-' : fmtWon(totalValue)}
@@ -267,7 +267,7 @@ export default function StocksPage() {
                   {holdings.map((s) => {
                     const up = (s.profitRate ?? 0) >= 0;
                     return (
-                      <div key={s.stockCode} className="bg-white border-2 border-sky-500 rounded-2xl p-4">
+                      <div key={s.stockCode} className="bg-white shadow-sm rounded-2xl p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <p className="text-base font-bold text-gray-900">{s.stockName}</p>
