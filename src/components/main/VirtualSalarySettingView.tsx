@@ -171,9 +171,9 @@ export default function VirtualSalarySettingView() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={targetSalary ? `₩ ${targetSalary}` : ''}
+                  value={targetSalary ?? ''}
                   onChange={e => handleTargetChange(e.target.value)}
-                  placeholder="₩ 3,000,000"
+                  placeholder="3,000,000"
                   className="flex-1 text-sm text-gray-900 bg-transparent outline-none placeholder:text-gray-300"
                 />
               </div>
@@ -205,9 +205,9 @@ export default function VirtualSalarySettingView() {
               <input
                 type="text"
                 inputMode="numeric"
-                value={emergencyTargetAmt ? `₩ ${emergencyTargetAmt}` : ''}
+                value={emergencyTargetAmt ?? ''}
                 onChange={e => handleEmergencyAmtChange(e.target.value)}
-                placeholder="₩ 2,500,000"
+                placeholder="2,500,000"
                 className="flex-1 text-sm text-gray-900 bg-transparent outline-none placeholder:text-gray-300"
               />
             </div>

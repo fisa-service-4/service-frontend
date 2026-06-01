@@ -35,8 +35,8 @@ function bankName(code: string): string {
 }
 
 function formatKRW(n: number | null | undefined): string {
-  if (n == null) return '₩ -';
-  return `₩ ${n.toLocaleString('ko-KR')}`;
+  if (n == null) return '-';
+  return `${n.toLocaleString('ko-KR')} 원`;
 }
 
 function maskAccountNumber(num: string): string {

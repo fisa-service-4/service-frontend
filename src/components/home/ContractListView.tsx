@@ -7,7 +7,7 @@ import { getContracts } from '@/api/virtualSalary';
 import type { Contract } from '@/types/virtualSalary';
 import BottomNav from '@/components/main/BottomNav';
 
-const fmt = (n: number) => `₩ ${n.toLocaleString()}`;
+const fmt = (n: number) => `${n.toLocaleString()} 원`;
 
 function getDday(expectedPaymentDate: string): string {
   const today = new Date();

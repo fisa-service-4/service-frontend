@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import type { DashboardData } from '@/types/virtualSalary';
 
-const fmt = (n: number) => `₩ ${n.toLocaleString()}`;
+const fmt = (n: number) => `${n.toLocaleString()} 원`;
 
 interface Props {
   dashboard: DashboardData | undefined;

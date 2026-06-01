@@ -28,11 +28,11 @@ import {
 
 const fmtWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
-  return '₩' + n.toLocaleString('ko-KR');
+  return n.toLocaleString('ko-KR') + ' 원';
 };
 const signWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
-  return (n >= 0 ? '+' : '-') + '₩' + Math.abs(n).toLocaleString('ko-KR');
+  return (n >= 0 ? '+' : '-') + Math.abs(n).toLocaleString('ko-KR') + ' 원';
 };
 const signRate = (n: number | null) => {
   if (n === null || n === undefined) return '-';

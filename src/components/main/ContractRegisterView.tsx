@@ -29,7 +29,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
   const deduction   = Math.floor(rawAmount * selectedTax.rate);
   const netAmount   = rawAmount - deduction;
 
-  const fmt = (n: number) => n > 0 ? `₩ ${n.toLocaleString()}` : '-';
+  const fmt = (n: number) => n > 0 ? `${n.toLocaleString()} 원` : '-';
 
   const handleAmountChange = (v: string) => {
     const num = v.replace(/[^0-9]/g, '');
@@ -103,9 +103,9 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
               <input
                 type="text"
                 inputMode="numeric"
-                value={amount ? `₩ ${amount}` : ''}
+                value={amount ?? ''}
                 onChange={(e) => handleAmountChange(e.target.value)}
-                placeholder="₩ 1,123,400"
+                placeholder="1,123,400"
                 className="w-full bg-gray-500 text-white placeholder:text-gray-300 rounded-xl px-4 py-3 text-sm outline-none"
               />
             </div>
@@ -155,7 +155,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-300">공제율 ({(selectedTax.rate * 100).toFixed(1)}%)</span>
-              <span>{deduction > 0 ? `- ₩ ${deduction.toLocaleString()}` : '-'}</span>
+              <span>{deduction > 0 ? `- ${deduction.toLocaleString()} 원` : '-'}</span>
             </div>
             <div className="h-px bg-gray-400 my-1" />
             <div className="flex items-center justify-between">

@@ -28,7 +28,7 @@ const RATIOS = [
 
 const fmtWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
-  return '₩' + n.toLocaleString('ko-KR');
+  return n.toLocaleString('ko-KR') + ' 원';
 };
 
 

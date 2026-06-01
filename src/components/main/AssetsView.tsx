@@ -38,8 +38,8 @@ const ACCOUNT_ROLE_LABEL: Record<string, string> = {
 };
 
 function formatKRW(amount: number | null | undefined): string {
-  if (amount == null) return '₩-';
-  return `₩${amount.toLocaleString('ko-KR')}`;
+  if (amount == null) return '-';
+  return `${amount.toLocaleString('ko-KR')} 원`;
 }
 
 function SkeletonCard({ className = '' }: { className?: string }) {
