@@ -26,6 +26,14 @@ import {
   type ChartCandle,
 } from '@/api/stock';
 
+const ORDER_STATUS_LABEL: Record<string, string> = {
+  REQUESTED: '주문접수',
+  PARTIAL_FILLED: '부분체결',
+  FILLED: '체결완료',
+  CANCELLED: '취소',
+  FAILED: '실패',
+};
+
 const fmtWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
   return n.toLocaleString('ko-KR') + ' 원';
@@ -368,7 +376,7 @@ export default function StocksPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-gray-400">상태</p>
-                          <p className="text-sm font-bold text-gray-900 mt-1">{o.status}</p>
+                          <p className="text-sm font-bold text-gray-900 mt-1">{ORDER_STATUS_LABEL[o.status] ?? o.status}</p>
                         </div>
                       </div>
                     </div>
