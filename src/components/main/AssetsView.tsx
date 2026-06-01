@@ -248,15 +248,15 @@ export default function AssetsView() {
         </div>
 
         {/* ── 탭 ── */}
-        <div className="bg-gray-600 rounded-2xl p-1.5 flex gap-1">
+        <div className="bg-white border-2 border-sky-500 rounded-2xl p-1.5 flex gap-1">
           {(['all', 'bank', 'stock'] as AssetTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                 activeTab === tab
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-300'
+                  ? 'bg-sky-500 text-white shadow-sm'
+                  : 'text-gray-500'
               }`}
             >
               {tab === 'all' ? '전체' : tab === 'bank' ? '은행' : '증권'}
@@ -331,14 +331,14 @@ export default function AssetsView() {
           </div>
 
           {hasAccounts || loading ? (
-            <div className="bg-gray-600 rounded-2xl p-2 space-y-2">
+            <div className="bg-white border-2 border-sky-500 rounded-2xl p-2 space-y-2">
               {loading ? (
                 <>
-                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
-                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-sky-50 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-sky-50 rounded-xl h-16 animate-pulse" />
                 </>
               ) : displayAccounts.length === 0 ? (
-                <p className="text-center text-sm text-gray-300 py-8">
+                <p className="text-center text-sm text-gray-400 py-8">
                   해당 유형의 계좌가 없습니다.
                 </p>
               ) : (
@@ -348,7 +348,7 @@ export default function AssetsView() {
                     className="flex items-center justify-between bg-white rounded-xl px-4 py-3"
                   >
                     <div>
-                      <p className="text-xs font-semibold text-gray-500">
+                      <p className="text-xs font-semibold text-gray-900">
                         {BANK_NAME[account.bankCode] ?? account.bankCode}
                       </p>
                       <p className="text-sm font-medium text-gray-800 mt-0.5">
