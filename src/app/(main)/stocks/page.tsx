@@ -281,16 +281,16 @@ export default function StocksPage() {
                           : <div className="h-[100px]" />
                         }
 
-                        <div className="flex justify-between mt-3 mb-4">
+                        <div className="flex justify-between items-start mt-3 mb-4">
                           <div>
-                            <p className="text-xs text-gray-400">보유수량</p>
-                            <p className="text-sm font-bold text-gray-900 mt-1">{s.quantity}주</p>
-                          </div>
-                          <div className="text-right">
                             <p className="text-xs text-gray-400">평가손익</p>
                             <p className={`text-sm font-bold mt-1 ${up ? 'text-success' : 'text-error'}`}>
                               {signWon(s.unrealizedProfit)} ({signRate(s.profitRate)})
                             </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <p className="text-xs text-gray-400">보유수량</p>
+                            <p className="text-xs font-bold text-gray-900">{s.quantity}주</p>
                           </div>
                         </div>
 
