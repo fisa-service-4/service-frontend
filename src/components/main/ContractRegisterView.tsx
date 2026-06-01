@@ -1,14 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { createContract } from '@/api/virtualSalary';
 import type { TaxType } from '@/types/virtualSalary';
 
 const TAX_OPTIONS: { value: TaxType; label: string; rate: number }[] = [
   { value: 'BUSINESS', label: '사업소득', rate: 0.033 },
-  { value: 'ETC',      label: '기타소득', rate: 0.088 },
-  { value: 'ARTIST',   label: '예술인',   rate: 0.088 },
 ];
 
 interface ContractRegisterViewProps {
@@ -62,11 +61,8 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
 
       {/* 헤더 */}
       <div className="flex items-center px-5 py-4 shrink-0 relative">
-        <button
-          onClick={onBack}
-          className="bg-gray-200 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-full"
-        >
-          뒤로
+        <button onClick={onBack}>
+          <ArrowLeft size={22} className="text-gray-800" />
         </button>
         <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">
           계약 등록

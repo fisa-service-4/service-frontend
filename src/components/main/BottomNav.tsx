@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { Home, Wallet, TrendingUp, User } from 'lucide-react';
+import { Home, Wallet, LineChart, User } from 'lucide-react';
 
 export type MainNavItem = 'home' | 'assets' | 'stocks' | 'mypage';
 
 const navItems = [
   { key: 'home'   as MainNavItem, label: '홈',        icon: Home       },
-  { key: 'assets' as MainNavItem, label: '자산',      icon: Wallet     },
-  { key: 'stocks' as MainNavItem, label: '증권',      icon: TrendingUp },
+  { key: 'assets' as MainNavItem, label: '은행',      icon: Wallet     },
+  { key: 'stocks' as MainNavItem, label: '증권',      icon: LineChart  },
   { key: 'mypage' as MainNavItem, label: '마이페이지', icon: User      },
 ];
 
