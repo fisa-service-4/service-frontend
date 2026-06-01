@@ -20,13 +20,13 @@ export default function BottomNav() {
   const activeNav = (pathname.split('/')[1] as MainNavItem) ?? 'home';
 
   return (
-    <div className="bg-slate-900 px-6 py-3 border-t border-slate-700 shrink-0">
-      <div className="flex justify-around items-center">
+    <div className="bg-slate-900 py-3 border-t border-slate-700 shrink-0">
+      <div className="flex items-center">
         {navItems.map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             onClick={() => router.push(`/${key}`)}
-            className={`flex flex-col items-center py-1 transition-colors ${
+            className={`flex-1 flex flex-col items-center py-1 transition-colors ${
               activeNav === key ? 'text-sky-400' : 'text-slate-400'
             }`}
           >
