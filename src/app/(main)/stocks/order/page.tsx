@@ -97,6 +97,7 @@ function StockOrderContent() {
       await createOrder(TEMP_ACCOUNT_ID, body);
       setSuccess(true);
       setQuantity(0);
+      setTimeout(() => router.push('/stocks?tab=orders'), 1500);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : '주문 처리 중 오류가 발생했습니다.');
     } finally {

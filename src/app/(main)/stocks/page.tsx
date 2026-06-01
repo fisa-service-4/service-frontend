@@ -1,9 +1,7 @@
 'use client';
 
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Bell, Search, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import NotificationPanel from '@/components/main/NotificationPanel';
@@ -49,10 +47,21 @@ const signRate = (n: number | null) => {
 
 
 export default function StocksPage() {
+  return (
+    <Suspense>
+      <StocksContent />
+    </Suspense>
+  );
+}
+
+function StocksContent() {
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as 'holdings' | 'orders' | 'favorites') ?? 'holdings';
+
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [returns, setReturns] = useState<Returns>({ dailyReturnRate: 0, monthlyReturnRate: 0, yearlyReturnRate: 0 });
   const [orders, setOrders] = useState<Order[]>([]);
-  const [tab, setTab] = useState<'holdings' | 'orders' | 'favorites'>('holdings');
+  const [tab, setTab] = useState<'holdings' | 'orders' | 'favorites'>(initialTab);
   const [favorites, setFavorites] = useState<FavoriteStock[]>([]);
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<StockSearchItem[]>([]);
