@@ -4,8 +4,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, TrendingUp, TrendingDown, Star } from 'lucide-react';
+import { Bell, Search, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import NotificationPanel from '@/components/main/NotificationPanel';
 import StockChart from '@/components/stock/StockChart';
 import {
   getHoldings,
@@ -27,11 +28,11 @@ import {
 
 const fmtWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
-  return '₩' + n.toLocaleString('ko-KR');
+  return n.toLocaleString('ko-KR') + ' 원';
 };
 const signWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
-  return (n >= 0 ? '+' : '-') + '₩' + Math.abs(n).toLocaleString('ko-KR');
+  return (n >= 0 ? '+' : '-') + Math.abs(n).toLocaleString('ko-KR') + ' 원';
 };
 const signRate = (n: number | null) => {
   if (n === null || n === undefined) return '-';
@@ -50,6 +51,7 @@ export default function StocksPage() {
   const [searching, setSearching] = useState(false);
   const [favoriteMap, setFavoriteMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
   const [chartMap, setChartMap] = useState<Record<string, ChartCandle[]>>({});
   const router = useRouter();
 
@@ -144,10 +146,14 @@ export default function StocksPage() {
   const profitUp = profitLoss >= 0;
 
   return (
-    <div className="flex flex-col h-screen bg-bg">
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+    <div className="flex flex-col h-screen bg-white">
+      <div className="flex items-center justify-end px-5 py-4 shrink-0">
+        <button className="p-1" onClick={() => setShowNotification(true)}>
+          <Bell size={22} className="text-gray-800" />
+        </button>
+      </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 pt-6 pb-4">증권</h1>
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
 
         {/* 검색창 */}
         <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-3 mb-4">
@@ -164,31 +170,29 @@ export default function StocksPage() {
         </div>
 
         {/* 총 평가금액 카드 */}
-        {!query && (
-          <div className="bg-bg-card border border-gray-100 shadow-sm rounded-2xl p-5 mb-4">
-            <p className="text-sm text-gray-500 mb-1">총 평가금액</p>
-            <p className="text-3xl font-bold text-gray-900 mb-5">
-              {loading ? '-' : fmtWon(totalValue)}
-            </p>
-            <div className="flex justify-between">
-              <div>
-                <p className="text-xs text-gray-400">평가손익</p>
-                <p className={`text-base font-bold mt-1 ${profitUp ? 'text-success' : 'text-error'}`}>
-                  {loading ? '-' : signWon(profitLoss)}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-400">수익률 (일간)</p>
-                <p className={`text-base font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-success' : 'text-error'}`}>
-                  {returns.dailyReturnRate >= 0
-                    ? <TrendingUp size={14} />
-                    : <TrendingDown size={14} />}
-                  {loading ? '-' : signRate(returns.dailyReturnRate)}
-                </p>
-              </div>
+        {!query && <div className="bg-white border-2 border-sky-500 rounded-2xl p-5 mb-4">
+          <p className="text-sm text-gray-500 mb-1">총 평가금액</p>
+          <p className="text-3xl font-bold text-gray-900 mb-5">
+            {loading ? '-' : fmtWon(totalValue)}
+          </p>
+          <div className="flex justify-between">
+            <div>
+              <p className="text-xs text-gray-400">평가손익</p>
+              <p className={`text-base font-bold mt-1 ${profitUp ? 'text-green-500' : 'text-red-500'}`}>
+                {loading ? '-' : signWon(profitLoss)}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-gray-400">수익률 (일간)</p>
+              <p className={`text-base font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {returns.dailyReturnRate >= 0
+                  ? <TrendingUp size={14} />
+                  : <TrendingDown size={14} />}
+                {loading ? '-' : signRate(returns.dailyReturnRate)}
+              </p>
             </div>
           </div>
-        )}
+        </div>}
 
         {/* 검색 결과 */}
         {query ? (
@@ -205,7 +209,7 @@ export default function StocksPage() {
                   return (
                     <div
                       key={s.stockCode}
-                      className="bg-bg-card border border-gray-200 rounded-2xl p-4 flex justify-between items-center cursor-pointer active:bg-gray-50"
+                      className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex justify-between items-center cursor-pointer active:bg-gray-50"
                       onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.changeRate}&market=${s.market}`)}
                     >
                       <div>
@@ -215,11 +219,14 @@ export default function StocksPage() {
                       <div className="flex items-center gap-3">
                         <div className="text-right">
                           <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
-                          <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-success' : 'text-error'}`}>
+                          <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
                             {signRate(s.changeRate)}
                           </p>
                         </div>
-                        <button onClick={(e) => toggleFavorite(s.stockCode, e)} className="p-1">
+                        <button
+                          onClick={(e) => toggleFavorite(s.stockCode, e)}
+                          className="p-1"
+                        >
                           <Star
                             size={20}
                             className={favoriteMap[s.stockCode] !== undefined ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}
@@ -241,7 +248,7 @@ export default function StocksPage() {
                   key={t}
                   onClick={() => setTab(t)}
                   className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                    tab === t ? 'bg-bg-card text-gray-900 shadow-sm' : 'text-gray-400'
+                    tab === t ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-400'
                   }`}
                 >
                   {t === 'holdings' ? '보유종목' : t === 'orders' ? '주문내역' : '관심종목'}
@@ -260,7 +267,7 @@ export default function StocksPage() {
                   {holdings.map((s) => {
                     const up = (s.profitRate ?? 0) >= 0;
                     return (
-                      <div key={s.stockCode} className="bg-bg-card border border-gray-100 shadow-sm rounded-2xl p-4">
+                      <div key={s.stockCode} className="bg-white border-2 border-sky-500 rounded-2xl p-4">
                         <div className="flex justify-between items-start mb-2">
                           <div>
                             <p className="text-base font-bold text-gray-900">{s.stockName}</p>
@@ -281,17 +288,17 @@ export default function StocksPage() {
                           </div>
                           <div className="text-right">
                             <p className="text-xs text-gray-400">평가손익</p>
-                            <p className={`text-sm font-bold mt-1 ${up ? 'text-success' : 'text-error'}`}>
+                            <p className={`text-sm font-bold mt-1 ${up ? 'text-green-500' : 'text-red-500'}`}>
                               {signWon(s.unrealizedProfit)} ({signRate(s.profitRate)})
                             </p>
                           </div>
                         </div>
 
                         <div className="flex gap-2">
-                          <button className="flex-1 py-3 rounded-xl bg-primary-500 text-white text-sm font-bold">
+                          <button className="flex-1 py-3 rounded-xl bg-sky-500 text-white text-sm font-bold">
                             매수
                           </button>
-                          <button className="flex-1 py-3 rounded-xl bg-error text-white text-sm font-bold">
+                          <button className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold">
                             매도
                           </button>
                         </div>
@@ -311,14 +318,14 @@ export default function StocksPage() {
                   {favorites.map((s) => {
                     const up = s.changeRate >= 0;
                     return (
-                      <div key={s.favoriteId} className="bg-bg-card border border-gray-200 rounded-2xl p-4 flex justify-between items-center">
+                      <div key={s.favoriteId} className="bg-white border-2 border-gray-100 rounded-2xl p-4 flex justify-between items-center">
                         <div>
                           <p className="text-sm font-bold text-gray-900">{s.stockName}</p>
                           <p className="text-xs text-gray-400 mt-0.5">{s.stockCode}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
-                          <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-success' : 'text-error'}`}>
+                          <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-green-500' : 'text-red-500'}`}>
                             {signRate(s.changeRate)}
                           </p>
                         </div>
@@ -336,7 +343,7 @@ export default function StocksPage() {
               ) : (
                 <div className="space-y-3">
                   {orders.map((o) => (
-                    <div key={o.orderId} className="bg-bg-card border border-gray-200 rounded-2xl p-4">
+                    <div key={o.orderId} className="bg-white border-2 border-gray-100 rounded-2xl p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="text-base font-bold text-gray-900">{o.stockName}</p>
@@ -344,8 +351,8 @@ export default function StocksPage() {
                         </div>
                         <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
                           o.orderType === 'BUY'
-                            ? 'bg-primary-50 text-primary-700 border border-primary-100'
-                            : 'bg-red-50 text-error border border-red-200'
+                            ? 'bg-sky-50 text-sky-600 border border-sky-200'
+                            : 'bg-red-50 text-red-500 border border-red-200'
                         }`}>
                           {o.orderType === 'BUY' ? '매수' : '매도'}
                         </span>
@@ -373,6 +380,7 @@ export default function StocksPage() {
         )}
       </div>
 
+      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
       <BottomNav />
     </div>
   );

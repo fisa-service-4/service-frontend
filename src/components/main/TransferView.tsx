@@ -33,8 +33,9 @@ const ROLE_LABEL: Record<string, string> = {
   STOCK:     '주식',
 };
 
-function formatKRW(n: number) {
-  return `₩${n.toLocaleString('ko-KR')}`;
+function formatKRW(n: number | null | undefined) {
+  if (n == null) return '-';
+  return `${n.toLocaleString('ko-KR')} 원`;
 }
 
 interface TransferViewProps {
@@ -120,8 +121,7 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
         return;
       }
       const created = await createTransfer(
-        { fromAccountId: fromId, toBankCode, toAccountNumber: toNumber, transferAmount: parsedAmount, requestedBy: 'USER' },
-        pinResult.pinToken
+        { fromAccountId: fromId, toBankCode, toAccountNumber: toNumber, transferAmount: parsedAmount, requestedBy: 'USER' }
       );
       const approved = await approveTransfer(created.transferId);
       setCompletedAt(approved.completedAt ?? '');

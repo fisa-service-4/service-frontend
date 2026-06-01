@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
 import NotificationPanel from '@/components/main/NotificationPanel';
@@ -47,8 +47,7 @@ export default function HomePage() {
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-5 py-4 shrink-0">
-          <button><Menu size={24} className="text-gray-800" /></button>
+        <div className="flex items-center justify-end px-5 py-4 shrink-0">
           <button className="p-1" onClick={() => setShowNotification(true)}>
             <Bell size={22} className="text-gray-800" />
           </button>
@@ -89,7 +88,7 @@ export default function HomePage() {
         </div>
 
         {/* AI 상담사 플로팅 버튼 */}
-        <button onClick={() => router.push('/chat')} className="absolute bottom-20 right-5 z-10 flex flex-col items-center drop-shadow-xl">
+        <button onClick={() => router.push('/chat')} className="absolute bottom-6 right-5 z-10 flex flex-col items-center drop-shadow-xl">
           <div className="relative w-9 h-4 -mb-0.75">
             <div className="absolute inset-x-1 top-0 h-3 border-t-2 border-l-2 border-r-2 border-sky-400 rounded-t-full" />
             <div className="absolute left-0 top-2 w-1.5 h-2 bg-sky-400 rounded-sm" />

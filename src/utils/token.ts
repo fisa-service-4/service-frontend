@@ -1,6 +1,7 @@
 const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const USER_ID_KEY = 'userId';
+const FIREBASE_UID_KEY = 'firebaseUid';
 
 export const tokenUtils = {
   setTokens: (accessToken: string, refreshToken: string) => {
@@ -14,9 +15,12 @@ export const tokenUtils = {
     const val = localStorage.getItem(USER_ID_KEY);
     return val ? Number(val) : null;
   },
+  setFirebaseUid: (uid: string) => localStorage.setItem(FIREBASE_UID_KEY, uid),
+  getFirebaseUid: (): string | null => localStorage.getItem(FIREBASE_UID_KEY),
   clearTokens: () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_ID_KEY);
+    localStorage.removeItem(FIREBASE_UID_KEY);
   },
 };

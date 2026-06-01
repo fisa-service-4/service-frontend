@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getContracts } from '@/api/virtualSalary';
 import type { CalendarEntry, Contract } from '@/types/virtualSalary';
@@ -35,6 +36,7 @@ interface Props {
 }
 
 export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: Props) {
+  const router = useRouter();
   const [year,  setYear]  = useState(TODAY_YEAR);
   const [month, setMonth] = useState(TODAY_MONTH);
   const [otherMonthContracts, setOtherMonthContracts] = useState<Contract[]>([]);
@@ -106,7 +108,10 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
               <ChevronRight size={14} />
             </button>
           </div>
-          <button className="text-xs bg-sky-50 text-sky-600 border border-sky-200 px-3 py-1.5 rounded-lg">
+          <button
+            onClick={() => router.push('/contracts')}
+            className="text-xs bg-sky-50 text-sky-600 border border-sky-200 px-3 py-1.5 rounded-lg"
+          >
             계약 리스트
           </button>
         </div>

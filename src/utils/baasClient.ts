@@ -2,7 +2,7 @@ import type { ApiResponse } from '@/types/auth';
 import { tokenUtils } from '@/utils/token';
 import { tryRefreshToken, redirectToLogin } from '@/utils/tokenRefresh';
 
-export async function mydataRequest<T>(
+export async function baasRequest<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
@@ -21,7 +21,7 @@ export async function mydataRequest<T>(
     };
   };
 
-  const response = await fetch(`/mydata/v1${path}`, {
+  const response = await fetch(`/baas/v1${path}`, {
     ...fetchOptions,
     headers: buildHeaders(),
   });
@@ -32,7 +32,7 @@ export async function mydataRequest<T>(
       redirectToLogin();
       throw new Error('세션이 만료되었습니다. 다시 로그인해 주세요.');
     }
-    const retry = await fetch(`/mydata/v1${path}`, {
+    const retry = await fetch(`/baas/v1${path}`, {
       ...fetchOptions,
       headers: buildHeaders(),
     });

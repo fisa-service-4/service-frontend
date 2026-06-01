@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { GripVertical, Sparkles, Lightbulb } from 'lucide-react';
+import { ArrowLeft, GripVertical, Sparkles, Lightbulb } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import VirtualSalaryCard from '@/components/home/VirtualSalaryCard';
 import {
@@ -144,15 +144,11 @@ export default function VirtualSalarySettingView() {
     <div className="flex flex-col h-screen bg-white">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-5 py-4 shrink-0">
-        <button
-          onClick={() => router.back()}
-          className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-full"
-        >
-          뒤로
+      <div className="relative flex items-center px-5 py-4 shrink-0">
+        <button onClick={() => router.back()}>
+          <ArrowLeft size={22} className="text-gray-800" />
         </button>
-        <span className="text-base font-bold text-gray-900">목표/분배 설정</span>
-        <div className="w-14" />
+        <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">목표/분배 설정</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
@@ -175,9 +171,9 @@ export default function VirtualSalarySettingView() {
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={targetSalary ? `₩ ${targetSalary}` : ''}
+                  value={targetSalary ?? ''}
                   onChange={e => handleTargetChange(e.target.value)}
-                  placeholder="₩ 3,000,000"
+                  placeholder="3,000,000"
                   className="flex-1 text-sm text-gray-900 bg-transparent outline-none placeholder:text-gray-300"
                 />
               </div>
@@ -209,9 +205,9 @@ export default function VirtualSalarySettingView() {
               <input
                 type="text"
                 inputMode="numeric"
-                value={emergencyTargetAmt ? `₩ ${emergencyTargetAmt}` : ''}
+                value={emergencyTargetAmt ?? ''}
                 onChange={e => handleEmergencyAmtChange(e.target.value)}
-                placeholder="₩ 2,500,000"
+                placeholder="2,500,000"
                 className="flex-1 text-sm text-gray-900 bg-transparent outline-none placeholder:text-gray-300"
               />
             </div>

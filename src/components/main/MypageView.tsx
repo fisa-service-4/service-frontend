@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, ChevronRight, User } from 'lucide-react';
+import { Bell, ChevronRight, User } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import NotificationPanel from '@/components/main/NotificationPanel';
 import { userApi } from '@/api/user';
 import type { UserProfile } from '@/types/auth';
 
@@ -11,6 +12,7 @@ export default function MypageView() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [alarmOn, setAlarmOn] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     userApi.getMe().then((profile) => {
@@ -33,12 +35,10 @@ export default function MypageView() {
     <div className="flex flex-col h-screen bg-gray-50">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-5 py-4 bg-white shrink-0">
-        <button>
-          <Menu size={24} className="text-gray-800" />
+      <div className="flex items-center justify-end px-5 py-4 bg-white shrink-0">
+        <button className="p-1" onClick={() => setShowNotification(true)}>
+          <Bell size={22} className="text-gray-800" />
         </button>
-        <span className="text-base font-bold text-gray-900">마이페이지</span>
-        <div className="w-6" />
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -66,18 +66,6 @@ export default function MypageView() {
         </div>
 
         <div className="px-4 py-5 space-y-5">
-
-          {/* 수입/자산 카드 */}
-          <div className="flex gap-3">
-            <div className="flex-1 bg-white rounded-2xl p-4 border-2 border-sky-500">
-              <p className="text-xs text-gray-400 mb-1">이번달 수입</p>
-              <p className="text-base font-bold text-gray-900">-</p>
-            </div>
-            <div className="flex-1 bg-white rounded-2xl p-4 border-2 border-sky-500">
-              <p className="text-xs text-gray-400 mb-1">총 자산</p>
-              <p className="text-base font-bold text-gray-900">-</p>
-            </div>
-          </div>
 
           {/* 계정 관리 */}
           <div>
@@ -142,17 +130,6 @@ export default function MypageView() {
                   <p className="text-sm font-semibold text-gray-900">가상 월급 설정</p>
                   <p className="text-xs text-gray-400">목표 금액/이체일/분배 비율</p>
                 </div>
-                <ChevronRight size={18} className="text-sky-500" />
-              </button>
-              <button className="w-full flex items-center gap-3 px-4 py-4">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">📈</span>
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="text-sm font-semibold text-gray-900">투자 성향 설정 변경</p>
-                  <p className="text-xs text-gray-400">안정형/중립형/공격형</p>
-                </div>
-                <span className="text-xs text-sky-600 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-full mr-1">1 / 2</span>
                 <ChevronRight size={18} className="text-sky-500" />
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-4">
@@ -223,6 +200,7 @@ export default function MypageView() {
         </div>
       </div>
 
+      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
       <BottomNav />
     </div>
   );

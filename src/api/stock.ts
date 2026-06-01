@@ -1,6 +1,19 @@
 import { apiRequest } from '@/utils/apiClient';
 
-// TODO: GET /api/v1/stocks/accounts (X-Firebase-Uid 연동) 완료 후 동적으로 변경 예정
+export interface StockAccount {
+  accountId: number;
+  accountNumber: string;
+  accountName: string;
+  bankCode: string;
+}
+
+export interface StockAccountListResponse {
+  accounts: StockAccount[];
+}
+
+export const getStockAccounts = () =>
+  apiRequest<StockAccountListResponse>('/stocks/accounts');
+
 export const TEMP_ACCOUNT_ID = 1;
 
 export interface Holding {
