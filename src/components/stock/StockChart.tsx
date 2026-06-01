@@ -20,7 +20,7 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
       height,
       attributionLogo: false,
       layout: {
-        background: { color: '#ffffff' },
+        background: { color: 'transparent' },
         textColor: '#6b7280',
       },
       grid: {
