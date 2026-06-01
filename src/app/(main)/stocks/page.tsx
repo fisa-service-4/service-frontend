@@ -171,20 +171,20 @@ export default function StocksPage() {
 
         {/* 총 평가금액 카드 */}
         {!query && <div className="bg-white shadow-sm rounded-2xl p-5 mb-4">
-          <p className="text-sm text-gray-500 mb-1">총 평가금액</p>
-          <p className="text-3xl font-bold text-gray-900 mb-5">
+          <p className="text-sm text-gray-600 mb-1">총 평가금액</p>
+          <p className="text-xl font-bold text-gray-900 mb-5">
             {loading ? '-' : fmtWon(totalValue)}
           </p>
           <div className="flex justify-between">
             <div>
-              <p className="text-xs text-gray-400">평가손익</p>
-              <p className={`text-base font-bold mt-1 ${profitUp ? 'text-green-500' : 'text-red-500'}`}>
+              <p className="text-sm text-gray-600">평가손익</p>
+              <p className={`text-xl font-bold mt-1 ${profitUp ? 'text-success' : 'text-error'}`}>
                 {loading ? '-' : signWon(profitLoss)}
               </p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-gray-400">수익률 (일간)</p>
-              <p className={`text-base font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              <p className="text-sm text-gray-600">수익률 (일간)</p>
+              <p className={`text-xl font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-success' : 'text-error'}`}>
                 {returns.dailyReturnRate >= 0
                   ? <TrendingUp size={14} />
                   : <TrendingDown size={14} />}
