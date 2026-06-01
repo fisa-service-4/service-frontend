@@ -269,7 +269,7 @@ export default function AssetsView() {
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-bold text-gray-900">보유 종목</h2>
-              {stockReturns && (
+              {stockReturns && stockReturns.dailyReturnRate != null && (
                 <span className="text-xs text-gray-500">
                   일간 <span className={stockReturns.dailyReturnRate >= 0 ? 'text-red-500 font-bold' : 'text-blue-500 font-bold'}>
                     {stockReturns.dailyReturnRate >= 0 ? '+' : ''}{stockReturns.dailyReturnRate.toFixed(2)}%
@@ -297,8 +297,8 @@ export default function AssetsView() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold text-gray-900">{formatKRW(holding.evaluationAmount)}</p>
-                      <p className={`text-xs font-semibold mt-0.5 ${holding.profitRate >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-                        {holding.profitRate >= 0 ? '+' : ''}{holding.profitRate.toFixed(2)}%
+                      <p className={`text-xs font-semibold mt-0.5 ${(holding.profitRate ?? 0) >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+                        {holding.profitRate != null ? `${holding.profitRate >= 0 ? '+' : ''}${holding.profitRate.toFixed(2)}%` : '-'}
                       </p>
                     </div>
                   </div>
