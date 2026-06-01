@@ -95,10 +95,12 @@ export default function IncomeCalendar({ calendarData, contracts, dday, onRegist
   }, [dday, year, month]);
 
   const filteredContracts = useMemo(() => {
-    if (selectedDay === null) return currentContracts;
+    const byDate = (a: Contract, b: Contract) =>
+      a.expectedPaymentDate.localeCompare(b.expectedPaymentDate);
+    if (selectedDay === null) return [...currentContracts].sort(byDate);
     const pad = (n: number) => String(n).padStart(2, '0');
     const dateStr = `${year}-${pad(month)}-${pad(selectedDay)}`;
-    return currentContracts.filter(c => c.expectedPaymentDate === dateStr);
+    return currentContracts.filter(c => c.expectedPaymentDate === dateStr).sort(byDate);
   }, [selectedDay, currentContracts, year, month]);
 
   const prevMonth = () => {
@@ -243,7 +245,11 @@ export default function IncomeCalendar({ calendarData, contracts, dday, onRegist
           ) : (
             <ul className="divide-y divide-gray-100">
               {filteredContracts.map(c => (
-                <li key={c.contractId} className="flex items-center justify-between py-2.5">
+                <li
+                  key={c.contractId}
+                  className="flex items-center justify-between py-2.5 cursor-pointer"
+                  onClick={() => router.push(`/contracts/${c.contractId}`)}
+                >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{c.clientName}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{c.expectedPaymentDate}</p>

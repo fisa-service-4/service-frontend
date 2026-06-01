@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 import { getContract, getPaymentMatchings, manualMatch } from '@/api/virtualSalary';
 import type { Contract, PaymentMatching, MatchingStatus } from '@/types/virtualSalary';
 import BottomNav from '@/components/main/BottomNav';
@@ -21,10 +22,9 @@ const TAX_LABEL: Record<string, string> = {
 
 // 입금 분류 표시
 const MATCHING_LABEL: Record<MatchingStatus, { text: string; color: string }> = {
-  MATCHED:        { text: '정상입금', color: 'text-gray-900' },
-  MANUAL_MATCHED: { text: '수동완료', color: 'text-sky-600' },
-  FAILED:         { text: '미입금',   color: 'text-red-500' },
-  TBC:            { text: '확인 중',  color: 'text-amber-600' },
+  MATCHED: { text: '정상입금', color: 'text-gray-900' },
+  FAILED:  { text: '미입금',   color: 'text-red-500' },
+  TBC:     { text: '확인 중',  color: 'text-amber-600' },
 };
 
 // 헤더 배지: 매칭 상태 우선, 없으면 계약 상태 + 날짜 계산
@@ -36,7 +36,6 @@ function getDetailBadge(
     switch (matching.matchingStatus) {
       case 'TBC':            return { label: '확인 중',  style: 'text-amber-600 bg-amber-100' };
       case 'MATCHED':        return { label: '입금완료', style: 'text-sky-600 bg-sky-100' };
-      case 'MANUAL_MATCHED': return { label: '수동완료', style: 'text-sky-600 bg-sky-100' };
       case 'FAILED':         return { label: '미입금',   style: 'text-red-500 bg-red-100' };
     }
   }
@@ -75,49 +74,41 @@ interface Props { contractId: number }
 export default function ContractDetailView({ contractId }: Props) {
   const router = useRouter();
 
-  const [contract,   setContract]   = useState<Contract | null>(null);
-  const [matching,   setMatching]   = useState<PaymentMatching | null>(null);
-  const [loading,    setLoading]    = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
-  const [showInput,  setShowInput]  = useState(false);
-  const [txId,       setTxId]       = useState('');
+  const [contract,    setContract]    = useState<Contract | null>(null);
+  const [matching,    setMatching]    = useState<PaymentMatching | null>(null);
+  const [loading,     setLoading]     = useState(true);
+  const [fetchError,  setFetchError]  = useState<string | null>(null);
   const [submitting,  setSubmitting]  = useState(false);
   const [submitErr,   setSubmitErr]   = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [refreshKey,  setRefreshKey]  = useState(0);
 
-  const fetchData = () => {
-    setLoading(true);
-    setFetchError(null);
-    // getContract 실패 시에도 matching은 시도
+  useEffect(() => {
+    let cancelled = false;
     getContract(contractId)
-      .then(c => setContract(c))
-      .catch(err => setFetchError(err instanceof Error ? err.message : '계약 정보를 불러올 수 없습니다.'));
+      .then(c   => { if (!cancelled) { setContract(c); setFetchError(null); } })
+      .catch(err => { if (!cancelled) setFetchError(err instanceof Error ? err.message : '계약 정보를 불러올 수 없습니다.'); });
     getPaymentMatchings({ contractId })
-      .then(ms => setMatching(ms[0] ?? null))
-      .catch(() => setMatching(null))
-      .finally(() => setLoading(false));
-  };
+      .then(ms  => { if (!cancelled) setMatching(ms[0] ?? null); })
+      .catch(()  => { if (!cancelled) setMatching(null); })
+      .finally(()  => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [contractId, refreshKey]);
 
-  useEffect(() => { fetchData(); }, [contractId]);
-
-  const handleManualMatch = async () => {
-    if (!matching || submitting) return;
-
-    // TBC(bankTransactionId 있음): 기존 ID 재사용 / FAILED 또는 TBC(ID 없음): 사용자 입력
-    const bankTransactionId = matching.matchingStatus === 'TBC' && matching.bankTransactionId
-      ? matching.bankTransactionId
-      : Number(txId);
-
-    if (!bankTransactionId) { setSubmitErr('거래 ID를 입력해주세요.'); return; }
-
+  const handleComplete = async () => {
+    if (submitting) return;
+    if (!matching) {
+      setSubmitErr('입금 확인 중 정보가 없습니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+    const bankTransactionId = matching.bankTransactionId ?? 0;
     setSubmitting(true);
     setSubmitErr(null);
     try {
       await manualMatch(matching.matchingId, { bankTransactionId, matchedBy: 'USER' });
-      fetchData();
-      setShowInput(false);
+      setLoading(true);
+      setRefreshKey(k => k + 1);
       setShowConfirm(false);
-      setTxId('');
     } catch (err) {
       setSubmitErr(err instanceof Error ? err.message : '처리 중 오류가 발생했습니다.');
     } finally {
@@ -129,8 +120,8 @@ export default function ContractDetailView({ contractId }: Props) {
     return (
       <div className="flex flex-col h-screen bg-white">
         <div className="flex items-center px-5 py-4 shrink-0">
-          <button onClick={() => router.back()} className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-full">
-            뒤로
+          <button onClick={() => router.back()}>
+            <ArrowLeft size={22} className="text-gray-800" />
           </button>
         </div>
         <div className="flex-1 flex items-center justify-center text-sm text-gray-400">불러오는 중...</div>
@@ -143,8 +134,8 @@ export default function ContractDetailView({ contractId }: Props) {
     return (
       <div className="flex flex-col h-screen bg-white">
         <div className="flex items-center px-5 py-4 shrink-0">
-          <button onClick={() => router.back()} className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-full">
-            뒤로
+          <button onClick={() => router.back()}>
+            <ArrowLeft size={22} className="text-gray-800" />
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center gap-3 px-5">
@@ -152,7 +143,7 @@ export default function ContractDetailView({ contractId }: Props) {
             {fetchError ?? '계약 정보를 불러올 수 없습니다.'}
           </p>
           <button
-            onClick={fetchData}
+            onClick={() => { setLoading(true); setRefreshKey(k => k + 1); }}
             className="text-sm text-sky-600 font-medium"
           >
             다시 시도
@@ -179,22 +170,27 @@ export default function ContractDetailView({ contractId }: Props) {
         ? { text: '불일치', color: 'text-amber-600' }
         : { text: '미입금',  color: 'text-red-500' };
     }
+    if (matching.matchingStatus === 'MATCHED' && matching.matchedBy === 'USER') {
+      return { text: '완료', color: 'text-sky-600' };
+    }
     return MATCHING_LABEL[matching.matchingStatus];
   })();
 
-  const isManual = matching?.matchingStatus === 'MANUAL_MATCHED';
+  const isManual = matching?.matchingStatus === 'MATCHED' && matching.matchedBy === 'USER';
 
-  // 수동 완료 버튼 노출 조건
-  const isTbcCase1      = matching?.matchingStatus === 'TBC' && !matching.bankTransactionId;  // 확인중 + 미입금
-  const isTbcCase3      = matching?.matchingStatus === 'TBC' && !!matching.bankTransactionId; // 확인중 + 불일치
-  const isFailed        = matching?.matchingStatus === 'FAILED';                               // 실패 + 미입금
-  const showManualButton = isTbcCase1 || isTbcCase3 || isFailed;
-  // TBC case 3는 이미 bankTransactionId 보유 → 거래 ID 입력 불필요
-  const needsTxInput    = isTbcCase1 || isFailed;
+  const todayMs    = new Date().setHours(0, 0, 0, 0);
+  const payMs      = new Date(contract.expectedPaymentDate).setHours(0, 0, 0, 0);
+  const tbcStartMs = payMs - 2 * 86_400_000;
+  const tbcEndMs   = payMs + 2 * 86_400_000;
+  const inTbcPeriod = todayMs >= tbcStartMs && todayMs <= tbcEndMs;
+
+  const isComplete =
+    contract.contractStatus === 'PAID' ||
+    contract.contractStatus === 'CANCELLED' ||
+    matching?.matchingStatus === 'MATCHED';
+  const canComplete = !isComplete && inTbcPeriod;
 
   // 입금 지연일: FAILED / DELAYED / TBC case 1(미입금) + 입금일 초과
-  const todayMs = new Date().setHours(0, 0, 0, 0);
-  const payMs   = new Date(contract.expectedPaymentDate).setHours(0, 0, 0, 0);
   const tbcPastDue    = matching?.matchingStatus === 'TBC' && !matching.bankTransactionId && todayMs > payMs;
   const isFailedState = matching?.matchingStatus === 'FAILED' || contract.contractStatus === 'DELAYED' || tbcPastDue;
   const delayDays = isFailedState
@@ -204,13 +200,10 @@ export default function ContractDetailView({ contractId }: Props) {
   return (
     <div className="flex flex-col h-screen bg-white">
 
-      {/* 뒤로 버튼 */}
+      {/* 헤더 */}
       <div className="px-5 py-4 shrink-0">
-        <button
-          onClick={() => router.back()}
-          className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-full"
-        >
-          뒤로
+        <button onClick={() => router.back()}>
+          <ArrowLeft size={22} className="text-gray-800" />
         </button>
       </div>
 
@@ -279,41 +272,21 @@ export default function ContractDetailView({ contractId }: Props) {
           </div>
         </div>
 
-        {/* 거래 금액 (실입금액): MATCHED 또는 TBC case 3(불일치) */}
-        {(matching?.matchingStatus === 'MATCHED' || tbcMismatch) && matching && (
+        {/* 거래 금액 (실입금액): 실제 입금액이 있는 경우 */}
+        {matching?.transactionAmount != null &&
+          (matching.matchingStatus === 'MATCHED' || tbcMismatch) && (
           <div className="mb-5">
             <Row
-              label="거래 금액 ( 실입금액)"
-              value={fmt(matching.transactionAmount ?? actualIncome)}
+              label="거래 금액 (실입금액)"
+              value={fmt(matching.transactionAmount)}
             />
           </div>
         )}
 
-        {/* 거래 ID 입력 (FAILED 또는 TBC 미입금) */}
-        {showManualButton && showInput && needsTxInput && !showConfirm && (
-          <div className="mb-4 space-y-2">
-            <p className="text-xs text-gray-400">
-              은행 거래 내역에서 확인한 거래 ID를 입력하세요.
-            </p>
-            <div className="flex items-center bg-gray-100 rounded-xl px-4 py-3">
-              <input
-                autoFocus
-                type="text"
-                inputMode="numeric"
-                value={txId}
-                onChange={e => setTxId(e.target.value.replace(/[^0-9]/g, ''))}
-                placeholder="거래 ID 입력"
-                className="flex-1 text-sm text-gray-900 bg-transparent outline-none placeholder:text-gray-300"
-              />
-            </div>
-            {submitErr && <p className="text-red-500 text-xs">{submitErr}</p>}
-          </div>
-        )}
-
-        {/* 최종 확인 패널 */}
+        {/* 확인 패널 */}
         {showConfirm && (
-          <div className="mb-4 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-4">
-            <p className="text-sm font-semibold text-gray-900 mb-1">입금 완료로 변경하시겠습니까?</p>
+          <div className="mb-4 bg-sky-50 border border-sky-200 rounded-2xl px-4 py-4">
+            <p className="text-sm font-semibold text-gray-900 mb-1">완료 처리하시겠습니까?</p>
             <p className="text-xs text-gray-500 mb-3">{contract.clientName} · {fmt(contract.contractAmount)}</p>
             {submitErr && <p className="text-red-500 text-xs mb-2">{submitErr}</p>}
             <div className="flex gap-3">
@@ -324,63 +297,27 @@ export default function ContractDetailView({ contractId }: Props) {
                 취소
               </button>
               <button
-                onClick={handleManualMatch}
+                onClick={handleComplete}
                 disabled={submitting}
                 className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm disabled:opacity-50"
               >
-                {submitting ? '처리 중...' : '확인'}
+                {submitting ? '처리 중...' : '완료'}
               </button>
             </div>
           </div>
         )}
 
-        {/* 액션 버튼 */}
-        <div className="space-y-3 mt-4">
-          {showManualButton && !showConfirm && (
-            <>
-              {!showInput ? (
-                <button
-                  onClick={() => {
-                    if (needsTxInput) {
-                      setShowInput(true);
-                    } else {
-                      setShowConfirm(true);
-                    }
-                  }}
-                  className="w-full py-3.5 bg-sky-500 text-white font-semibold rounded-2xl text-sm"
-                >
-                  입금 완료로 변경하기
-                </button>
-              ) : (
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => { setShowInput(false); setTxId(''); setSubmitErr(null); }}
-                    className="flex-1 py-3.5 bg-gray-100 text-gray-600 font-semibold rounded-2xl text-sm"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (!txId) { setSubmitErr('거래 ID를 입력해주세요.'); return; }
-                      setSubmitErr(null);
-                      setShowConfirm(true);
-                    }}
-                    className="flex-1 py-3.5 bg-sky-500 text-white font-semibold rounded-2xl text-sm"
-                  >
-                    완료로 변경
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          <button
-            onClick={() => router.back()}
-            className="w-full py-3.5 bg-gray-100 text-gray-600 font-semibold rounded-2xl text-sm"
-          >
-            확인
-          </button>
-        </div>
+        {/* 하단 버튼 */}
+        {canComplete && !showConfirm && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="w-full py-3.5 bg-sky-500 text-white font-semibold rounded-2xl text-sm"
+            >
+              완료 처리하기
+            </button>
+          </div>
+        )}
 
       </div>
 
