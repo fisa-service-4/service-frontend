@@ -2,8 +2,10 @@
 
 import { Suspense, useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { TrendingUp, TrendingDown, Minus, Plus, ChevronDown, ArrowLeft } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Plus, ChevronDown, ArrowLeft, X } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import PinKeypad from '@/components/PinKeypad';
+import { authApi } from '@/api/auth';
 import {
   getCashBalance,
   createOrder,
@@ -62,6 +64,11 @@ function StockOrderContent() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  const [showPin, setShowPin] = useState(false);
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [pinLoading, setPinLoading] = useState(false);
+
   useEffect(() => {
     getCashBalance(TEMP_ACCOUNT_ID)
       .then((res) => setAvailableBalance(res.availableBalance))
@@ -83,6 +90,44 @@ function StockOrderContent() {
   );
 
   const setByRatio = (ratio: number) => setQuantity(Math.floor(maxQty * ratio));
+
+  const openPin = () => {
+    if (quantity <= 0) return;
+    setPin('');
+    setPinError('');
+    setShowPin(true);
+  };
+
+  const handlePinPress = async (value: string) => {
+    if (pinLoading) return;
+    setPinError('');
+
+    if (value === 'backspace') {
+      setPin((p) => p.slice(0, -1));
+      return;
+    }
+    if (pin.length >= 6) return;
+
+    const next = pin + value;
+    setPin(next);
+
+    if (next.length < 6) return;
+
+    setTimeout(async () => {
+      setPinLoading(true);
+      try {
+        await authApi.verifyPin(next);
+        setShowPin(false);
+        setPin('');
+        await handleSubmit();
+      } catch {
+        setPinError('PIN번호가 올바르지 않습니다. 다시 입력해주세요.');
+        setPin('');
+      } finally {
+        setPinLoading(false);
+      }
+    }, 200);
+  };
 
   const handleSubmit = async () => {
     if (quantity <= 0) return;
@@ -266,7 +311,7 @@ function StockOrderContent() {
 
         {/* 주문 버튼 */}
         <button
-          onClick={handleSubmit}
+          onClick={openPin}
           disabled={quantity <= 0 || submitting}
           className={`w-full py-4 rounded-2xl text-white text-base font-bold transition-opacity ${
             side === 'BUY' ? 'bg-primary-500' : 'bg-red-500'
@@ -277,6 +322,53 @@ function StockOrderContent() {
       </div>
 
       <BottomNav />
+
+      {/* PIN 오버레이 */}
+      {showPin && (
+        <div className="absolute inset-0 bg-white z-50 flex flex-col">
+
+          {/* 헤더 */}
+          <div className="flex items-center px-5 py-4 shrink-0 relative border-b border-gray-100">
+            <button onClick={() => setShowPin(false)}>
+              <X size={22} className="text-gray-800" />
+            </button>
+            <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">
+              PIN 입력
+            </span>
+          </div>
+
+          <div className="flex-1 flex flex-col items-center pt-12 px-4">
+
+            {/* 안내 문구 */}
+            <div className="bg-gray-700 rounded-full px-6 py-2.5 mb-10">
+              <p className="text-white text-sm font-medium">
+                {side === 'BUY' ? '매수' : '매도'} 주문을 위해 PIN을 입력해주세요
+              </p>
+            </div>
+
+            {/* PIN 도트 */}
+            <div className="flex gap-4 mb-12">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-5 h-5 rounded-full transition-colors ${
+                    i < pin.length ? 'bg-gray-700' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {/* 에러 메시지 */}
+            {pinError && (
+              <p className="text-sm text-error mb-6">{pinError}</p>
+            )}
+
+            <div className="mt-auto pb-8 w-full">
+              <PinKeypad onPress={handlePinPress} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
