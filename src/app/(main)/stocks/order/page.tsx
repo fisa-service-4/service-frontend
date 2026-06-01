@@ -161,32 +161,37 @@ function StockOrderContent() {
         <div className="bg-gray-100 shadow-md rounded-2xl p-4 mb-4 space-y-4">
 
           {/* 주문 유형 */}
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-500">주문 유형</span>
-            <div className="relative">
-              <button
-                onClick={() => setMethodOpen((o) => !o)}
-                className="flex items-center gap-2 bg-bg-card border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900"
-              >
-                {ORDER_METHODS.find((m) => m.value === orderMethod)?.label}
-                <ChevronDown size={15} />
-              </button>
-              {methodOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-bg-card border border-gray-200 rounded-xl shadow-lg z-10 min-w-28 overflow-hidden">
-                  {ORDER_METHODS.map((m) => (
-                    <button
-                      key={m.value}
-                      onClick={() => { setOrderMethod(m.value as 'MARKET' | 'LIMIT'); setMethodOpen(false); }}
-                      className={`w-full text-left px-4 py-2.5 text-sm font-medium ${
-                        orderMethod === m.value ? 'text-primary-500' : 'text-gray-700'
-                      }`}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+          <div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">주문 유형</span>
+              <div className="relative">
+                <button
+                  onClick={() => setMethodOpen((o) => !o)}
+                  className="flex items-center gap-2 bg-bg-card border border-gray-200 rounded-lg px-3 py-2 text-sm font-semibold text-gray-900"
+                >
+                  {ORDER_METHODS.find((m) => m.value === orderMethod)?.label}
+                  <ChevronDown size={15} />
+                </button>
+                {methodOpen && (
+                  <div className="absolute right-0 top-full mt-1 bg-bg-card border border-gray-200 rounded-xl shadow-lg z-10 min-w-28 overflow-hidden">
+                    {ORDER_METHODS.map((m) => (
+                      <button
+                        key={m.value}
+                        onClick={() => { setOrderMethod(m.value as 'MARKET' | 'LIMIT'); setMethodOpen(false); }}
+                        className={`w-full text-left px-4 py-2.5 text-sm font-medium ${
+                          orderMethod === m.value ? 'text-primary-500' : 'text-gray-700'
+                        }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
+            <p className={`text-xs text-primary-500 text-right mt-1 ${orderMethod === 'MARKET' ? 'visible' : 'invisible'}`}>
+              시장가는 현재가로 즉시 체결됩니다.
+            </p>
           </div>
 
           {/* 수량 */}
@@ -240,13 +245,6 @@ function StockOrderContent() {
             </div>
           </div>
         </div>
-
-        {/* 시장가 안내 */}
-        {orderMethod === 'MARKET' && (
-          <div className="bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 mb-4 text-center">
-            <p className="text-xs text-primary-700">시장가는 현재가로 즉시 체결됩니다.</p>
-          </div>
-        )}
 
         {/* 에러 메시지 */}
         {error && (
