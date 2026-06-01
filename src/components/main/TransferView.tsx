@@ -34,8 +34,8 @@ const ROLE_LABEL: Record<string, string> = {
 };
 
 function formatKRW(n: number | null | undefined) {
-  if (n == null) return '₩-';
-  return `₩${n.toLocaleString('ko-KR')}`;
+  if (n == null) return '-';
+  return `${n.toLocaleString('ko-KR')} 원`;
 }
 
 interface TransferViewProps {

@@ -6,7 +6,7 @@ import { getContract, getPaymentMatchings, manualMatch } from '@/api/virtualSala
 import type { Contract, PaymentMatching, MatchingStatus } from '@/types/virtualSalary';
 import BottomNav from '@/components/main/BottomNav';
 
-const fmt = (n: number) => `₩ ${n.toLocaleString()}`;
+const fmt = (n: number) => `${n.toLocaleString()} 원`;
 
 const TAX_RATE: Record<string, number> = {
   BUSINESS: 0.033,

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import PinKeypad from '@/components/PinKeypad';
 import BottomNav from '@/components/main/BottomNav';
 
@@ -62,10 +62,7 @@ export default function PinChangeView() {
         <button onClick={() => router.back()} className="absolute left-5">
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
-        <button className="absolute left-14">
-          <Menu size={24} className="text-gray-800" />
-        </button>
-        <span className="w-full text-center text-base font-bold text-gray-900">PIN 변경</span>
+<span className="w-full text-center text-base font-bold text-gray-900">PIN 변경</span>
       </div>
 
       <div className="flex-1 flex flex-col items-center pt-8 px-4">

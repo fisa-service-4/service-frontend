@@ -2,7 +2,7 @@
 
 import type { Contract, ContractStatus } from '@/types/virtualSalary';
 
-const fmt = (n: number) => `₩ ${n.toLocaleString()}`;
+const fmt = (n: number) => `${n.toLocaleString()} 원`;
 
 const CONTRACT_STATUS_LABEL: Record<ContractStatus, string> = {
   PENDING:   '입금 예정',

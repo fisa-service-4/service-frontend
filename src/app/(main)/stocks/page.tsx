@@ -4,8 +4,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, TrendingUp, TrendingDown, Star } from 'lucide-react';
+import { Bell, Search, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import NotificationPanel from '@/components/main/NotificationPanel';
 import StockChart from '@/components/stock/StockChart';
 import {
   getHoldings,
@@ -27,11 +28,11 @@ import {
 
 const fmtWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
-  return '₩' + n.toLocaleString('ko-KR');
+  return n.toLocaleString('ko-KR') + ' 원';
 };
 const signWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
-  return (n >= 0 ? '+' : '-') + '₩' + Math.abs(n).toLocaleString('ko-KR');
+  return (n >= 0 ? '+' : '-') + Math.abs(n).toLocaleString('ko-KR') + ' 원';
 };
 const signRate = (n: number | null) => {
   if (n === null || n === undefined) return '-';
@@ -50,6 +51,7 @@ export default function StocksPage() {
   const [searching, setSearching] = useState(false);
   const [favoriteMap, setFavoriteMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
   const [chartMap, setChartMap] = useState<Record<string, ChartCandle[]>>({});
   const router = useRouter();
 
@@ -145,9 +147,13 @@ export default function StocksPage() {
 
   return (
     <div className="flex flex-col h-screen bg-white">
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex items-center justify-end px-5 py-4 shrink-0">
+        <button className="p-1" onClick={() => setShowNotification(true)}>
+          <Bell size={22} className="text-gray-800" />
+        </button>
+      </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 pt-6 pb-4">증권</h1>
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
 
         {/* 검색창 */}
         <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-3 mb-4">
@@ -374,6 +380,7 @@ export default function StocksPage() {
         )}
       </div>
 
+      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
       <BottomNav />
     </div>
   );

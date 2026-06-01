@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccounts } from '@/api/bank';
 import { getAssetDashboard, connectMyData } from '@/api/mydata';
@@ -38,8 +38,8 @@ const ACCOUNT_ROLE_LABEL: Record<string, string> = {
 };
 
 function formatKRW(amount: number | null | undefined): string {
-  if (amount == null) return '₩-';
-  return `₩${amount.toLocaleString('ko-KR')}`;
+  if (amount == null) return '-';
+  return `${amount.toLocaleString('ko-KR')} 원`;
 }
 
 function SkeletonCard({ className = '' }: { className?: string }) {
@@ -167,11 +167,7 @@ export default function AssetsView() {
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-5 py-4 shrink-0">
-        <button aria-label="메뉴">
-          <Menu size={24} className="text-gray-800" />
-        </button>
-        <h1 className="text-base font-bold text-gray-900">통합 자산 현황</h1>
+      <div className="flex items-center justify-end px-5 py-4 shrink-0">
         <button className="p-1" onClick={() => setShowNotification(true)}>
           <Bell size={22} className="text-gray-800" />
         </button>
@@ -252,15 +248,15 @@ export default function AssetsView() {
         </div>
 
         {/* ── 탭 ── */}
-        <div className="bg-gray-600 rounded-2xl p-1.5 flex gap-1">
+        <div className="bg-white border-2 border-sky-500 rounded-2xl p-1.5 flex gap-1">
           {(['all', 'bank', 'stock'] as AssetTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                 activeTab === tab
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-300'
+                  ? 'bg-sky-500 text-white shadow-sm'
+                  : 'text-gray-500'
               }`}
             >
               {tab === 'all' ? '전체' : tab === 'bank' ? '은행' : '증권'}
@@ -335,14 +331,14 @@ export default function AssetsView() {
           </div>
 
           {hasAccounts || loading ? (
-            <div className="bg-gray-600 rounded-2xl p-2 space-y-2">
+            <div className="bg-white border-2 border-sky-500 rounded-2xl p-2 space-y-2">
               {loading ? (
                 <>
-                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
-                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-sky-50 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-sky-50 rounded-xl h-16 animate-pulse" />
                 </>
               ) : displayAccounts.length === 0 ? (
-                <p className="text-center text-sm text-gray-300 py-8">
+                <p className="text-center text-sm text-gray-400 py-8">
                   해당 유형의 계좌가 없습니다.
                 </p>
               ) : (
@@ -352,7 +348,7 @@ export default function AssetsView() {
                     className="flex items-center justify-between bg-white rounded-xl px-4 py-3"
                   >
                     <div>
-                      <p className="text-xs font-semibold text-gray-500">
+                      <p className="text-xs font-semibold text-gray-900">
                         {BANK_NAME[account.bankCode] ?? account.bankCode}
                       </p>
                       <p className="text-sm font-medium text-gray-800 mt-0.5">
