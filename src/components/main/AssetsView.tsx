@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft, Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccounts } from '@/api/bank';
 import { getAssetDashboard, connectMyData } from '@/api/mydata';
@@ -167,11 +167,7 @@ export default function AssetsView() {
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-5 py-4 shrink-0">
-        <button aria-label="메뉴">
-          <Menu size={24} className="text-gray-800" />
-        </button>
-        <h1 className="text-base font-bold text-gray-900">통합 자산 현황</h1>
+      <div className="flex items-center justify-end px-5 py-4 shrink-0">
         <button className="p-1" onClick={() => setShowNotification(true)}>
           <Bell size={22} className="text-gray-800" />
         </button>

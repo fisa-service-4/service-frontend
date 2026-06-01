@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, ChevronRight, User } from 'lucide-react';
+import { Bell, ChevronRight, User } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import NotificationPanel from '@/components/main/NotificationPanel';
 import { userApi } from '@/api/user';
 import type { UserProfile } from '@/types/auth';
 
@@ -11,6 +12,7 @@ export default function MypageView() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [alarmOn, setAlarmOn] = useState(false);
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     userApi.getMe().then((profile) => {
@@ -33,12 +35,10 @@ export default function MypageView() {
     <div className="flex flex-col h-screen bg-gray-50">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-5 py-4 bg-white shrink-0">
-        <button>
-          <Menu size={24} className="text-gray-800" />
+      <div className="flex items-center justify-end px-5 py-4 bg-white shrink-0">
+        <button className="p-1" onClick={() => setShowNotification(true)}>
+          <Bell size={22} className="text-gray-800" />
         </button>
-        <span className="text-base font-bold text-gray-900">마이페이지</span>
-        <div className="w-6" />
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -200,6 +200,7 @@ export default function MypageView() {
         </div>
       </div>
 
+      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
       <BottomNav />
     </div>
   );

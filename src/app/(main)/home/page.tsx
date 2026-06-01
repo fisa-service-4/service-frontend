@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, Bell } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import ContractRegisterView from '@/components/main/ContractRegisterView';
 import NotificationPanel from '@/components/main/NotificationPanel';
@@ -47,8 +47,7 @@ export default function HomePage() {
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-5 py-4 shrink-0">
-          <button><Menu size={24} className="text-gray-800" /></button>
+        <div className="flex items-center justify-end px-5 py-4 shrink-0">
           <button className="p-1" onClick={() => setShowNotification(true)}>
             <Bell size={22} className="text-gray-800" />
           </button>
