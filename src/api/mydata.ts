@@ -16,6 +16,26 @@ export interface MyDataConnection {
   stockLinked: boolean;
 }
 
+export interface BankAccountSummary {
+  accountId: number;
+  accountNumber: string;
+  accountName: string;
+  bankCode: string;
+  balance: number;
+}
+
+export interface StockAccountSummary {
+  accountId: number;
+  accountNumber: string;
+  accountName: string;
+  bankCode: string;
+}
+
+export interface MyDataConnections {
+  bankAccounts: BankAccountSummary[];
+  stockAccounts: StockAccountSummary[];
+}
+
 export const getAssetDashboard = () =>
   mydataRequest<AssetDashboard>('/assets/dashboard');
 
@@ -24,3 +44,6 @@ export const connectMyData = (provider: string) =>
     method: 'POST',
     body: JSON.stringify({ provider }),
   });
+
+export const getConnections = () =>
+  mydataRequest<MyDataConnections>('/connections');
