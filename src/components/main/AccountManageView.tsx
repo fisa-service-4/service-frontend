@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Pencil, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Settings, Check, Loader2 } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccounts, setAccountRole } from '@/api/bank';
 import type { BankAccount, AccountRole } from '@/types/bank';
@@ -191,7 +191,7 @@ export default function AccountManageView() {
                           className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                           aria-label={`${label} 수정`}
                         >
-                          <Pencil size={16} className="text-gray-400" />
+                          <Settings size={16} className="text-gray-400" />
                         </button>
                       )}
                     </div>
