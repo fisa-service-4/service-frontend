@@ -1,5 +1,5 @@
-.git
-.next
 node_modules
-.idea
-.vscode
+.next
+.git
+.env
+README.md
