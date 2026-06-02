@@ -320,7 +320,7 @@ function StocksContent() {
                           </button>
                           <button
                             className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold"
-                            onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=SELL`)}
+                            onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=SELL&holdingQty=${s.quantity}`)}
                           >
                             매도
                           </button>
