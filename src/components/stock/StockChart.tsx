@@ -15,7 +15,8 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
   useEffect(() => {
     if (!containerRef.current || data.length === 0) return;
 
-    const chart = createChart(containerRef.current, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chartOptions: any = {
       width: containerRef.current.clientWidth,
       height,
       attributionLogo: false,
@@ -37,7 +38,9 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
         borderColor: '#e5e7eb',
         timeVisible: true,
       },
-    });
+    };
+
+    const chart = createChart(containerRef.current, chartOptions);
 
     const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#22c55e',
