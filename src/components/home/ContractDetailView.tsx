@@ -272,13 +272,17 @@ export default function ContractDetailView({ contractId }: Props) {
           </div>
         </div>
 
-        {/* 거래 금액 (실입금액): 실제 입금액이 있는 경우 */}
-        {matching?.transactionAmount != null &&
-          (matching.matchingStatus === 'MATCHED' || tbcMismatch) && (
+        {/* 거래 금액 (실입금액) */}
+        {(matching?.matchingStatus === 'MATCHED' ||
+          (tbcMismatch && matching?.transactionAmount != null)) && (
           <div className="mb-5">
             <Row
               label="거래 금액 (실입금액)"
-              value={fmt(matching.transactionAmount)}
+              value={fmt(
+                tbcMismatch
+                  ? matching!.transactionAmount!
+                  : (matching!.transactionAmount ?? actualIncome)
+              )}
             />
           </div>
         )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getContracts } from '@/api/virtualSalary';
 import type { Contract } from '@/types/virtualSalary';
@@ -75,8 +75,10 @@ function ContractRow({ contract, onClick }: { contract: Contract; onClick: () =>
 
 export default function ContractListView() {
   const router = useRouter();
-  const [year,      setYear]      = useState(TODAY_YEAR);
-  const [month,     setMonth]     = useState(TODAY_MONTH);
+  const searchParams = useSearchParams();
+
+  const [year,      setYear]      = useState(() => Number(searchParams.get('year'))  || TODAY_YEAR);
+  const [month,     setMonth]     = useState(() => Number(searchParams.get('month')) || TODAY_MONTH);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading,   setLoading]   = useState(true);
 
@@ -90,12 +92,18 @@ export default function ContractListView() {
   }, [year, month]);
 
   const prevMonth = () => {
-    if (month === 1) { setYear(y => y - 1); setMonth(12); }
-    else setMonth(m => m - 1);
+    const ny = month === 1 ? year - 1 : year;
+    const nm = month === 1 ? 12 : month - 1;
+    setYear(ny);
+    setMonth(nm);
+    router.replace(`/contracts?year=${ny}&month=${nm}`, { scroll: false });
   };
   const nextMonth = () => {
-    if (month === 12) { setYear(y => y + 1); setMonth(1); }
-    else setMonth(m => m + 1);
+    const ny = month === 12 ? year + 1 : year;
+    const nm = month === 12 ? 1 : month + 1;
+    setYear(ny);
+    setMonth(nm);
+    router.replace(`/contracts?year=${ny}&month=${nm}`, { scroll: false });
   };
 
   const byDate = (a: Contract, b: Contract) =>
