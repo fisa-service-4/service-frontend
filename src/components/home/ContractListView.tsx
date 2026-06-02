@@ -20,12 +20,8 @@ function getDday(expectedPaymentDate: string): string {
   return `D+${Math.abs(diff)}`;
 }
 
-// TBC 기간: 입금예정일 -2일 ~ +2일
-// - 기간 전          → 입금 전 (PENDING)
-// - 기간 중          → 확인 중 (TBC)
-// - 기간 후 미입금   → 미입금  (FAILED)
 function getContractBadge(contract: Contract): { label: string; style: string } {
-  if (contract.contractStatus === 'PAID')      return { label: '입금완료', style: 'bg-primary-100 text-primary-700' };
+  if (contract.contractStatus === 'PAID')      return { label: '입금완료', style: 'bg-gray-100 text-gray-500' };
   if (contract.contractStatus === 'CANCELLED') return { label: '취소',     style: 'bg-gray-100 text-gray-400' };
 
   const today = new Date();
@@ -35,13 +31,10 @@ function getContractBadge(contract: Contract): { label: string; style: string } 
   const tbcStart = new Date(pay); tbcStart.setDate(pay.getDate() - 2);
   const tbcEnd   = new Date(pay); tbcEnd.setDate(pay.getDate() + 2);
 
-  if (contract.contractStatus === 'DELAYED' || today > tbcEnd) {
-    return { label: '미입금', style: 'bg-red-100 text-red-500' };
-  }
-  if (today >= tbcStart) {
-    return { label: '확인 중', style: 'bg-amber-100 text-amber-600' };
-  }
-  return { label: '입금 전', style: 'bg-gray-100 text-gray-500' };
+  if (today > tbcEnd)    return { label: '실패',    style: 'bg-red-100 text-red-600'     };
+  if (today >= tbcStart) return { label: '확인 중', style: 'bg-amber-100 text-amber-600' };
+  if (contract.contractStatus === 'DELAYED') return { label: '실패', style: 'bg-red-100 text-red-600' };
+  return { label: '입금 전', style: 'bg-primary-100 text-primary-700' };
 }
 
 const _today = new Date();
@@ -50,7 +43,7 @@ const TODAY_MONTH = _today.getMonth() + 1;
 
 function ContractRow({ contract, onClick }: { contract: Contract; onClick: () => void }) {
   const { label, style } = getContractBadge(contract);
-  const isActive = contract.contractStatus === 'PENDING' || contract.contractStatus === 'DELAYED';
+  const isActive = contract.contractStatus === 'PENDING';
 
   return (
     <button
@@ -109,11 +102,25 @@ export default function ContractListView() {
   const byDate = (a: Contract, b: Contract) =>
     a.expectedPaymentDate.localeCompare(b.expectedPaymentDate);
 
+  const todayMs = new Date().setHours(0, 0, 0, 0);
+  const tbcEndMs = (c: Contract) => {
+    const pay = new Date(c.expectedPaymentDate).setHours(0, 0, 0, 0);
+    return pay + 2 * 86_400_000;
+  };
+
   const inProgress = contracts
-    .filter(c => c.contractStatus === 'PENDING' || c.contractStatus === 'DELAYED')
+    .filter(c =>
+      c.contractStatus !== 'PAID' &&
+      c.contractStatus !== 'CANCELLED' &&
+      todayMs <= tbcEndMs(c),
+    )
     .sort(byDate);
   const completed = contracts
-    .filter(c => c.contractStatus === 'PAID' || c.contractStatus === 'CANCELLED')
+    .filter(c =>
+      c.contractStatus === 'PAID' ||
+      c.contractStatus === 'CANCELLED' ||
+      todayMs > tbcEndMs(c),
+    )
     .sort(byDate);
 
   return (

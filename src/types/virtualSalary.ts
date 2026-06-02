@@ -12,6 +12,7 @@ export interface Contract {
   contractId: number;
   clientName: string;
   contractAmount: number;
+  actualIncome?: number;
   taxType: TaxType;
   expectedPaymentDate: string;
   contractStatus: ContractStatus;

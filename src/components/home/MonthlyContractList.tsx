@@ -1,27 +1,34 @@
 "use client";
 
-import type { Contract, ContractStatus } from "@/types/virtualSalary";
+import type { Contract } from "@/types/virtualSalary";
 
-const fmt = (n: number) => `${n.toLocaleString()} 원`;
+const fmt = (n: number | undefined | null) => n != null ? `${n.toLocaleString()} 원` : '-';
 
-const CONTRACT_STATUS_LABEL: Record<ContractStatus, string> = {
-  PENDING: "입금 예정",
-  PAID: "입금 완료",
-  DELAYED: "미입금",
-  CANCELLED: "취소",
-};
+function getContractBadge(c: Contract): { label: string; style: string } {
+  if (c.contractStatus === "PAID")      return { label: "입금 완료", style: "bg-gray-100 text-gray-500" };
+  if (c.contractStatus === "CANCELLED") return { label: "취소",      style: "bg-gray-100 text-gray-500" };
 
-const CONTRACT_STATUS_STYLE: Record<ContractStatus, string> = {
-  PENDING: "bg-amber-100 text-amber-600",
-  PAID: "bg-primary-100 text-primary-700",
-  DELAYED: "bg-red-100 text-red-600",
-  CANCELLED: "bg-gray-100 text-gray-500",
-};
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const pay   = new Date(c.expectedPaymentDate); pay.setHours(0, 0, 0, 0);
+  const tbcStart = new Date(pay); tbcStart.setDate(pay.getDate() - 2);
+  const tbcEnd   = new Date(pay); tbcEnd.setDate(pay.getDate() + 2);
+
+  if (today > tbcEnd)    return { label: "실패",    style: "bg-red-100 text-red-600"     };
+  if (today >= tbcStart) return { label: "확인 중", style: "bg-amber-100 text-amber-600" };
+  if (c.contractStatus === "DELAYED") return { label: "실패", style: "bg-red-100 text-red-600" };
+  return { label: "입금 전", style: "bg-primary-100 text-primary-700" };
+}
 
 const TAX_TYPE_LABEL: Record<string, string> = {
   BUSINESS: "사업소득 3.3%",
   ETC: "기타소득 8.8%",
   ARTIST: "예술인 8.8%",
+};
+
+const TAX_RATE: Record<string, number> = {
+  BUSINESS: 0.033,
+  ETC: 0.088,
+  ARTIST: 0.088,
 };
 
 interface Props {
@@ -68,12 +75,14 @@ export default function MonthlyContractList({ contracts, loading }: Props) {
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-gray-900 mb-1">
-                      {c.settlement ? fmt(c.settlement.actualIncome) : "-"}
+                      {c.contractStatus === 'DELAYED'
+                        ? '-'
+                        : fmt(c.settlement?.actualIncome ?? c.actualIncome ?? (c.contractAmount != null ? Math.floor(c.contractAmount * (1 - (TAX_RATE[c.taxType] ?? 0.033))) : undefined))}
                     </p>
                     <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded-md ${CONTRACT_STATUS_STYLE[c.contractStatus]}`}
+                      className={`text-xs font-medium px-2 py-0.5 rounded-md ${getContractBadge(c).style}`}
                     >
-                      {CONTRACT_STATUS_LABEL[c.contractStatus]}
+                      {getContractBadge(c).label}
                     </span>
                   </div>
                 </div>
