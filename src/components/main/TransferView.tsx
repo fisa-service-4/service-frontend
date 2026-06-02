@@ -113,14 +113,9 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
     setPinLoading(true);
     setPinError('');
     try {
-      const pinResult = await apiRequest<{ matched: boolean; pinToken: string; lockedYn: boolean }>(
+      await apiRequest<void>(
         '/auth/pin/verify', { method: 'POST', body: JSON.stringify({ pin: enteredPin }) }
       );
-      if (!pinResult.matched) {
-        setPinError('PIN이 올바르지 않습니다. 다시 입력해 주세요.');
-        setPin('');
-        return;
-      }
       const created = await createTransfer(
         { fromAccountId: fromId, toBankCode, toAccountNumber: toNumber, transferAmount: parsedAmount, requestedBy: 'USER' }
       );
