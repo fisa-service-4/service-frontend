@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getContracts } from '@/api/virtualSalary';
 import type { Contract } from '@/types/virtualSalary';
 import BottomNav from '@/components/main/BottomNav';
@@ -106,15 +106,11 @@ export default function ContractListView() {
     <div className="flex flex-col h-screen bg-white">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-5 py-4 shrink-0">
-        <button
-          onClick={() => router.back()}
-          className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-full"
-        >
-          뒤로
+      <div className="flex items-center px-5 py-4 shrink-0 relative">
+        <button onClick={() => router.back()} className="absolute left-5">
+          <ArrowLeft size={22} className="text-gray-800" />
         </button>
-        <span className="text-base font-bold text-gray-900">계약 현황</span>
-        <div className="w-14" />
+        <span className="w-full text-center text-base font-bold text-gray-900">계약 현황</span>
       </div>
 
       {/* 월 네비게이션 */}
