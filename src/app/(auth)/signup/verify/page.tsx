@@ -116,7 +116,7 @@ export default function SignupVerifyPage() {
       return;
     }
 
-    router.push('/signup/pin');
+    router.push('/signup/onboarding');
   }
 
   return (
@@ -164,15 +164,24 @@ export default function SignupVerifyPage() {
 
           {error && <p className="text-red-500 text-xs mb-3 px-1">{error}</p>}
 
-          {/* 다음 버튼 */}
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={loading || code.length !== OTP_LENGTH}
-            className="w-full h-14 bg-gray-200 text-gray-700 rounded-xl text-base font-medium disabled:opacity-50 transition-opacity"
-          >
-            {loading ? '처리 중...' : '다음'}
-          </button>
+          {/* 이전 / 다음 버튼 */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => router.push('/signup/phone')}
+              className="flex-1 h-14 bg-white border border-gray-200 text-gray-700 rounded-xl text-base font-medium"
+            >
+              이전
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={loading || code.length !== OTP_LENGTH}
+              className="flex-1 h-14 bg-gray-200 text-gray-700 rounded-xl text-base font-medium disabled:opacity-50 transition-opacity"
+            >
+              {loading ? '처리 중...' : '다음'}
+            </button>
+          </div>
 
           <p className="text-center text-xs text-gray-400 mt-3">인증문자가 오지 않나요?</p>
         </div>

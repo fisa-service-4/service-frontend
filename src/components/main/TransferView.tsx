@@ -11,15 +11,16 @@ import type { BankAccount } from '@/types/bank';
 type Step = 'form' | 'confirm' | 'pin' | 'complete';
 
 const BANKS = [
-  { code: '004', name: 'KB국민은행' },
-  { code: '011', name: 'NH농협은행' },
-  { code: '020', name: '우리은행' },
-  { code: '023', name: 'SC제일은행' },
-  { code: '027', name: '씨티은행' },
-  { code: '081', name: '하나은행' },
-  { code: '088', name: '신한은행' },
-  { code: '090', name: '카카오뱅크' },
-  { code: '092', name: '토스뱅크' },
+  { code: '004', name: 'KB국민은행',  logo: '/banks/KB.png' },
+  { code: '088', name: '신한은행',    logo: '/banks/Shinhan.png' },
+  { code: '020', name: '우리은행',    logo: '/banks/Woori.png' },
+  { code: '081', name: '하나은행',    logo: '/banks/Hana.png' },
+  { code: '011', name: 'NH농협은행',  logo: '/banks/NH.png' },
+  { code: '003', name: 'IBK기업은행', logo: '/banks/IBK.png' },
+  { code: '023', name: 'SC제일은행',  logo: '/banks/SC.png' },
+  { code: '027', name: '씨티은행',    logo: null },
+  { code: '090', name: '카카오뱅크',  logo: '/banks/Kakao.png' },
+  { code: '092', name: '토스뱅크',   logo: '/banks/Toss.png' },
 ];
 
 const BANK_MAP: Record<string, string> = Object.fromEntries(
@@ -152,20 +153,20 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
             <div className="relative">
               <button
                 onClick={() => setShowFromDrop((v) => !v)}
-                className="w-full flex items-center gap-3 bg-gray-700 rounded-2xl px-4 py-3.5 text-left"
+                className="w-full flex items-center gap-3 bg-white border-2 border-sky-500 rounded-2xl px-4 py-3.5 text-left"
               >
-                <div className="w-7 h-7 bg-gray-500 rounded-full shrink-0" />
+                <div className="w-7 h-7 bg-sky-100 rounded-full shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
+                  <p className="text-sm font-semibold text-gray-900 truncate">
                     {accountLabel(fromAccount!)} {fromAccount?.accountNumber}
                   </p>
-                  <p className="text-xs text-gray-300 mt-0.5">
+                  <p className="text-xs text-gray-500 mt-0.5">
                     {formatKRW(fromAccount?.balance ?? 0)}
                   </p>
                 </div>
                 <ChevronDown
                   size={18}
-                  className={`text-gray-300 shrink-0 transition-transform ${showFromDrop ? 'rotate-180' : ''}`}
+                  className={`text-gray-500 shrink-0 transition-transform ${showFromDrop ? 'rotate-180' : ''}`}
                 />
               </button>
               {showFromDrop && (
@@ -195,9 +196,18 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
                 onClick={() => setShowBankSheet(true)}
                 className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-100 rounded-2xl"
               >
-                <span className={`text-sm ${toBankCode ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
-                  {toBankCode ? BANK_MAP[toBankCode] : '···'}
-                </span>
+                <div className="flex items-center gap-2">
+                  {toBankCode && BANKS.find((b) => b.code === toBankCode)?.logo && (
+                    <img
+                      src={BANKS.find((b) => b.code === toBankCode)!.logo!}
+                      alt={BANK_MAP[toBankCode]}
+                      className="w-6 h-6 rounded-full object-contain"
+                    />
+                  )}
+                  <span className={`text-sm ${toBankCode ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>
+                    {toBankCode ? BANK_MAP[toBankCode] : '은행 선택'}
+                  </span>
+                </div>
                 <ChevronDown size={16} className="text-gray-500" />
               </button>
               <input
@@ -261,20 +271,36 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
               className="absolute inset-0 bg-black/40"
               onClick={() => setShowBankSheet(false)}
             />
-            <div className="relative bg-white rounded-t-3xl p-5 pb-8">
-              <p className="text-base font-bold text-gray-900 mb-4">銀行 선택</p>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="relative bg-white rounded-t-3xl pt-5 pb-8">
+              <p className="text-base font-bold text-gray-900 mb-2 px-5">은행 선택</p>
+              <div className="max-h-72 overflow-y-auto divide-y divide-gray-100">
                 {BANKS.map((b) => (
                   <button
                     key={b.code}
                     onClick={() => { setToBankCode(b.code); setShowBankSheet(false); }}
-                    className={`py-3 rounded-xl text-sm font-medium border transition-colors ${
-                      toBankCode === b.code
-                        ? 'bg-gray-900 text-white border-gray-900'
-                        : 'bg-white text-gray-700 border-gray-200'
+                    className={`w-full flex items-center gap-3 px-5 py-3.5 transition-colors ${
+                      toBankCode === b.code ? 'bg-sky-50' : 'hover:bg-gray-50'
                     }`}
                   >
-                    {b.name}
+                    {b.logo ? (
+                      <img
+                        src={b.logo}
+                        alt={b.name}
+                        className="w-9 h-9 rounded-full object-contain shrink-0"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500 shrink-0">
+                        {b.name[0]}
+                      </div>
+                    )}
+                    <span className={`text-sm font-medium ${
+                      toBankCode === b.code ? 'text-sky-600' : 'text-gray-800'
+                    }`}>
+                      {b.name}
+                    </span>
+                    {toBankCode === b.code && (
+                      <Check size={16} className="ml-auto text-sky-600 shrink-0" />
+                    )}
                   </button>
                 ))}
               </div>
