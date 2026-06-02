@@ -57,7 +57,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
       <div className="flex items-center px-5 py-4 shrink-0 relative">
@@ -80,7 +80,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             {/* 거래처 명 */}
             <div>
               <label className="text-sm text-gray-700 mb-1.5 block">
-                거래처 명 <span className="text-sky-500">*</span>
+                거래처 명 <span className="text-primary-500">*</span>
               </label>
               <input
                 type="text"
@@ -94,7 +94,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             {/* 계약 금액 */}
             <div>
               <label className="text-sm text-gray-700 mb-1.5 block">
-                계약 금액 <span className="text-sky-500">*</span>
+                계약 금액 <span className="text-primary-500">*</span>
               </label>
               <input
                 type="text"
@@ -109,13 +109,13 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             {/* 입금 예정일 */}
             <div>
               <label className="text-sm text-gray-700 mb-1.5 block">
-                입금 예정일 <span className="text-sky-500">*</span>
+                입금 예정일 <span className="text-primary-500">*</span>
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-gray-500 text-white placeholder:text-gray-300 rounded-xl px-4 py-3 text-sm outline-none [color-scheme:dark]"
+                className="w-full bg-gray-500 text-white placeholder:text-gray-300 rounded-xl px-4 py-3 text-sm outline-none scheme-dark"
               />
             </div>
 
@@ -129,7 +129,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
                     onClick={() => setTaxType(opt.value)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       taxType === opt.value
-                        ? 'bg-sky-500 text-white'
+                        ? 'bg-primary-500 text-white'
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >
@@ -180,7 +180,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
           <button
             onClick={handleSubmit}
             disabled={!isValid || submitting}
-            className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-2xl text-sm disabled:opacity-50"
+            className="flex-1 py-3 bg-primary-500 text-white font-semibold rounded-2xl text-sm disabled:opacity-50"
           >
             {submitting ? '등록 중...' : '등록'}
           </button>

@@ -1,5 +1,5 @@
 export type ContractStatus = 'PENDING' | 'PAID' | 'DELAYED' | 'CANCELLED';
-export type MatchingStatus = 'TBC' | 'MATCHED' | 'MANUAL_MATCHED' | 'FAILED';
+export type MatchingStatus = 'TBC' | 'MATCHED' | 'FAILED';
 export type TaxType = 'BUSINESS' | 'ETC' | 'ARTIST';
 export type PriorityItem = 'SALARY' | 'EMERGENCY' | 'INVESTMENT';
 
@@ -12,6 +12,7 @@ export interface Contract {
   contractId: number;
   clientName: string;
   contractAmount: number;
+  actualIncome?: number;
   taxType: TaxType;
   expectedPaymentDate: string;
   contractStatus: ContractStatus;

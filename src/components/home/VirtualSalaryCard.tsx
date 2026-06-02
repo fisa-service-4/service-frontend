@@ -15,7 +15,6 @@ export default function VirtualSalaryCard({ dashboard, loading, showSettingButto
   const router = useRouter();
   const dday = dashboard?.dday ?? null;
   const ddayLabel = dday === null ? '-' : dday === 0 ? 'D-DAY' : `D-${dday}`;
-  // dday(남은 일수)로 실제 월급일 역산
   const paydayOfMonth = dday !== null
     ? new Date(Date.now() + dday * 86_400_000).getDate()
     : null;
@@ -29,7 +28,7 @@ export default function VirtualSalaryCard({ dashboard, loading, showSettingButto
             {loading || !dashboard ? '-' : fmt(dashboard.targetSalary)}
           </span>
         </span>
-        <span className="bg-sky-50 text-sky-600 text-xs font-bold px-2.5 py-1 rounded-lg border border-sky-200">
+        <span className="bg-primary-50 text-primary-700 text-xs font-bold px-2.5 py-1 rounded-lg border border-primary-100">
           {loading ? 'D--' : ddayLabel}
         </span>
       </div>
@@ -39,24 +38,33 @@ export default function VirtualSalaryCard({ dashboard, loading, showSettingButto
         {loading || !dashboard ? '-' : fmt(dashboard.currentBalance)}
       </p>
 
-      {/* 잔액 바: 컬러 = 남은 금액, 회색 = 사용한 금액 */}
-      <div className="w-full h-2 bg-gray-200 rounded-full mb-4">
+      {/* 잔액 진행 바 */}
+      <div className="w-full h-3 bg-gray-100 rounded-full mb-1 overflow-hidden">
         <div
-          className="h-2 bg-sky-500 rounded-full transition-all duration-500"
-          style={{ width: `${Math.min(100 - (dashboard?.progressRate ?? 0), 100)}%` }}
+          className="h-3 bg-primary-500 rounded-full transition-all duration-700"
+          style={{
+            width: `${
+              !dashboard
+                ? 0
+                : Math.max(2, Math.min(100 - (dashboard.progressRate ?? 0), 100))
+            }%`,
+          }}
         />
+      </div>
+      <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
+        <span>사용 {dashboard ? Math.round(dashboard.progressRate ?? 0) : 0}%</span>
+        <span>잔여 {dashboard ? Math.round(Math.max(0, 100 - (dashboard.progressRate ?? 0))) : 0}%</span>
       </div>
 
       <div className="flex items-center justify-between text-xs text-gray-400">
-        <span>월급</span>
+        <span>월급일</span>
         <span>{loading ? '-' : paydayOfMonth ? `매월 ${paydayOfMonth}일` : '-'}</span>
       </div>
 
-      {/* 설정 미완료 시 유도 버튼 */}
       {!loading && !dashboard && showSettingButton && (
         <button
           onClick={() => router.push('/mypage/virtual-salary')}
-          className="mt-4 w-full py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl"
+          className="mt-4 w-full py-2.5 bg-primary-500 text-white text-sm font-semibold rounded-xl"
         >
           가상 월급 설정하기
         </button>
