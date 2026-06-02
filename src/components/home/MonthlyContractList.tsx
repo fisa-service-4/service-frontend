@@ -13,7 +13,7 @@ const CONTRACT_STATUS_LABEL: Record<ContractStatus, string> = {
 
 const CONTRACT_STATUS_STYLE: Record<ContractStatus, string> = {
   PENDING: "bg-amber-100 text-amber-600",
-  PAID: "bg-sky-100 text-sky-600",
+  PAID: "bg-primary-100 text-primary-700",
   DELAYED: "bg-red-100 text-red-600",
   CANCELLED: "bg-gray-100 text-gray-500",
 };
@@ -49,12 +49,12 @@ export default function MonthlyContractList({ contracts, loading }: Props) {
             return (
               <div
                 key={c.contractId}
-                className={`rounded-2xl p-4 border-2 bg-white ${isActive ? "border-sky-500" : "border-gray-200"}`}
+                className={`rounded-2xl p-4 border-2 bg-white ${isActive ? "border-primary-500" : "border-gray-200"}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
                     <div
-                      className={`w-2.5 h-2.5 rounded-full mt-0.5 shrink-0 ${isActive ? "bg-sky-500" : "bg-gray-400"}`}
+                      className={`w-2.5 h-2.5 rounded-full mt-0.5 shrink-0 ${isActive ? "bg-primary-500" : "bg-gray-400"}`}
                     />
                     <div>
                       <p className="text-sm font-semibold text-gray-900">

@@ -35,12 +35,12 @@ function getDetailBadge(
   if (matching) {
     switch (matching.matchingStatus) {
       case 'TBC':            return { label: '확인 중',  style: 'text-amber-600 bg-amber-100' };
-      case 'MATCHED':        return { label: '입금완료', style: 'text-sky-600 bg-sky-100' };
+      case 'MATCHED':        return { label: '입금완료', style: 'text-primary-700 bg-primary-100' };
       case 'FAILED':         return { label: '미입금',   style: 'text-red-500 bg-red-100' };
     }
   }
   if (contract.contractStatus === 'CANCELLED') return { label: '취소',     style: 'text-gray-400 bg-gray-100' };
-  if (contract.contractStatus === 'PAID')      return { label: '입금완료', style: 'text-sky-600 bg-sky-100' };
+  if (contract.contractStatus === 'PAID')      return { label: '입금완료', style: 'text-primary-700 bg-primary-100' };
   if (contract.contractStatus === 'DELAYED')   return { label: '미입금',   style: 'text-red-500 bg-red-100' };
 
   // PENDING: TBC 기간 기반 계산
@@ -118,7 +118,7 @@ export default function ContractDetailView({ contractId }: Props) {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-screen bg-white">
+      <div className="flex flex-col h-screen bg-bg">
         <div className="flex items-center px-5 py-4 shrink-0">
           <button onClick={() => router.back()}>
             <ArrowLeft size={22} className="text-gray-800" />
@@ -132,7 +132,7 @@ export default function ContractDetailView({ contractId }: Props) {
 
   if (!contract) {
     return (
-      <div className="flex flex-col h-screen bg-white">
+      <div className="flex flex-col h-screen bg-bg">
         <div className="flex items-center px-5 py-4 shrink-0">
           <button onClick={() => router.back()}>
             <ArrowLeft size={22} className="text-gray-800" />
@@ -144,7 +144,7 @@ export default function ContractDetailView({ contractId }: Props) {
           </p>
           <button
             onClick={() => { setLoading(true); setRefreshKey(k => k + 1); }}
-            className="text-sm text-sky-600 font-medium"
+            className="text-sm text-primary-700 font-medium"
           >
             다시 시도
           </button>
@@ -171,7 +171,7 @@ export default function ContractDetailView({ contractId }: Props) {
         : { text: '미입금',  color: 'text-red-500' };
     }
     if (matching.matchingStatus === 'MATCHED' && matching.matchedBy === 'USER') {
-      return { text: '완료', color: 'text-sky-600' };
+      return { text: '완료', color: 'text-primary-700' };
     }
     return MATCHING_LABEL[matching.matchingStatus];
   })();
@@ -198,7 +198,7 @@ export default function ContractDetailView({ contractId }: Props) {
     : null;
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
       <div className="px-5 py-4 shrink-0">
@@ -289,7 +289,7 @@ export default function ContractDetailView({ contractId }: Props) {
 
         {/* 확인 패널 */}
         {showConfirm && (
-          <div className="mb-4 bg-sky-50 border border-sky-200 rounded-2xl px-4 py-4">
+          <div className="mb-4 bg-primary-50 border border-primary-100 rounded-2xl px-4 py-4">
             <p className="text-sm font-semibold text-gray-900 mb-1">완료 처리하시겠습니까?</p>
             <p className="text-xs text-gray-500 mb-3">{contract.clientName} · {fmt(contract.contractAmount)}</p>
             {submitErr && <p className="text-red-500 text-xs mb-2">{submitErr}</p>}
@@ -303,7 +303,7 @@ export default function ContractDetailView({ contractId }: Props) {
               <button
                 onClick={handleComplete}
                 disabled={submitting}
-                className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm disabled:opacity-50"
+                className="flex-1 py-3 bg-primary-500 text-white font-semibold rounded-xl text-sm disabled:opacity-50"
               >
                 {submitting ? '처리 중...' : '완료'}
               </button>
@@ -316,7 +316,7 @@ export default function ContractDetailView({ contractId }: Props) {
           <div className="mt-4">
             <button
               onClick={() => setShowConfirm(true)}
-              className="w-full py-3.5 bg-sky-500 text-white font-semibold rounded-2xl text-sm"
+              className="w-full py-3.5 bg-primary-500 text-white font-semibold rounded-2xl text-sm"
             >
               완료 처리하기
             </button>

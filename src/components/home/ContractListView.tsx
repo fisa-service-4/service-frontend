@@ -25,7 +25,7 @@ function getDday(expectedPaymentDate: string): string {
 // - 기간 중          → 확인 중 (TBC)
 // - 기간 후 미입금   → 미입금  (FAILED)
 function getContractBadge(contract: Contract): { label: string; style: string } {
-  if (contract.contractStatus === 'PAID')      return { label: '입금완료', style: 'bg-sky-100 text-sky-600' };
+  if (contract.contractStatus === 'PAID')      return { label: '입금완료', style: 'bg-primary-100 text-primary-700' };
   if (contract.contractStatus === 'CANCELLED') return { label: '취소',     style: 'bg-gray-100 text-gray-400' };
 
   const today = new Date();
@@ -62,7 +62,7 @@ function ContractRow({ contract, onClick }: { contract: Contract; onClick: () =>
         <p className="text-xs text-gray-400 mt-0.5">
           {fmt(contract.contractAmount)} · {contract.expectedPaymentDate}
           {isActive && (
-            <span className="ml-2 font-semibold text-sky-500">{getDday(contract.expectedPaymentDate)}</span>
+            <span className="ml-2 font-semibold text-primary-500">{getDday(contract.expectedPaymentDate)}</span>
           )}
         </p>
       </div>
@@ -117,7 +117,7 @@ export default function ContractListView() {
     .sort(byDate);
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
       <div className="relative flex items-center px-5 py-4 shrink-0">
@@ -131,7 +131,7 @@ export default function ContractListView() {
       <div className="flex items-center justify-center gap-4 pb-3 shrink-0">
         <button
           onClick={prevMonth}
-          className="w-7 h-7 bg-sky-50 border border-sky-200 rounded-full flex items-center justify-center text-sky-600"
+          className="w-7 h-7 bg-primary-50 border border-primary-100 rounded-full flex items-center justify-center text-primary-700"
         >
           <ChevronLeft size={14} />
         </button>
@@ -140,7 +140,7 @@ export default function ContractListView() {
         </span>
         <button
           onClick={nextMonth}
-          className="w-7 h-7 bg-sky-50 border border-sky-200 rounded-full flex items-center justify-center text-sky-600"
+          className="w-7 h-7 bg-primary-50 border border-primary-100 rounded-full flex items-center justify-center text-primary-700"
         >
           <ChevronRight size={14} />
         </button>
@@ -157,7 +157,7 @@ export default function ContractListView() {
         ) : (
           <>
             {inProgress.length > 0 && (
-              <div className="bg-white border-2 border-sky-500 rounded-2xl px-4">
+              <div className="bg-bg-card shadow-md rounded-2xl px-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <h2 className="text-sm font-bold text-gray-900">진행 중인 계약</h2>
                   <span className="text-xs text-gray-400">{inProgress.length}건</span>
@@ -175,7 +175,7 @@ export default function ContractListView() {
             )}
 
             {completed.length > 0 && (
-              <div className="bg-white border-2 border-gray-200 rounded-2xl px-4">
+              <div className="bg-bg-card shadow-md rounded-2xl px-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
                   <h2 className="text-sm font-bold text-gray-900">계약 완료</h2>
                   <span className="text-xs text-gray-400">{completed.length}건</span>

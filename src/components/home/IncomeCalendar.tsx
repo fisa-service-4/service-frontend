@@ -38,7 +38,7 @@ const STATUS_LABEL: Record<ContractStatus, string> = {
 
 const STATUS_COLOR: Record<ContractStatus, string> = {
   PENDING: 'text-amber-500',
-  PAID: 'text-sky-500',
+  PAID: 'text-primary-500',
   DELAYED: 'text-red-500',
   CANCELLED: 'text-gray-400',
 };
@@ -131,27 +131,27 @@ export default function IncomeCalendar({ calendarData, contracts, dday, onRegist
         </button>
       </div>
 
-      <div className="bg-white border-2 border-sky-500 rounded-2xl p-4">
+      <div className="bg-bg-card shadow-md rounded-2xl p-4">
         {/* 월 네비게이션 + 등록 버튼 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <button
               onClick={prevMonth}
-              className="w-7 h-7 bg-sky-50 border border-sky-200 rounded-full flex items-center justify-center text-sky-600"
+              className="w-7 h-7 bg-primary-50 border border-primary-100 rounded-full flex items-center justify-center text-primary-700"
             >
               <ChevronLeft size={14} />
             </button>
             <span className="text-base font-bold text-gray-900 w-24 text-center">{year}년 {month}월</span>
             <button
               onClick={nextMonth}
-              className="w-7 h-7 bg-sky-50 border border-sky-200 rounded-full flex items-center justify-center text-sky-600"
+              className="w-7 h-7 bg-primary-50 border border-primary-100 rounded-full flex items-center justify-center text-primary-700"
             >
               <ChevronRight size={14} />
             </button>
           </div>
           <button
             onClick={onRegisterClick}
-            className="w-7 h-7 bg-sky-500 rounded-full flex items-center justify-center text-white text-lg leading-none"
+            className="w-7 h-7 bg-primary-500 rounded-full flex items-center justify-center text-white text-lg leading-none"
           >
             +
           </button>
@@ -160,7 +160,7 @@ export default function IncomeCalendar({ calendarData, contracts, dday, onRegist
         {/* 요일 헤더 */}
         <div className="grid grid-cols-7 mb-2">
           {['일', '월', '화', '수', '목', '금', '토'].map((d, i) => (
-            <p key={d} className={`text-center text-xs font-medium ${i === 0 ? 'text-red-400' : i === 6 ? 'text-sky-500' : 'text-gray-400'}`}>
+            <p key={d} className={`text-center text-xs font-medium ${i === 0 ? 'text-red-400' : i === 6 ? 'text-primary-500' : 'text-gray-400'}`}>
               {d}
             </p>
           ))}
@@ -187,17 +187,20 @@ export default function IncomeCalendar({ calendarData, contracts, dday, onRegist
                 >
                   <div className={`w-8 h-8 flex items-center justify-center text-sm rounded-full
                     ${isPrev || isNext ? 'text-gray-300' : ''}
-                    ${isToday ? 'bg-sky-500 text-white font-bold' : ''}
-                    ${isSelected && !isToday ? 'bg-sky-100 text-sky-700 font-bold ring-1 ring-sky-400' : ''}
+                    ${isToday ? 'bg-primary-500 text-white font-bold' : ''}
+                    ${isSelected && !isToday ? 'bg-primary-100 text-primary-700 font-bold ring-2 ring-primary-500' : ''}
                     ${!isPrev && !isNext && !isToday && !isSelected
-                      ? isSun ? 'text-red-400' : isSat ? 'text-sky-500' : 'text-gray-800'
+                      ? isSun ? 'text-red-400' : isSat ? 'text-primary-500' : 'text-gray-800'
                       : ''}
                   `}>
                     {cell.day}
                   </div>
-                  <div className="h-1.5 flex justify-center mt-0.5">
-                    {!isPrev && !isNext && (isPayday || isIncome) && (
-                      <div className={`w-1.5 h-1.5 rounded-full ${isPayday ? 'bg-sky-500' : 'bg-sky-200'}`} />
+                  <div className="h-2 flex justify-center items-center gap-0.5 mt-0.5">
+                    {!isPrev && !isNext && isPayday && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary-700" />
+                    )}
+                    {!isPrev && !isNext && isIncome && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-primary-500" />
                     )}
                   </div>
                 </div>
@@ -209,15 +212,15 @@ export default function IncomeCalendar({ calendarData, contracts, dday, onRegist
         {/* 범례 */}
         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-sky-500" />
+            <div className="w-2 h-2 rounded-full bg-primary-700" />
             <span className="text-xs text-gray-400">가상 월급</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-sky-200" />
+            <div className="w-2 h-2 rounded-full bg-primary-500" />
             <span className="text-xs text-gray-400">입금 예정</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-sky-500 flex items-center justify-center shrink-0">
+            <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shrink-0">
               <span className="text-[9px] text-white font-bold">{TODAY_DAY}</span>
             </div>
             <span className="text-xs text-gray-400">오늘</span>
@@ -231,7 +234,7 @@ export default function IncomeCalendar({ calendarData, contracts, dday, onRegist
             {selectedDay !== null && (
               <button
                 onClick={() => setSelectedDay(null)}
-                className="text-xs text-sky-500"
+                className="text-xs text-primary-500"
               >
                 전체 보기
               </button>

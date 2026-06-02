@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, GripVertical, Sparkles, Lightbulb } from 'lucide-react';
+import { ArrowLeft, GripVertical, Sparkles, Lightbulb, X } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import PinKeypad from '@/components/PinKeypad';
+import { authApi } from '@/api/auth';
 import {
   getVirtualSalarySetting,
   saveVirtualSalarySetting,
@@ -86,6 +88,11 @@ export default function VirtualSalarySettingView() {
   const [aiData,      setAiData]      = useState<AiRecommendation | null>(null);
   const [aiError,     setAiError]     = useState<string | null>(null);
 
+  const [showPin,    setShowPin]    = useState(false);
+  const [pin,        setPin]        = useState('');
+  const [pinError,   setPinError]   = useState('');
+  const [pinLoading, setPinLoading] = useState(false);
+
   const [toast,    setToast]    = useState<string | null>(null);
   const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -166,16 +173,54 @@ export default function VirtualSalarySettingView() {
     setShowAiModal(false);
   };
 
-  const handleSave = async () => {
-    if (saving) return;
+  const openPin = () => {
     const paydayNum = Number(payday);
     if (!rawSalary || paydayNum < 1 || paydayNum > 31) {
       setError('월급 금액과 월급일(1~31)을 올바르게 입력해주세요.');
       return;
     }
+    setError(null);
+    setPin('');
+    setPinError('');
+    setShowPin(true);
+  };
+
+  const handlePinPress = async (value: string) => {
+    if (pinLoading) return;
+    setPinError('');
+
+    if (value === 'backspace') {
+      setPin(p => p.slice(0, -1));
+      return;
+    }
+    if (pin.length >= 6) return;
+
+    const next = pin + value;
+    setPin(next);
+    if (next.length < 6) return;
+
+    setTimeout(async () => {
+      setPinLoading(true);
+      try {
+        await authApi.verifyPin(next);
+        setShowPin(false);
+        setPin('');
+        await handleActualSave();
+      } catch {
+        setPinError('PIN번호가 올바르지 않습니다. 다시 입력해주세요.');
+        setPin('');
+      } finally {
+        setPinLoading(false);
+      }
+    }, 200);
+  };
+
+  const handleActualSave = async () => {
+    if (saving) return;
     setSaving(true);
     setError(null);
     try {
+      const paydayNum = Number(payday);
       const emoRatio = rawSalary > 0 ? Math.round((rawEmergencyTransfer  / rawSalary) * 10000) / 100 : 0;
       const invRatio = rawSalary > 0 ? Math.round((rawInvestmentTransfer / rawSalary) * 10000) / 100 : 0;
       const body = {
@@ -293,7 +338,7 @@ export default function VirtualSalarySettingView() {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-screen bg-white">
+      <div className="flex flex-col h-screen bg-bg">
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-gray-400">불러오는 중...</p>
         </div>
@@ -303,20 +348,20 @@ export default function VirtualSalarySettingView() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="relative flex items-center px-5 py-4 shrink-0">
+      <div className="relative flex items-center px-5 py-4 bg-bg-card shrink-0 border-b border-gray-100">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
         <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">목표/분배 설정</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-6 pt-4">
 
-        {/* 항목별 설정 — 단일 박스 */}
-        <div className="bg-white border-2 border-sky-500 rounded-2xl p-4">
+        {/* 항목별 설정 */}
+        <div className="bg-bg-card shadow-md rounded-2xl p-4">
           <h2 className="text-base font-bold text-gray-900 mb-0.5">항목별 설정</h2>
           <p className="text-xs text-gray-400 mb-3">
             ≡ 아이콘을 드래그해 분배 우선순위를 바꿀 수 있어요
@@ -325,10 +370,10 @@ export default function VirtualSalarySettingView() {
         </div>
 
         {/* AI 추천 */}
-        <div className="bg-white border-2 border-sky-500 rounded-2xl p-5">
+        <div className="bg-bg-card shadow-md rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-              <Sparkles size={18} className="text-sky-500" />
+            <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+              <Sparkles size={18} className="text-primary-500" />
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900">AI 추천</p>
@@ -339,7 +384,7 @@ export default function VirtualSalarySettingView() {
           <button
             onClick={handleAiRecommend}
             disabled={aiLoading}
-            className="w-full py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60"
+            className="w-full py-2.5 bg-primary-500 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 disabled:opacity-60"
           >
             <Sparkles size={13} />
             {aiLoading ? '분석 중...' : 'AI 추천 받기'}
@@ -355,9 +400,9 @@ export default function VirtualSalarySettingView() {
 
         {/* 저장 버튼 */}
         <button
-          onClick={handleSave}
+          onClick={openPin}
           disabled={saving}
-          className="w-full py-3.5 bg-sky-500 text-white font-semibold rounded-2xl text-sm disabled:opacity-50"
+          className="w-full py-3.5 bg-primary-500 text-white font-bold rounded-2xl text-sm disabled:opacity-50"
         >
           {saving ? '저장 중...' : hasSetting ? '수정하기' : '저장하기'}
         </button>
@@ -378,12 +423,12 @@ export default function VirtualSalarySettingView() {
           onClick={() => setShowAiModal(false)}
         >
           <div
-            className="bg-white rounded-2xl p-5 w-full max-w-sm mb-2"
+            className="bg-bg-card rounded-2xl p-5 w-full max-w-sm mb-2"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                <Lightbulb size={18} className="text-sky-500" />
+              <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                <Lightbulb size={18} className="text-primary-500" />
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-900">AI 추천</p>
@@ -393,7 +438,6 @@ export default function VirtualSalarySettingView() {
 
             <p className="text-sm text-gray-600 leading-relaxed mb-4">{aiData.summary}</p>
 
-            {/* 추천 금액 항목 */}
             <div className="space-y-2 mb-5">
               <div className="flex items-center justify-between px-3 py-2.5 bg-gray-50 rounded-xl">
                 <span className="text-sm text-gray-500">현재 월급액</span>
@@ -401,21 +445,21 @@ export default function VirtualSalarySettingView() {
                   {rawSalary > 0 ? rawSalary.toLocaleString() + ' 원' : '미설정'}
                 </span>
               </div>
-              <div className="flex items-center justify-between px-3 py-2.5 bg-sky-50 border border-sky-100 rounded-xl">
+              <div className="flex items-center justify-between px-3 py-2.5 bg-primary-50 border border-primary-100 rounded-xl">
                 <span className="text-sm text-gray-600">비상금 이체액/월</span>
                 <div className="text-right">
-                  <span className="text-sm font-bold text-sky-600">
+                  <span className="text-sm font-bold text-primary-700">
                     {aiEmergencyAmt > 0 ? aiEmergencyAmt.toLocaleString() + ' 원' : '-'}
                   </span>
                   <span className="text-xs text-gray-400 ml-1.5">({aiData.recommendedEmergencyRatio}%)</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between px-3 py-2.5 bg-sky-50 border border-sky-100 rounded-xl">
+              <div className="flex items-center justify-between px-3 py-2.5 bg-primary-50 border border-primary-100 rounded-xl">
                 <span className="text-sm text-gray-600">투자 이체액/월</span>
                 <div className="text-right">
                   {hasStockAccount ? (
                     <>
-                      <span className="text-sm font-bold text-sky-600">
+                      <span className="text-sm font-bold text-primary-700">
                         {aiInvestmentAmt > 0 ? aiInvestmentAmt.toLocaleString() + ' 원' : '-'}
                       </span>
                       <span className="text-xs text-gray-400 ml-1.5">({aiData.recommendedInvestmentRatio}%)</span>
@@ -436,11 +480,55 @@ export default function VirtualSalarySettingView() {
               </button>
               <button
                 onClick={applyAiRecommendation}
-                className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-1.5"
+                className="flex-1 py-3 bg-primary-500 text-white font-semibold rounded-xl text-sm flex items-center justify-center gap-1.5"
               >
                 <Sparkles size={13} />
                 적용하기
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PIN 오버레이 */}
+      {showPin && (
+        <div className="absolute inset-0 bg-bg-card z-50 flex flex-col">
+          <div className="flex items-center px-5 py-4 shrink-0 relative border-b border-gray-100">
+            <button onClick={() => setShowPin(false)}>
+              <X size={22} className="text-gray-800" />
+            </button>
+            <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">
+              PIN 입력
+            </span>
+          </div>
+
+          <div className="flex-1 flex flex-col items-center pt-12 px-4">
+            <div className="bg-gray-700 rounded-full px-6 py-2.5 mb-10">
+              <p className="text-white text-sm font-medium">
+                설정 저장을 위해 PIN을 입력해주세요
+              </p>
+            </div>
+
+            <div className="flex gap-4 mb-12">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-5 h-5 rounded-full transition-colors ${
+                    i < pin.length ? 'bg-gray-700' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+
+            {pinError && (
+              <p className="text-sm text-error mb-6">{pinError}</p>
+            )}
+            {pinLoading && (
+              <p className="text-sm text-gray-400 mb-6">확인 중...</p>
+            )}
+
+            <div className="mt-auto pb-8 w-full">
+              <PinKeypad onPress={handlePinPress} />
             </div>
           </div>
         </div>
