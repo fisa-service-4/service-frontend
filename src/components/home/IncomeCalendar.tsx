@@ -90,7 +90,7 @@ export default function IncomeCalendar({ calendarData, dday, onRegisterClick }: 
         </button>
       </div>
 
-      <div className="bg-white border-2 border-sky-500 rounded-2xl p-4">
+      <div className="bg-bg-card shadow-md rounded-2xl p-4">
         {/* 월 네비게이션 */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">

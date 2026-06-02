@@ -21,7 +21,7 @@ export default function VirtualSalaryCard({ dashboard, loading, showSettingButto
     : null;
 
   return (
-    <div className="bg-white border-2 border-sky-500 rounded-2xl p-5">
+    <div className="bg-bg-card shadow-md rounded-2xl p-5">
       <div className="flex items-center justify-between mb-1">
         <span className="text-sm text-gray-500">
           이번달 가상 월급{' '}

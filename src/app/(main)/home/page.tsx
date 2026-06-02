@@ -43,7 +43,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
         {/* 헤더 */}

@@ -37,7 +37,7 @@ export default function MonthlyContractList({ contracts, loading }: Props) {
       {loading ? (
         <div className="text-sm text-gray-400 text-center py-6">불러오는 중...</div>
       ) : contracts.length === 0 ? (
-        <div className="text-sm text-gray-400 text-center py-6 bg-gray-50 rounded-2xl">
+        <div className="text-sm text-gray-400 text-center py-6 bg-bg-card shadow-md rounded-2xl">
           이번달 등록된 계약이 없어요
         </div>
       ) : (
@@ -47,7 +47,7 @@ export default function MonthlyContractList({ contracts, loading }: Props) {
             return (
               <div
                 key={c.contractId}
-                className={`rounded-2xl p-4 border-2 bg-white ${isActive ? 'border-sky-500' : 'border-gray-200'}`}
+                className="rounded-2xl p-4 bg-bg-card shadow-md"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-2">
