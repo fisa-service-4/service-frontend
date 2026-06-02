@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import PinKeypad from '@/components/PinKeypad';
 import BottomNav from '@/components/main/BottomNav';
+import { authApi } from '@/api/auth';
 
 type Step = 'current' | 'new' | 'confirm';
 
@@ -16,13 +17,14 @@ const STEP_LABEL: Record<Step, string> = {
 
 export default function PinChangeView() {
   const router = useRouter();
-  const [step, setStep]         = useState<Step>('current');
-  const [pin, setPin]           = useState('');
-  const [newPin, setNewPin]     = useState('');
+  const [step, setStep]           = useState<Step>('current');
+  const [pin, setPin]             = useState('');
+  const [currentPin, setCurrentPin] = useState('');
+  const [newPin, setNewPin]       = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg]   = useState('');
 
-  function handlePress(value: string) {
+  async function handlePress(value: string) {
     if (value === 'backspace') {
       setPin((p) => p.slice(0, -1));
       setErrorMsg('');
@@ -35,20 +37,39 @@ export default function PinChangeView() {
 
     if (next.length < 6) return;
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (step === 'current') {
-        setStep('new');
-        setPin('');
+        try {
+          await authApi.verifyPin(next);
+          setCurrentPin(next);
+          setStep('new');
+          setPin('');
+        } catch {
+          setErrorMsg('현재 PIN이 올바르지 않습니다. 다시 입력해주세요.');
+          setPin('');
+          setTimeout(() => setErrorMsg(''), 1000);
+        }
       } else if (step === 'new') {
         setNewPin(next);
         setStep('confirm');
         setPin('');
       } else if (step === 'confirm') {
         if (next === newPin) {
-          setShowModal(true);
+          try {
+            await authApi.changePin(currentPin, next);
+            setShowModal(true);
+          } catch {
+            setErrorMsg('현재 PIN이 올바르지 않습니다. 다시 입력해주세요.');
+            setCurrentPin('');
+            setNewPin('');
+            setStep('current');
+            setPin('');
+            setTimeout(() => setErrorMsg(''), 1000);
+          }
         } else {
           setErrorMsg('PIN이 일치하지 않습니다. 다시 입력해주세요.');
           setPin('');
+          setTimeout(() => setErrorMsg(''), 1000);
         }
       }
     }, 200);
@@ -68,9 +89,7 @@ export default function PinChangeView() {
       <div className="flex-1 flex flex-col items-center pt-8 px-4">
 
         {/* 안내 문구 */}
-        <div className="bg-gray-700 rounded-full px-6 py-2.5 mb-10">
-          <p className="text-white text-sm font-medium">{STEP_LABEL[step]}</p>
-        </div>
+        <p className="text-gray-900 text-sm font-medium mb-10">{STEP_LABEL[step]}</p>
 
         {/* PIN 도트 */}
         <div className="flex gap-4 mb-12">
@@ -85,9 +104,9 @@ export default function PinChangeView() {
         </div>
 
         {/* 에러 메시지 */}
-        {errorMsg && (
-          <p className="text-sm text-red-500 mb-6">{errorMsg}</p>
-        )}
+        <p className={`text-sm text-red-500 mb-6 transition-opacity ${errorMsg ? 'opacity-100' : 'opacity-0'}`}>
+          {errorMsg || ' '}
+        </p>
 
         {/* 키패드 */}
         <PinKeypad onPress={handlePress} />

@@ -10,6 +10,7 @@ import {
   getCashBalance,
   createOrder,
   getStockChart,
+  getHoldings,
   TEMP_ACCOUNT_ID,
   type OrderCreateRequest,
   type ChartCandle,
@@ -51,14 +52,17 @@ function StockOrderContent() {
   const stockPrice = Number(searchParams.get('price') ?? 0);
   const changeRate = Number(searchParams.get('changeRate') ?? 0);
   const market = searchParams.get('market') ?? '';
+  const urlHoldingQty = Number(searchParams.get('holdingQty') ?? 0);
 
   const [side, setSide] = useState<'BUY' | 'SELL'>(
     searchParams.get('side') === 'SELL' ? 'SELL' : 'BUY'
   );
+
   const [orderMethod, setOrderMethod] = useState<'MARKET' | 'LIMIT'>('MARKET');
   const [quantity, setQuantity] = useState(0);
   const [methodOpen, setMethodOpen] = useState(false);
   const [availableBalance, setAvailableBalance] = useState<number | null>(null);
+  const [holdingQty, setHoldingQty] = useState(urlHoldingQty);
   const [chartData, setChartData] = useState<ChartCandle[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -81,15 +85,30 @@ function StockOrderContent() {
     }
   }, [stockCode]);
 
+  useEffect(() => {
+    if (urlHoldingQty > 0 || !stockCode) return;
+    getHoldings(TEMP_ACCOUNT_ID)
+      .then((res) => {
+        const matched = res.holdings.find((h) => h.stockCode === stockCode);
+        setHoldingQty(matched?.quantity ?? 0);
+      })
+      .catch(console.error);
+  }, [stockCode, urlHoldingQty]);
+
   const up = changeRate >= 0;
   const estimate = quantity * stockPrice;
 
-  const maxQty = useMemo(
-    () => (stockPrice > 0 && availableBalance !== null ? Math.floor(availableBalance / stockPrice) : 0),
-    [availableBalance, stockPrice]
-  );
+  const maxQty = useMemo(() => {
+    if (side === 'SELL') return holdingQty;
+    return stockPrice > 0 && availableBalance !== null ? Math.floor(availableBalance / stockPrice) : 0;
+  }, [side, holdingQty, availableBalance, stockPrice]);
 
   const setByRatio = (ratio: number) => setQuantity(Math.floor(maxQty * ratio));
+
+  const handleSideChange = (newSide: 'BUY' | 'SELL') => {
+    setSide(newSide);
+    setQuantity(0);
+  };
 
   const openPin = () => {
     if (quantity <= 0) return;
@@ -191,7 +210,7 @@ function StockOrderContent() {
         {/* 매수 / 매도 토글 */}
         <div className="flex gap-2 mb-4">
           <button
-            onClick={() => setSide('BUY')}
+            onClick={() => handleSideChange('BUY')}
             className={`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${
               side === 'BUY' ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-400'
             }`}
@@ -199,7 +218,7 @@ function StockOrderContent() {
             매수
           </button>
           <button
-            onClick={() => setSide('SELL')}
+            onClick={() => handleSideChange('SELL')}
             className={`flex-1 py-3 rounded-xl text-sm font-bold transition-colors ${
               side === 'SELL' ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-400'
             }`}
@@ -254,11 +273,15 @@ function StockOrderContent() {
                 type="number"
                 value={quantity}
                 min={0}
-                onChange={(e) => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+                max={side === 'SELL' ? maxQty : undefined}
+                onChange={(e) => {
+                  const val = Math.max(0, parseInt(e.target.value) || 0);
+                  setQuantity(side === 'SELL' ? Math.min(val, maxQty) : val);
+                }}
                 className="w-14 text-center text-sm font-bold text-gray-900 outline-none bg-transparent"
               />
               <button
-                onClick={() => setQuantity((q) => q + 1)}
+                onClick={() => setQuantity((q) => side === 'SELL' ? Math.min(q + 1, maxQty) : q + 1)}
                 className="w-10 h-10 flex items-center justify-center text-gray-500"
               >
                 <Plus size={16} />
@@ -289,8 +312,17 @@ function StockOrderContent() {
               시장가는 현재가로 즉시 체결됩니다.
             </p>
             <div className="flex justify-between">
-              <span className="text-sm text-gray-500">주문 가능 예수금</span>
-              <span className="text-sm font-bold text-gray-900">{fmtWon(availableBalance ?? 0)}</span>
+              {side === 'SELL' ? (
+                <>
+                  <span className="text-sm text-gray-500">보유 수량</span>
+                  <span className="text-sm font-bold text-gray-900">{holdingQty}주</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-sm text-gray-500">주문 가능 예수금</span>
+                  <span className="text-sm font-bold text-gray-900">{fmtWon(availableBalance ?? 0)}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
