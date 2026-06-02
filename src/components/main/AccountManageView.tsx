@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Settings, Loader2 } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import { getAccounts, setAccountRole } from '@/api/bank';
+import { getAccountsWithRoles, setAccountRole } from '@/api/bank';
+import { getStockAccounts } from '@/api/stock';
 import type { BankAccount, AccountRole } from '@/types/bank';
 
 const ROLE_CONFIG: { role: AccountRole; label: string }[] = [
@@ -14,12 +15,12 @@ const ROLE_CONFIG: { role: AccountRole; label: string }[] = [
   { role: 'EMERGENCY', label: '비상금 통장' },
 ];
 
-const ROLE_ACCOUNT_LABEL: Partial<Record<AccountRole, string>> = {
-  DEPOSIT:   '입출금 통장',
-  SALARY:    '월급 통장',
-  EMERGENCY: '비상금 통장',
-  STOCK:     '계좌',
-};
+// const ROLE_ACCOUNT_LABEL: Partial<Record<AccountRole, string>> = {
+//   DEPOSIT:   '입출금 통장',
+//   SALARY:    '월급 통장',
+//   EMERGENCY: '비상금 통장',
+//   STOCK:     '계좌',
+// };
 
 const BANK_CODE_MAP: Record<string, string> = {
   '001': '한국은행', '002': '산업은행', '003': '기업은행', '004': '국민은행',
@@ -39,27 +40,28 @@ function formatKRW(n: number | null | undefined): string {
   return `${n.toLocaleString('ko-KR')} 원`;
 }
 
-function maskAccountNumber(num: string): string {
-  const parts = num.split('-');
-  if (parts.length >= 2) {
-    return parts.slice(0, -1).join('-') + '-****';
-  }
-  return num.slice(0, -4) + '****';
-}
+// function maskAccountNumber(num: string): string {
+//   const parts = num.split('-');
+//   if (parts.length >= 2) {
+//     return parts.slice(0, -1).join('-') + '-****';
+//   }
+//   return num.slice(0, -4) + '****';
+// }
 
 // ────────────────────────────────────────────────────────────
 // 로딩 스켈레톤
 // ────────────────────────────────────────────────────────────
-function RoleSkeleton() {
+function AccountListSkeleton() {
   return (
-    <div className="space-y-5">
-      {ROLE_CONFIG.map(({ role }) => (
-        <div key={role}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="w-24 h-8 bg-sky-100 rounded-xl animate-pulse" />
-            <div className="w-6 h-6 bg-gray-100 rounded animate-pulse" />
+    <div className="space-y-3">
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="bg-white rounded-2xl px-4 py-4 flex items-center justify-between shadow-sm">
+          <div className="space-y-2">
+            <div className="w-32 h-4 bg-gray-200 rounded animate-pulse" />
+            <div className="w-24 h-3 bg-gray-100 rounded animate-pulse" />
+            <div className="w-20 h-3 bg-gray-100 rounded animate-pulse" />
           </div>
-          <div className="h-16 bg-sky-100 rounded-2xl animate-pulse" />
+          <div className="w-6 h-6 bg-gray-100 rounded animate-pulse" />
         </div>
       ))}
     </div>
@@ -72,9 +74,10 @@ function RoleSkeleton() {
 export default function AccountManageView() {
   const router = useRouter();
 
-  const [accounts, setAccounts]     = useState<BankAccount[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [fetchError, setFetchError] = useState('');
+  const [accounts, setAccounts]         = useState<BankAccount[]>([]);
+  const [stockAccountIds, setStockAccountIds] = useState<Set<number>>(new Set());
+  const [loading, setLoading]           = useState(true);
+  const [fetchError, setFetchError]     = useState('');
   const [mode, setMode]             = useState<'view' | 'edit'>('view');
   const [selections, setSelections] = useState<Partial<Record<AccountRole, number | ''>>>({});
   const [saving, setSaving]         = useState(false);
@@ -83,8 +86,11 @@ export default function AccountManageView() {
   const fetchAccounts = () => {
     setLoading(true);
     setFetchError('');
-    getAccounts()
-      .then(setAccounts)
+    Promise.all([getAccountsWithRoles(), getStockAccounts()])
+      .then(([allAccounts, stockRes]) => {
+        setAccounts(allAccounts);
+        setStockAccountIds(new Set(stockRes.accounts.map((a) => a.accountId)));
+      })
       .catch(() => setFetchError('계좌 정보를 불러오지 못했습니다.'))
       .finally(() => setLoading(false));
   };
@@ -121,7 +127,9 @@ export default function AccountManageView() {
         if (accountId) tasks.push(setAccountRole(Number(accountId), role));
       });
       await Promise.all(tasks);
-      await getAccounts().then(setAccounts);
+      const [allAccounts, stockRes] = await Promise.all([getAccountsWithRoles(), getStockAccounts()]);
+      setAccounts(allAccounts);
+      setStockAccountIds(new Set(stockRes.accounts.map((a) => a.accountId)));
       setMode('view');
       setSelections({});
     } catch {
@@ -131,23 +139,26 @@ export default function AccountManageView() {
     }
   };
 
-  // 특정 역할에서 선택 가능한 계좌 목록 (다른 역할에 이미 선택된 계좌 제외)
-  const availableAccounts = (role: AccountRole) =>
-    accounts.filter((a) => {
-      const assignedRole = a.accountRole;
-      if (!assignedRole || assignedRole === 'NONE' || assignedRole === role) return true;
-      // 현재 selections에서 다른 역할에 선택된 계좌는 제외
+  // 특정 역할에서 선택 가능한 계좌 목록
+  const availableAccounts = (role: AccountRole) => {
+    const isStockRole = role === 'STOCK';
+    return accounts.filter((a) => {
+      // STOCK 역할: 증권 계좌만 / 그 외: 은행 계좌만
+      const isStockAccount = stockAccountIds.has(a.accountId);
+      if (isStockRole !== isStockAccount) return false;
+      // 다른 역할에 이미 선택된 계좌 제외
       const usedByOther = ROLE_CONFIG.some(
         (r) => r.role !== role && selections[r.role] === a.accountId
       );
       return !usedByOther;
     });
+  };
 
   // ══════════════════════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════════════════════
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
       <div className="flex items-center px-5 py-4 bg-white shrink-0 relative border-b border-gray-100">
@@ -163,7 +174,7 @@ export default function AccountManageView() {
       {mode === 'view' && (
         <div className="flex-1 overflow-y-auto px-4 py-5">
           {loading ? (
-            <RoleSkeleton />
+            <AccountListSkeleton />
           ) : fetchError ? (
             <div className="flex flex-col items-center justify-center h-full gap-3 pt-20">
               <p className="text-sm text-gray-400">{fetchError}</p>
@@ -175,40 +186,38 @@ export default function AccountManageView() {
               </button>
             </div>
           ) : (
-            <div className="space-y-5">
-              {ROLE_CONFIG.map(({ role, label }) => {
-                const account = accounts.find((a) => a.accountRole === role) ?? null;
-                return (
-                  <div key={role}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="px-4 py-1.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 shadow-sm">
-                        {label}
-                      </span>
-                      <button
-                        onClick={enterEdit}
-                        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                        aria-label="계좌 설정"
-                      >
-                        <Settings size={16} className="text-gray-400" />
-                      </button>
+            <div>
+              <div className="flex justify-end mb-1 pr-1">
+                <button
+                  onClick={enterEdit}
+                  className="p-1"
+                  aria-label="계좌 설정"
+                >
+                  <Settings size={16} className="text-gray-400" />
+                </button>
+              </div>
+              <div className="bg-bg-card shadow-md rounded-2xl p-2 space-y-2">
+                {ROLE_CONFIG.map(({ role, label }) => {
+                  const account = accounts.find((a) => a.accountRole === role) ?? null;
+                  return (
+                    <div key={role} className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3">
+                      <div>
+                        <p className="text-xs font-semibold text-gray-900">{label}</p>
+                        {account ? (
+                          <p className="text-sm font-medium text-gray-800 mt-0.5">
+                            {bankName(account.bankCode)} · {account.accountNumber}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-gray-400 mt-0.5">미설정</p>
+                        )}
+                      </div>
+                      {account && (
+                        <p className="text-sm font-bold text-gray-900">{formatKRW(account.balance)}</p>
+                      )}
                     </div>
-                    {account ? (
-                      <div className="bg-white border-2 border-sky-500 rounded-2xl px-4 py-4">
-                        <p className="text-sm font-bold text-gray-900">
-                          {bankName(account.bankCode)} {ROLE_ACCOUNT_LABEL[role]}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {maskAccountNumber(account.accountNumber)}
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="bg-gray-100 border-2 border-dashed border-gray-200 rounded-2xl px-4 py-4 flex items-center justify-center">
-                        <p className="text-sm text-gray-400">미설정</p>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
@@ -238,7 +247,7 @@ export default function AccountManageView() {
                       <option value="">계좌를 선택해주세요</option>
                       {availableAccounts(role).map((a) => (
                         <option key={a.accountId} value={a.accountId}>
-                          {bankName(a.bankCode)} · {maskAccountNumber(a.accountNumber)}
+                          {bankName(a.bankCode)} · {a.accountNumber}
                         </option>
                       ))}
                     </select>

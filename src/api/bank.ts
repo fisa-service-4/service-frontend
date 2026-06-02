@@ -1,4 +1,5 @@
 import { baasRequest } from "@/utils/baasClient";
+import { apiRequest } from "@/utils/apiClient";
 import type {
   AccountRole,
   AccountRoleUpdateResponse,
@@ -15,8 +16,11 @@ export const getAccounts = () =>
     (res) => res.content,
   );
 
+export const getAccountsWithRoles = () =>
+  apiRequest<BankAccount[]>("/accounts");
+
 export const setAccountRole = (accountId: number, accountRole: AccountRole) =>
-  baasRequest<AccountRoleUpdateResponse>(`/accounts/${accountId}/role`, {
+  apiRequest<AccountRoleUpdateResponse>(`/accounts/${accountId}/role`, {
     method: "PATCH",
     body: JSON.stringify({ accountRole }),
   });
