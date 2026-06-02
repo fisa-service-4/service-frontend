@@ -16,6 +16,8 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
     if (!containerRef.current || data.length === 0) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chart = createChart(containerRef.current, {
+
     const chartOptions: any = {
       width: containerRef.current.clientWidth,
       height,
@@ -38,6 +40,7 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
         borderColor: '#e5e7eb',
         timeVisible: true,
       },
+    } as any);
     };
 
     const chart = createChart(containerRef.current, chartOptions);
