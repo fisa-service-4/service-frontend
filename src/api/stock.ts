@@ -1,4 +1,5 @@
 import { apiRequest } from '@/utils/apiClient';
+import { tokenUtils } from '@/utils/token';
 
 export interface StockAccount {
   accountId: number;
@@ -12,7 +13,11 @@ export interface StockAccountListResponse {
 }
 
 export const getStockAccounts = () =>
-  apiRequest<StockAccountListResponse>('/stocks/accounts');
+  apiRequest<StockAccountListResponse>('/stocks/accounts', {
+    headers: {
+      'X-Firebase-Uid': tokenUtils.getFirebaseUid() ?? '',
+    },
+  });
 
 export const TEMP_ACCOUNT_ID = 1;
 

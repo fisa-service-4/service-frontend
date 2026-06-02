@@ -43,7 +43,7 @@ function formatKRW(amount: number | null | undefined): string {
 }
 
 function SkeletonCard({ className = '' }: { className?: string }) {
-  return <div className={`bg-sky-100 rounded-xl animate-pulse ${className}`} />;
+  return <div className={`bg-gray-200 rounded-xl animate-pulse ${className}`} />;
 }
 
 export default function AssetsView() {
@@ -102,8 +102,6 @@ export default function AssetsView() {
     }
   }
 
-
-
   if (subView === 'transfer') {
     return (
       <TransferView
@@ -115,7 +113,7 @@ export default function AssetsView() {
 
   if (subView === 'connect') {
     return (
-      <div className="flex flex-col h-screen bg-white">
+      <div className="flex flex-col h-screen bg-bg">
         <div className="flex items-center px-5 py-4 shrink-0 border-b border-gray-100">
           <button onClick={() => { setSubView('overview'); setConnectError(''); }} className="mr-3">
             <ArrowLeft size={22} className="text-gray-800" />
@@ -131,7 +129,7 @@ export default function AssetsView() {
                 key={inst.code}
                 onClick={() => handleConnect(inst.code)}
                 disabled={connectLoading}
-                className="py-4 bg-white border-2 border-gray-200 rounded-2xl text-sm font-semibold text-gray-800 active:border-sky-500 active:text-sky-600 disabled:opacity-50 transition-colors"
+                className="py-4 bg-bg-card shadow-md rounded-2xl text-sm font-semibold text-gray-800 active:text-sky-600 disabled:opacity-50 transition-colors"
               >
                 {inst.name}
               </button>
@@ -161,9 +159,8 @@ export default function AssetsView() {
   const stockRatio  = dashboard ? Math.round(dashboard.investmentRatio) : 0;
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
 
-      {/* 콘텐츠 영역 (알림 오버레이 포함) */}
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
       {/* 헤더 */}
@@ -176,7 +173,7 @@ export default function AssetsView() {
       <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
 
         {/* ── 총 자산 카드 ── */}
-        <div className="bg-white border-2 border-sky-500 rounded-2xl p-5">
+        <div className="bg-bg-card shadow-md rounded-2xl p-5">
           {loading ? (
             <div className="space-y-3">
               <SkeletonCard className="h-3 w-16" />
@@ -197,13 +194,13 @@ export default function AssetsView() {
                 지난달 대비 -
               </span>
               <div className="flex gap-3">
-                <div className="flex-1 bg-sky-50 border border-sky-100 rounded-xl p-3">
+                <div className="flex-1 bg-gray-100 rounded-xl p-3">
                   <p className="text-xs text-gray-400 mb-1">은행 잔액</p>
                   <p className="text-sm font-bold text-gray-900">
                     {formatKRW(dashboard?.totalBankAssetAmount ?? 0)}
                   </p>
                 </div>
-                <div className="flex-1 bg-sky-50 border border-sky-100 rounded-xl p-3">
+                <div className="flex-1 bg-gray-100 rounded-xl p-3">
                   <p className="text-xs text-gray-400 mb-1">증권 평가 금액</p>
                   <p className="text-sm font-bold text-gray-900">
                     {formatKRW(dashboard?.totalStockAssetAmount ?? 0)}
@@ -217,11 +214,11 @@ export default function AssetsView() {
         {/* ── 자산 구성 ── */}
         <div>
           <h2 className="text-base font-bold text-gray-900 mb-3">자산 구성</h2>
-          <div className="bg-white border-2 border-sky-500 rounded-2xl p-5 space-y-4">
+          <div className="bg-bg-card shadow-md rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" />
               <span className="text-sm text-gray-700 w-8 shrink-0">은행</span>
-              <div className="flex-1 h-2 bg-sky-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-sky-500 rounded-full transition-all duration-500"
                   style={{ width: `${bankRatio}%` }}
@@ -234,7 +231,7 @@ export default function AssetsView() {
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-sky-200 shrink-0" />
               <span className="text-sm text-gray-700 w-8 shrink-0">증권</span>
-              <div className="flex-1 h-2 bg-sky-100 rounded-full overflow-hidden">
+              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-sky-300 rounded-full transition-all duration-500"
                   style={{ width: `${stockRatio}%` }}
@@ -248,15 +245,15 @@ export default function AssetsView() {
         </div>
 
         {/* ── 탭 ── */}
-        <div className="bg-white border-2 border-sky-500 rounded-2xl p-1.5 flex gap-1">
+        <div className="bg-gray-100 rounded-xl p-1 flex gap-1">
           {(['all', 'bank', 'stock'] as AssetTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+              className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
                 activeTab === tab
-                  ? 'bg-sky-500 text-white shadow-sm'
-                  : 'text-gray-500'
+                  ? 'bg-bg-card text-gray-900 shadow-md'
+                  : 'text-gray-400'
               }`}
             >
               {tab === 'all' ? '전체' : tab === 'bank' ? '은행' : '증권'}
@@ -277,19 +274,19 @@ export default function AssetsView() {
                 </span>
               )}
             </div>
-            <div className="bg-gray-600 rounded-2xl p-2 space-y-2">
+            <div className="bg-bg-card shadow-md rounded-2xl p-2 space-y-2">
               {holdingsLoading ? (
                 <>
-                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
-                  <div className="bg-white/10 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
                 </>
               ) : holdings.length === 0 ? (
-                <p className="text-center text-sm text-gray-300 py-8">보유 종목이 없습니다.</p>
+                <p className="text-center text-sm text-gray-400 py-8">보유 종목이 없습니다.</p>
               ) : (
                 holdings.map((holding) => (
                   <div
                     key={holding.stockCode}
-                    className="flex items-center justify-between bg-white rounded-xl px-4 py-3"
+                    className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3"
                   >
                     <div>
                       <p className="text-sm font-bold text-gray-900">{holding.stockName}</p>
@@ -331,11 +328,11 @@ export default function AssetsView() {
           </div>
 
           {hasAccounts || loading ? (
-            <div className="bg-white border-2 border-sky-500 rounded-2xl p-2 space-y-2">
+            <div className="bg-bg-card shadow-md rounded-2xl p-2 space-y-2">
               {loading ? (
                 <>
-                  <div className="bg-sky-50 rounded-xl h-16 animate-pulse" />
-                  <div className="bg-sky-50 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
+                  <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
                 </>
               ) : displayAccounts.length === 0 ? (
                 <p className="text-center text-sm text-gray-400 py-8">
@@ -345,7 +342,7 @@ export default function AssetsView() {
                 displayAccounts.map((account) => (
                   <div
                     key={account.accountId}
-                    className="flex items-center justify-between bg-white rounded-xl px-4 py-3"
+                    className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3"
                   >
                     <div>
                       <p className="text-xs font-semibold text-gray-900">
@@ -364,8 +361,8 @@ export default function AssetsView() {
               )}
             </div>
           ) : (
-            <div className="bg-white border-2 border-sky-500 rounded-2xl p-8 flex flex-col items-center text-center">
-              <div className="w-14 h-14 bg-sky-50 border-2 border-sky-500 rounded-full flex items-center justify-center mb-4">
+            <div className="bg-bg-card shadow-md rounded-2xl p-8 flex flex-col items-center text-center">
+              <div className="w-14 h-14 bg-sky-50 rounded-full flex items-center justify-center mb-4">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
                   <path
                     d="M6 14.5L11.5 20L22 8"

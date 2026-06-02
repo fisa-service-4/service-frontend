@@ -189,7 +189,7 @@ function StocksContent() {
         {/* 총 평가금액 카드 */}
         {!query && <div className="bg-bg-card shadow-md rounded-2xl p-5 mb-4">
           <p className="text-xs text-gray-500 mb-1">총 평가금액</p>
-          <p className="text-xl font-bold text-gray-900 mb-5">
+          <p className="text-3xl font-bold text-gray-900 mb-5">
             {loading ? '-' : fmtWon(totalValue)}
           </p>
           <div className="flex justify-between">
@@ -320,7 +320,7 @@ function StocksContent() {
                           </button>
                           <button
                             className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold"
-                            onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=SELL`)}
+                            onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=SELL&holdingQty=${s.quantity}`)}
                           >
                             매도
                           </button>

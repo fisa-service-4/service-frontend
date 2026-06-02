@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Settings, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Settings, Loader2 } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccounts, setAccountRole } from '@/api/bank';
 import type { BankAccount, AccountRole } from '@/types/bank';
@@ -72,14 +72,13 @@ function RoleSkeleton() {
 export default function AccountManageView() {
   const router = useRouter();
 
-  const [accounts, setAccounts]               = useState<BankAccount[]>([]);
-  const [loading, setLoading]                 = useState(true);
-  const [fetchError, setFetchError]           = useState('');
-  const [mode, setMode]                       = useState<'view' | 'edit'>('view');
-  const [selectedRole, setSelectedRole]       = useState<AccountRole | null>(null);
-  const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
-  const [saving, setSaving]                   = useState(false);
-  const [saveError, setSaveError]             = useState('');
+  const [accounts, setAccounts]     = useState<BankAccount[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [fetchError, setFetchError] = useState('');
+  const [mode, setMode]             = useState<'view' | 'edit'>('view');
+  const [selections, setSelections] = useState<Partial<Record<AccountRole, number | ''>>>({});
+  const [saving, setSaving]         = useState(false);
+  const [saveError, setSaveError]   = useState('');
 
   const fetchAccounts = () => {
     setLoading(true);
@@ -92,11 +91,14 @@ export default function AccountManageView() {
 
   useEffect(() => { fetchAccounts(); }, []);
 
-  // 연필 버튼 클릭 → 수정 모드 진입
-  const enterEdit = (role: AccountRole) => {
-    const current = accounts.find((a) => a.accountRole === role);
-    setSelectedRole(role);
-    setSelectedAccountId(current?.accountId ?? null);
+  // 톱니바퀴 클릭 → 통합 수정 화면 진입
+  const enterEdit = () => {
+    const initial: Partial<Record<AccountRole, number | ''>> = {};
+    ROLE_CONFIG.forEach(({ role }) => {
+      const account = accounts.find((a) => a.accountRole === role);
+      initial[role] = account?.accountId ?? '';
+    });
+    setSelections(initial);
     setSaveError('');
     setMode('edit');
   };
@@ -104,26 +106,24 @@ export default function AccountManageView() {
   // 취소
   const cancelEdit = () => {
     setMode('view');
-    setSelectedRole(null);
-    setSelectedAccountId(null);
+    setSelections({});
     setSaveError('');
   };
 
-  // 저장
-  const handleSave = async () => {
-    if (!selectedRole) return;
-    if (selectedAccountId === null) {
-      setSaveError('계좌를 선택해주세요.');
-      return;
-    }
+  // 전체 저장
+  const handleSaveAll = async () => {
     setSaving(true);
     setSaveError('');
     try {
-      await setAccountRole(selectedAccountId, selectedRole);
+      const tasks: Promise<unknown>[] = [];
+      ROLE_CONFIG.forEach(({ role }) => {
+        const accountId = selections[role];
+        if (accountId) tasks.push(setAccountRole(Number(accountId), role));
+      });
+      await Promise.all(tasks);
       await getAccounts().then(setAccounts);
       setMode('view');
-      setSelectedRole(null);
-      setSelectedAccountId(null);
+      setSelections({});
     } catch {
       setSaveError('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
@@ -131,16 +131,17 @@ export default function AccountManageView() {
     }
   };
 
-  // ── 수정 모드에서 계좌 항목의 상태 판별 ──────────────────
-  const getAccountItemState = (account: BankAccount): 'checked' | 'selectable' | 'disabled' => {
-    const role = account.accountRole;
-    if (account.accountId === selectedAccountId) return 'checked';
-    if (!role || role === 'NONE' || role === selectedRole) return 'selectable';
-    return 'disabled';
-  };
-
-  const roleLabelOf = (role: AccountRole): string =>
-    ROLE_CONFIG.find((r) => r.role === role)?.label ?? role;
+  // 특정 역할에서 선택 가능한 계좌 목록 (다른 역할에 이미 선택된 계좌 제외)
+  const availableAccounts = (role: AccountRole) =>
+    accounts.filter((a) => {
+      const assignedRole = a.accountRole;
+      if (!assignedRole || assignedRole === 'NONE' || assignedRole === role) return true;
+      // 현재 selections에서 다른 역할에 선택된 계좌는 제외
+      const usedByOther = ROLE_CONFIG.some(
+        (r) => r.role !== role && selections[r.role] === a.accountId
+      );
+      return !usedByOther;
+    });
 
   // ══════════════════════════════════════════════════════════
   // RENDER
@@ -154,7 +155,7 @@ export default function AccountManageView() {
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
         <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">
-          {mode === 'edit' && selectedRole ? `${roleLabelOf(selectedRole)} 설정` : '계좌 관리'}
+          {mode === 'edit' ? '계좌 설정' : '계좌 관리'}
         </span>
       </div>
 
@@ -177,25 +178,20 @@ export default function AccountManageView() {
             <div className="space-y-5">
               {ROLE_CONFIG.map(({ role, label }) => {
                 const account = accounts.find((a) => a.accountRole === role) ?? null;
-                const isStock = role === 'STOCK';
-                const canEdit = !(isStock && account !== null);
                 return (
                   <div key={role}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="px-4 py-1.5 bg-white border border-gray-200 rounded-xl text-sm font-semibold text-gray-800 shadow-sm">
                         {label}
                       </span>
-                      {canEdit && (
-                        <button
-                          onClick={() => enterEdit(role)}
-                          className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                          aria-label={`${label} 수정`}
-                        >
-                          <Settings size={16} className="text-gray-400" />
-                        </button>
-                      )}
+                      <button
+                        onClick={enterEdit}
+                        className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                        aria-label="계좌 설정"
+                      >
+                        <Settings size={16} className="text-gray-400" />
+                      </button>
                     </div>
-
                     {account ? (
                       <div className="bg-white border-2 border-sky-500 rounded-2xl px-4 py-4">
                         <p className="text-sm font-bold text-gray-900">
@@ -218,61 +214,42 @@ export default function AccountManageView() {
         </div>
       )}
 
-      {/* ── 수정 모드 ── */}
-      {mode === 'edit' && selectedRole && (
+      {/* ── 수정 모드: 한 화면에서 전체 역할 설정 ── */}
+      {mode === 'edit' && (
         <div className="flex-1 flex flex-col overflow-hidden">
-
-          {/* 계좌 목록 */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+          <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">
             {accounts.length === 0 ? (
               <p className="text-sm text-gray-400 text-center pt-10">연동된 계좌가 없습니다.</p>
             ) : (
-              accounts.map((account) => {
-                const state = getAccountItemState(account);
-                const isDisabled = state === 'disabled';
-                const isChecked  = state === 'checked';
-
-                return (
-                  <button
-                    key={account.accountId}
-                    disabled={isDisabled}
-                    onClick={() => setSelectedAccountId(isChecked ? null : account.accountId)}
-                    className={`w-full text-left rounded-2xl px-4 py-3 border-2 transition-all flex items-center justify-between gap-3
-                      ${isDisabled
-                        ? 'bg-gray-50 border-gray-100 opacity-50 cursor-not-allowed'
-                        : isChecked
-                          ? 'bg-sky-50 border-sky-500'
-                          : 'bg-white border-gray-200 hover:border-sky-300'
-                      }`}
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors
-                          ${isChecked
-                            ? 'bg-sky-500 border-sky-500'
-                            : 'border-gray-300 bg-white'
-                          }`}
-                      >
-                        {isChecked && <Check size={12} className="text-white" strokeWidth={3} />}
-                      </div>
-
-                      <p className="text-sm text-gray-800 truncate">
-                        {bankName(account.bankCode)} · {maskAccountNumber(account.accountNumber)}
-                      </p>
-                    </div>
-
-                    {isDisabled && account.accountRole && account.accountRole !== 'NONE' && (
-                      <span className="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded-lg shrink-0 whitespace-nowrap">
-                        {roleLabelOf(account.accountRole)}으로 사용 중
-                      </span>
-                    )}
-                  </button>
-                );
-              })
+              ROLE_CONFIG.map(({ role, label }) => (
+                <div key={role}>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">{label}</label>
+                  <div className="relative">
+                    <select
+                      value={selections[role] ?? ''}
+                      onChange={(e) =>
+                        setSelections((prev) => ({
+                          ...prev,
+                          [role]: e.target.value ? Number(e.target.value) : '',
+                        }))
+                      }
+                      className="w-full h-14 bg-gray-100 rounded-2xl px-4 text-sm text-gray-800 outline-none appearance-none cursor-pointer"
+                    >
+                      <option value="">계좌를 선택해주세요</option>
+                      {availableAccounts(role).map((a) => (
+                        <option key={a.accountId} value={a.accountId}>
+                          {bankName(a.bankCode)} · {maskAccountNumber(a.accountNumber)}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">▼</span>
+                  </div>
+                </div>
+              ))
             )}
           </div>
 
-          {/* 하단 버튼 영역 */}
+          {/* 하단 버튼 */}
           <div className="px-4 pt-3 pb-4 bg-white border-t border-gray-100 shrink-0">
             {saveError && (
               <p className="text-xs text-red-500 text-center mb-2">{saveError}</p>
@@ -281,23 +258,16 @@ export default function AccountManageView() {
               <button
                 onClick={cancelEdit}
                 disabled={saving}
-                className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-sm font-semibold text-gray-600 bg-white hover:bg-gray-50 transition-colors"
+                className="flex-1 py-3 rounded-2xl border-2 border-gray-200 text-sm font-semibold text-gray-600 bg-white"
               >
                 취소
               </button>
               <button
-                onClick={handleSave}
-                disabled={saving || selectedAccountId === null}
-                className={`flex-1 py-3 rounded-2xl text-sm font-semibold text-white flex items-center justify-center gap-1.5 transition-colors
-                  ${saving || selectedAccountId === null
-                    ? 'bg-sky-300 cursor-not-allowed'
-                    : 'bg-sky-500 hover:bg-sky-600 active:bg-sky-700'
-                  }`}
+                onClick={handleSaveAll}
+                disabled={saving}
+                className="flex-1 py-3 rounded-2xl bg-sky-500 text-sm font-semibold text-white flex items-center justify-center gap-1.5 disabled:bg-sky-300"
               >
-                {saving
-                  ? <><Loader2 size={15} className="animate-spin" /> 저장 중</>
-                  : '저장'
-                }
+                {saving ? <><Loader2 size={15} className="animate-spin" /> 저장 중</> : '저장'}
               </button>
             </div>
           </div>
