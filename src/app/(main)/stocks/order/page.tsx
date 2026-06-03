@@ -60,6 +60,7 @@ function StockOrderContent() {
 
   const [orderMethod, setOrderMethod] = useState<'MARKET' | 'LIMIT'>('MARKET');
   const [quantity, setQuantity] = useState(0);
+  const [limitPrice, setLimitPrice] = useState(stockPrice);
   const [methodOpen, setMethodOpen] = useState(false);
   const [availableBalance, setAvailableBalance] = useState<number | null>(null);
   const [holdingQty, setHoldingQty] = useState(urlHoldingQty);
@@ -96,12 +97,13 @@ function StockOrderContent() {
   }, [stockCode, urlHoldingQty]);
 
   const up = changeRate >= 0;
-  const estimate = quantity * stockPrice;
+  const activePrice = orderMethod === 'LIMIT' ? limitPrice : stockPrice;
+  const estimate = quantity * activePrice;
 
   const maxQty = useMemo(() => {
     if (side === 'SELL') return holdingQty;
-    return stockPrice > 0 && availableBalance !== null ? Math.floor(availableBalance / stockPrice) : 0;
-  }, [side, holdingQty, availableBalance, stockPrice]);
+    return activePrice > 0 && availableBalance !== null ? Math.floor(availableBalance / activePrice) : 0;
+  }, [side, holdingQty, availableBalance, activePrice]);
 
   const setByRatio = (ratio: number) => setQuantity(Math.floor(maxQty * ratio));
 
@@ -158,7 +160,7 @@ function StockOrderContent() {
         orderType: side,
         orderMethod,
         quantity,
-        price: stockPrice,
+        price: activePrice,
       };
       await createOrder(TEMP_ACCOUNT_ID, body);
       setSuccess(true);
@@ -246,7 +248,7 @@ function StockOrderContent() {
                     {ORDER_METHODS.map((m) => (
                       <button
                         key={m.value}
-                        onClick={() => { setOrderMethod(m.value as 'MARKET' | 'LIMIT'); setMethodOpen(false); }}
+                        onClick={() => { setOrderMethod(m.value as 'MARKET' | 'LIMIT'); setLimitPrice(stockPrice); setMethodOpen(false); }}
                         className={`w-full text-left px-4 py-2.5 text-sm font-medium ${
                           orderMethod === m.value ? 'text-primary-500' : 'text-gray-700'
                         }`}
@@ -258,6 +260,34 @@ function StockOrderContent() {
                 )}
               </div>
             </div>
+
+          {/* 지정가 입력 */}
+          {orderMethod === 'LIMIT' && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">지정 가격</span>
+              <div className="flex items-center bg-bg-card border border-gray-200 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setLimitPrice((p) => Math.max(0, p - 100))}
+                  className="w-10 h-10 flex items-center justify-center text-gray-500"
+                >
+                  <Minus size={16} />
+                </button>
+                <input
+                  type="number"
+                  value={limitPrice}
+                  min={0}
+                  onChange={(e) => setLimitPrice(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-28 text-center text-sm font-bold text-gray-900 outline-none bg-transparent"
+                />
+                <button
+                  onClick={() => setLimitPrice((p) => p + 100)}
+                  className="w-10 h-10 flex items-center justify-center text-gray-500"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* 수량 */}
           <div className="flex justify-between items-center">
