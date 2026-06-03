@@ -60,7 +60,7 @@ function StockOrderContent() {
 
   const [orderMethod, setOrderMethod] = useState<'MARKET' | 'LIMIT'>('MARKET');
   const [quantity, setQuantity] = useState(0);
-  const [limitPrice, setLimitPrice] = useState(stockPrice);
+  const [limitPrice, setLimitPrice] = useState<number | ''>(stockPrice);
   const [methodOpen, setMethodOpen] = useState(false);
   const [availableBalance, setAvailableBalance] = useState<number | null>(null);
   const [holdingQty, setHoldingQty] = useState(urlHoldingQty);
