@@ -158,7 +158,7 @@ function StockOrderContent() {
         orderType: side,
         orderMethod,
         quantity,
-        price: orderMethod === 'LIMIT' ? stockPrice : null,
+        price: stockPrice,
       };
       await createOrder(TEMP_ACCOUNT_ID, body);
       setSuccess(true);
