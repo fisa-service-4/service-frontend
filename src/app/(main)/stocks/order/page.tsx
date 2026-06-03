@@ -97,7 +97,7 @@ function StockOrderContent() {
   }, [stockCode, urlHoldingQty]);
 
   const up = changeRate >= 0;
-  const activePrice = orderMethod === 'LIMIT' ? limitPrice : stockPrice;
+  const activePrice = orderMethod === 'LIMIT' ? (Number(limitPrice) || 0) : stockPrice;
   const estimate = quantity * activePrice;
 
   const maxQty = useMemo(() => {
