@@ -258,8 +258,8 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
               <div
                 className={`max-w-[75%] px-4 py-3 rounded-3xl text-sm leading-relaxed whitespace-pre-line ${
                   msg.role === 'user'
-                    ? 'bg-sky-500 text-white rounded-br-sm'
-                    : 'bg-gray-200 text-gray-900 rounded-bl-sm'
+                    ? 'bg-primary-500 text-white rounded-br-sm'
+                    : 'bg-gray-100 text-gray-900 rounded-bl-sm'
                 }`}
               >
                 {msg.content}
@@ -268,7 +268,7 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
           ))}
           {isSending && (
             <div className="flex justify-start">
-              <div className="bg-gray-200 text-gray-400 rounded-3xl rounded-bl-sm px-4 py-3 text-sm">
+              <div className="bg-gray-100 text-gray-400 rounded-3xl rounded-bl-sm px-4 py-3 text-sm">
                 ...
               </div>
             </div>
@@ -285,7 +285,7 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
                 <div
                   key={i}
                   className={`w-4 h-4 rounded-full transition-colors ${
-                    i < pin.length ? 'bg-gray-700' : 'bg-gray-200'
+                    i < pin.length ? 'bg-primary-500' : 'bg-gray-200'
                   }`}
                 />
               ))}
@@ -314,7 +314,7 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
               <button
                 onClick={handleSend}
                 disabled={isSending}
-                className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center shrink-0 disabled:opacity-50"
+                className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center shrink-0 disabled:opacity-50"
               >
                 <ArrowRight size={16} className="text-white" />
               </button>
