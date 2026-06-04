@@ -267,7 +267,7 @@ function StockOrderContent() {
               <span className="text-sm text-gray-500">지정 가격</span>
               <div className="flex items-center bg-bg-card border border-gray-200 rounded-lg overflow-hidden">
                 <button
-                  onClick={() => setLimitPrice((p) => Math.max(0, p - 100))}
+                  onClick={() => setLimitPrice((p) => Math.max(0, (Number(p) || 0) - 100))}
                   className="w-10 h-10 flex items-center justify-center text-gray-500"
                 >
                   <Minus size={16} />
@@ -280,7 +280,7 @@ function StockOrderContent() {
                   className="w-28 text-center text-sm font-bold text-gray-900 outline-none bg-transparent"
                 />
                 <button
-                  onClick={() => setLimitPrice((p) => p + 100)}
+                  onClick={() => setLimitPrice((p) => (Number(p) || 0) + 100)}
                   className="w-10 h-10 flex items-center justify-center text-gray-500"
                 >
                   <Plus size={16} />
