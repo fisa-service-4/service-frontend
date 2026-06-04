@@ -42,10 +42,11 @@ function formatKRW(n: number | null | undefined) {
 interface TransferViewProps {
   accounts: BankAccount[];
   onBack: () => void;
+  onComplete?: () => void;
 }
 
 // 1. 중복 선언되었던 함수 정의 부분을 하나로 병합
-export default function TransferView({ accounts, onBack }: TransferViewProps) {
+export default function TransferView({ accounts, onBack, onComplete }: TransferViewProps) {
   const [step, setStep]                 = useState<Step>('form');
   const [fromId, setFromId]             = useState(accounts[0]?.accountId ?? 0);
   const [toBankCode, setToBankCode]     = useState('');
@@ -489,7 +490,7 @@ export default function TransferView({ accounts, onBack }: TransferViewProps) {
 
       <div className="px-5 pb-6 shrink-0">
         <button
-          onClick={onBack}
+          onClick={onComplete ?? onBack}
           className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold text-base"
         >
           확인

@@ -73,3 +73,15 @@ export interface TransferApproved {
   transferStatus: string;
   completedAt: string;
 }
+
+export interface TransferResult {
+  transferId: number;
+  fromAccountId: number;
+  toBankCode: string;
+  toAccountNumber: string;
+  transferAmount: number;
+  transferStatus: string;
+  failureReason: string | null;
+  requestedAt: string;
+  completedAt: string | null;
+}
