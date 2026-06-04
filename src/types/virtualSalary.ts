@@ -60,8 +60,8 @@ export interface HomeSummary {
 }
 
 export interface AiRecommendation {
-  recommendedEmergencyRatio: number;
-  recommendedInvestmentRatio: number;
+  recommendedEmergencyAmount: number;
+  recommendedInvestmentAmount: number;
   summary: string;
 }
 
