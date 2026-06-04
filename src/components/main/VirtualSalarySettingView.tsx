@@ -164,11 +164,9 @@ export default function VirtualSalarySettingView() {
 
   const applyAiRecommendation = () => {
     if (!aiData) return;
-    const eAmt = rawSalary > 0 ? Math.round(rawSalary * aiData.recommendedEmergencyRatio  / 100) : 0;
-    const iAmt = rawSalary > 0 && hasStockAccount
-      ? Math.round(rawSalary * aiData.recommendedInvestmentRatio / 100)
-      : 0;
-    setEmergencyTransfer(eAmt  > 0 ? eAmt.toLocaleString()  : '');
+    const eAmt = aiData.recommendedEmergencyAmount || 0;
+    const iAmt = hasStockAccount ? aiData.recommendedInvestmentAmount || 0 : 0;
+    setEmergencyTransfer(eAmt > 0 ? eAmt.toLocaleString() : '');
     setInvestmentTransfer(iAmt > 0 ? iAmt.toLocaleString() : '');
     setShowAiModal(false);
   };
@@ -331,10 +329,8 @@ export default function VirtualSalarySettingView() {
     );
   };
 
-  const aiEmergencyAmt  = aiData && rawSalary > 0
-    ? Math.round(rawSalary * aiData.recommendedEmergencyRatio  / 100) : 0;
-  const aiInvestmentAmt = aiData && rawSalary > 0 && hasStockAccount
-    ? Math.round(rawSalary * aiData.recommendedInvestmentRatio / 100) : 0;
+  const aiEmergencyAmt  = aiData ? aiData.recommendedEmergencyAmount  : 0;
+  const aiInvestmentAmt = aiData && hasStockAccount ? aiData.recommendedInvestmentAmount : 0;
 
   if (loading) {
     return (
@@ -447,27 +443,19 @@ export default function VirtualSalarySettingView() {
               </div>
               <div className="flex items-center justify-between px-3 py-2.5 bg-primary-50 border border-primary-100 rounded-xl">
                 <span className="text-sm text-gray-600">비상금 이체액/월</span>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-primary-700">
-                    {aiEmergencyAmt > 0 ? aiEmergencyAmt.toLocaleString() + ' 원' : '-'}
-                  </span>
-                  <span className="text-xs text-gray-400 ml-1.5">({aiData.recommendedEmergencyRatio}%)</span>
-                </div>
+                <span className="text-sm font-bold text-primary-700">
+                  {aiEmergencyAmt > 0 ? aiEmergencyAmt.toLocaleString() + ' 원' : '-'}
+                </span>
               </div>
               <div className="flex items-center justify-between px-3 py-2.5 bg-primary-50 border border-primary-100 rounded-xl">
                 <span className="text-sm text-gray-600">투자 이체액/월</span>
-                <div className="text-right">
-                  {hasStockAccount ? (
-                    <>
-                      <span className="text-sm font-bold text-primary-700">
-                        {aiInvestmentAmt > 0 ? aiInvestmentAmt.toLocaleString() + ' 원' : '-'}
-                      </span>
-                      <span className="text-xs text-gray-400 ml-1.5">({aiData.recommendedInvestmentRatio}%)</span>
-                    </>
-                  ) : (
-                    <span className="text-sm text-amber-500 font-medium">계좌 미연결</span>
-                  )}
-                </div>
+                {hasStockAccount ? (
+                  <span className="text-sm font-bold text-primary-700">
+                    {aiInvestmentAmt > 0 ? aiInvestmentAmt.toLocaleString() + ' 원' : '-'}
+                  </span>
+                ) : (
+                  <span className="text-sm text-amber-500 font-medium">계좌 미연결</span>
+                )}
               </div>
             </div>
 
