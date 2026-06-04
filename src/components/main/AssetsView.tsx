@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Bell } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import { getAccounts } from '@/api/bank';
+import { getAccounts, getAccountsWithRoles } from '@/api/bank';
 import { getAssetDashboard, connectMyData } from '@/api/mydata';
 import type { AssetDashboard } from '@/api/mydata';
 import type { BankAccount } from '@/types/bank';
@@ -102,11 +102,20 @@ export default function AssetsView() {
     }
   }
 
+  async function handleTransferComplete() {
+    setSubView('overview');
+    try {
+      const accs = await getAccountsWithRoles();
+      setAccounts(accs);
+    } catch {}
+  }
+
   if (subView === 'transfer') {
     return (
       <TransferView
         accounts={accounts}
         onBack={() => setSubView('overview')}
+        onComplete={handleTransferComplete}
       />
     );
   }

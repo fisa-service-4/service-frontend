@@ -9,6 +9,7 @@ import type {
   TransferRequest,
   TransferCreated,
   TransferApproved,
+  TransferResult,
 } from "@/types/bank";
 
 export const getAccounts = () =>
@@ -44,7 +45,7 @@ export const getTransactions = (
 };
 
 export const createTransfer = (body: TransferRequest) =>
-  baasRequest<TransferCreated>("/bank/transfers", {
+  apiRequest<TransferCreated>("/transfers", {
     method: "POST",
     body: JSON.stringify(body),
     headers: {
@@ -53,6 +54,12 @@ export const createTransfer = (body: TransferRequest) =>
   });
 
 export const approveTransfer = (transferId: number) =>
-  baasRequest<TransferApproved>(`/bank/transfers/${transferId}/approve`, {
+  apiRequest<TransferApproved>(`/transfers/${transferId}/approve`, {
     method: "POST",
+    headers: {
+      "Idempotency-Key": crypto.randomUUID(),
+    },
   });
+
+export const getTransferResult = (transferId: number) =>
+  apiRequest<TransferResult>(`/transfers/${transferId}`);
