@@ -25,6 +25,53 @@ const GREETING: Message = {
   content: '안녕하세요! 저는 AI 금융 상담사예요.\n자산 관리, 소비 분석, 투자 등\n무엇이든 물어보세요 😊',
 };
 
+function parseCardContent(content: string): { header: string; items: { label: string; value: string }[]; footer: string } {
+  const lines = content.split('\n');
+  const header = lines[0] ?? '';
+  const items: { label: string; value: string }[] = [];
+  const extras: string[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('• ')) {
+      const colonIdx = line.indexOf(': ');
+      if (colonIdx !== -1) {
+        items.push({ label: line.slice(2, colonIdx), value: line.slice(colonIdx + 2) });
+      }
+    } else if (line.trim()) {
+      extras.push(line.trim());
+    }
+  }
+
+  return { header, items, footer: extras.join('\n') };
+}
+
+function AiCard({ content }: { content: string }) {
+  const isComplete = content.startsWith('✅');
+  const { header, items, footer } = parseCardContent(content);
+
+  return (
+    <div className={`max-w-[80%] rounded-2xl overflow-hidden text-sm ${isComplete ? 'bg-primary-50 border border-primary-100' : 'bg-gray-100'}`}>
+      <div className={`px-4 py-3 font-semibold text-gray-900 ${isComplete ? 'border-b border-primary-100' : 'border-b border-gray-200'}`}>
+        {header}
+      </div>
+      <div className="px-4 py-3 space-y-2">
+        {items.map((item, i) => (
+          <div key={i} className="flex justify-between items-center">
+            <span className="text-gray-500 text-xs">{item.label}</span>
+            <span className={`font-semibold text-sm ${isComplete ? 'text-primary-700' : 'text-gray-900'}`}>{item.value}</span>
+          </div>
+        ))}
+      </div>
+      {footer && (
+        <div className="px-4 pb-3 text-xs text-gray-500 leading-relaxed border-t border-gray-200 pt-2">
+          {footer}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ChatBotViewProps {
   onClose: () => void;
 }
@@ -255,15 +302,20 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
               key={`${msg.id}-${index}`}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={`max-w-[75%] px-4 py-3 rounded-3xl text-sm leading-relaxed whitespace-pre-line ${
-                  msg.role === 'user'
-                    ? 'bg-primary-500 text-white rounded-br-sm'
-                    : 'bg-gray-100 text-gray-900 rounded-bl-sm'
-                }`}
-              >
-                {msg.content}
-              </div>
+              {msg.role === 'ai' && (content => {
+                const isCard = content.startsWith('💰') || content.startsWith('✅');
+                if (isCard) return <AiCard content={content} />;
+                return (
+                  <div className="max-w-[75%] px-4 py-3 rounded-3xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-line bg-gray-100 text-gray-900">
+                    {content}
+                  </div>
+                );
+              })(msg.content)}
+              {msg.role === 'user' && (
+                <div className="max-w-[75%] px-4 py-3 rounded-3xl rounded-br-sm text-sm leading-relaxed whitespace-pre-line bg-primary-500 text-white">
+                  {msg.content}
+                </div>
+              )}
             </div>
           ))}
           {isSending && (
