@@ -302,15 +302,15 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
               key={`${msg.id}-${index}`}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {msg.role === 'ai' && (content => {
-                const isCard = content.startsWith('💰') || content.startsWith('✅');
-                if (isCard) return <AiCard content={content} />;
-                return (
+              {msg.role === 'ai' && (
+                msg.content.startsWith('💰') || msg.content.startsWith('✅') ? (
+                  <AiCard content={msg.content} />
+                ) : (
                   <div className="max-w-[75%] px-4 py-3 rounded-3xl rounded-bl-sm text-sm leading-relaxed whitespace-pre-line bg-gray-100 text-gray-900">
-                    {content}
+                    {msg.content}
                   </div>
-                );
-              })(msg.content)}
+                )
+              )}
               {msg.role === 'user' && (
                 <div className="max-w-[75%] px-4 py-3 rounded-3xl rounded-br-sm text-sm leading-relaxed whitespace-pre-line bg-primary-500 text-white">
                   {msg.content}
