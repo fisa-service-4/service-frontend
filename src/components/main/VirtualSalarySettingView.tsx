@@ -396,7 +396,7 @@ export default function VirtualSalarySettingView() {
           disabled={saving}
           className="w-full py-3.5 bg-primary-500 text-white font-bold rounded-2xl text-sm disabled:opacity-50"
         >
-          {saving ? '저장 중...' : hasSetting ? '저장하기' : '저장하기'}
+          {saving ? '저장 중...' : '저장하기'}
         </button>
 
       </div>
