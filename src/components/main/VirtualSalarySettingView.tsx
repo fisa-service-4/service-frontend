@@ -225,7 +225,7 @@ export default function VirtualSalarySettingView() {
         payday: paydayNum,
         ...(rawEmergencyTarget    > 0 && { emergencyTargetAmount: rawEmergencyTarget }),
         ...(rawEmergencyTransfer  > 0 && { emergencyAmount: rawEmergencyTransfer }),
-        ...(rawInvestmentTransfer > 0 && { investmentAmount: rawInvestmentTransfer }),
+        ...(hasStockAccount && rawInvestmentTransfer > 0 && { investmentAmount: rawInvestmentTransfer }),
         priorityOrder,
       };
       await saveVirtualSalarySetting(body);
