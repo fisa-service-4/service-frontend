@@ -7,6 +7,7 @@ import BottomNav from '@/components/main/BottomNav';
 import NotificationPanel from '@/components/main/NotificationPanel';
 import StockChart from '@/components/stock/StockChart';
 import {
+  getStockAccounts,
   getHoldings,
   getReturns,
   getOrders,
@@ -15,7 +16,6 @@ import {
   removeFavorite,
   getStockChart,
   searchStocks,
-  TEMP_ACCOUNT_ID,
   type Holding,
   type Returns,
   type Order,
@@ -58,6 +58,7 @@ function StocksContent() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as 'holdings' | 'orders' | 'favorites') ?? 'holdings';
 
+  const [accountId, setAccountId] = useState<number | null>(null);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [returns, setReturns] = useState<Returns>({ dailyReturnRate: 0, monthlyReturnRate: 0, yearlyReturnRate: 0 });
   const [orders, setOrders] = useState<Order[]>([]);
@@ -75,16 +76,26 @@ function StocksContent() {
   useEffect(() => {
     (async () => {
       try {
-        const [holdingRes, returnsRes, favRes] = await Promise.all([
-          getHoldings(TEMP_ACCOUNT_ID),
-          getReturns(TEMP_ACCOUNT_ID),
+        const [accountsRes, favRes] = await Promise.all([
+          getStockAccounts(),
           getFavorites(),
         ]);
-        setHoldings(holdingRes.holdings);
-        setReturns(returnsRes);
+
+        const id = accountsRes.accounts[0]?.accountId ?? null;
+        setAccountId(id);
+
         const map: Record<string, number> = {};
         favRes.favorites.forEach((f) => { map[f.stockCode] = f.favoriteId; });
         setFavoriteMap(map);
+
+        if (!id) return;
+
+        const [holdingRes, returnsRes] = await Promise.all([
+          getHoldings(id),
+          getReturns(id),
+        ]);
+        setHoldings(holdingRes.holdings);
+        setReturns(returnsRes);
 
         const charts = await Promise.all(
           holdingRes.holdings.map((h) => getStockChart(h.stockCode, 'DAILY'))
@@ -101,16 +112,16 @@ function StocksContent() {
   }, []);
 
   useEffect(() => {
-    if (tab !== 'orders') return;
+    if (tab !== 'orders' || !accountId) return;
     (async () => {
       try {
-        const res = await getOrders(TEMP_ACCOUNT_ID);
+        const res = await getOrders(accountId);
         setOrders(res.content);
       } catch (e) {
         console.error(e);
       }
     })();
-  }, [tab]);
+  }, [tab, accountId]);
 
   useEffect(() => {
     if (tab !== 'favorites') return;

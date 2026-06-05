@@ -7,7 +7,7 @@ import { getAccounts, getAccountsWithRoles } from '@/api/bank';
 import { getAssetDashboard, connectMyData } from '@/api/mydata';
 import type { AssetDashboard } from '@/api/mydata';
 import type { BankAccount } from '@/types/bank';
-import { getStockAccounts, getHoldings, getReturns, TEMP_ACCOUNT_ID } from '@/api/stock';
+import { getStockAccounts, getHoldings, getReturns } from '@/api/stock';
 import type { Holding, Returns } from '@/api/stock';
 import TransferView from '@/components/main/TransferView';
 import NotificationPanel from '@/components/main/NotificationPanel';
@@ -74,10 +74,10 @@ export default function AssetsView() {
     setHoldingsLoading(true);
     getStockAccounts()
       .then((res) => {
-        const accountId = res.accounts?.[0]?.accountId ?? TEMP_ACCOUNT_ID;
+        const accountId = res.accounts?.[0]?.accountId;
+        if (!accountId) return Promise.reject(new Error('no account'));
         return Promise.all([getHoldings(accountId), getReturns(accountId)]);
       })
-      .catch(() => Promise.all([getHoldings(TEMP_ACCOUNT_ID), getReturns(TEMP_ACCOUNT_ID)]))
       .then(([holdingsRes, returnsRes]) => {
         setHoldings(holdingsRes.holdings);
         setStockReturns(returnsRes);
