@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { UserCircle2, Bell, Mail, ShieldCheck, ChevronRight } from 'lucide-react';
+import { useEffect } from 'react';
 import { tokenUtils } from '@/utils/token';
 
 interface ToggleProps {
