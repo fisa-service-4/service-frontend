@@ -2,6 +2,8 @@ const ACCESS_TOKEN_KEY = 'accessToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 const USER_ID_KEY = 'userId';
 const FIREBASE_UID_KEY = 'firebaseUid';
+const USER_EMAIL_KEY = 'userEmail';
+const USER_NAME_KEY = 'userName';
 
 export const tokenUtils = {
   setTokens: (accessToken: string, refreshToken: string) => {
@@ -17,10 +19,16 @@ export const tokenUtils = {
   },
   setFirebaseUid: (uid: string) => localStorage.setItem(FIREBASE_UID_KEY, uid),
   getFirebaseUid: (): string | null => localStorage.getItem(FIREBASE_UID_KEY),
+  setUserEmail: (email: string) => localStorage.setItem(USER_EMAIL_KEY, email),
+  getUserEmail: (): string | null => localStorage.getItem(USER_EMAIL_KEY),
+  setUserName: (name: string) => localStorage.setItem(USER_NAME_KEY, name),
+  getUserName: (): string | null => localStorage.getItem(USER_NAME_KEY),
   clearTokens: () => {
     localStorage.removeItem(ACCESS_TOKEN_KEY);
     localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_ID_KEY);
     localStorage.removeItem(FIREBASE_UID_KEY);
+    localStorage.removeItem(USER_EMAIL_KEY);
+    localStorage.removeItem(USER_NAME_KEY);
   },
 };
