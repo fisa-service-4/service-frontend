@@ -64,4 +64,11 @@ export const authApi = {
       body: JSON.stringify({ refreshToken }),
       skipAuth: true,
     }),
+
+  adminSignup: (data: { email: string; password: string; userName: string }) =>
+    apiRequest<SignupResponse>('/auth/admin/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      skipAuth: true,
+    }),
 };
