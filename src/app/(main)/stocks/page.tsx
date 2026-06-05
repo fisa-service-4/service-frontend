@@ -76,21 +76,26 @@ function StocksContent() {
   useEffect(() => {
     (async () => {
       try {
-        const accountsRes = await getStockAccounts();
-        const id = accountsRes.accounts[0]?.accountId ?? null;
-        setAccountId(id);
-        if (!id) return;
-
-        const [holdingRes, returnsRes, favRes] = await Promise.all([
-          getHoldings(id),
-          getReturns(id),
+        const [accountsRes, favRes] = await Promise.all([
+          getStockAccounts(),
           getFavorites(),
         ]);
-        setHoldings(holdingRes.holdings);
-        setReturns(returnsRes);
+
+        const id = accountsRes.accounts[0]?.accountId ?? null;
+        setAccountId(id);
+
         const map: Record<string, number> = {};
         favRes.favorites.forEach((f) => { map[f.stockCode] = f.favoriteId; });
         setFavoriteMap(map);
+
+        if (!id) return;
+
+        const [holdingRes, returnsRes] = await Promise.all([
+          getHoldings(id),
+          getReturns(id),
+        ]);
+        setHoldings(holdingRes.holdings);
+        setReturns(returnsRes);
 
         const charts = await Promise.all(
           holdingRes.holdings.map((h) => getStockChart(h.stockCode, 'DAILY'))
