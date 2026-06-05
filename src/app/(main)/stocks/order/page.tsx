@@ -7,11 +7,11 @@ import BottomNav from '@/components/main/BottomNav';
 import PinKeypad from '@/components/PinKeypad';
 import { authApi } from '@/api/auth';
 import {
+  getStockAccounts,
   getCashBalance,
   createOrder,
   getStockChart,
   getHoldings,
-  TEMP_ACCOUNT_ID,
   type OrderCreateRequest,
   type ChartCandle,
 } from '@/api/stock';
@@ -62,6 +62,7 @@ function StockOrderContent() {
   const [quantity, setQuantity] = useState(0);
   const [limitPrice, setLimitPrice] = useState<number | ''>(stockPrice);
   const [methodOpen, setMethodOpen] = useState(false);
+  const [accountId, setAccountId] = useState<number | null>(null);
   const [availableBalance, setAvailableBalance] = useState<number | null>(null);
   const [holdingQty, setHoldingQty] = useState(urlHoldingQty);
   const [chartData, setChartData] = useState<ChartCandle[]>([]);
@@ -75,9 +76,18 @@ function StockOrderContent() {
   const [pinLoading, setPinLoading] = useState(false);
 
   useEffect(() => {
-    getCashBalance(TEMP_ACCOUNT_ID)
-      .then((res) => setAvailableBalance(res.availableBalance))
-      .catch(console.error);
+    (async () => {
+      try {
+        const accountsRes = await getStockAccounts();
+        const id = accountsRes.accounts[0]?.accountId ?? null;
+        setAccountId(id);
+        if (!id) return;
+        const res = await getCashBalance(id);
+        setAvailableBalance(res.availableBalance);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
 
     if (stockCode) {
       getStockChart(stockCode, 'DAILY')
@@ -87,14 +97,14 @@ function StockOrderContent() {
   }, [stockCode]);
 
   useEffect(() => {
-    if (urlHoldingQty > 0 || !stockCode) return;
-    getHoldings(TEMP_ACCOUNT_ID)
+    if (urlHoldingQty > 0 || !stockCode || !accountId) return;
+    getHoldings(accountId)
       .then((res) => {
         const matched = res.holdings.find((h) => h.stockCode === stockCode);
         setHoldingQty(matched?.quantity ?? 0);
       })
       .catch(console.error);
-  }, [stockCode, urlHoldingQty]);
+  }, [stockCode, urlHoldingQty, accountId]);
 
   const up = changeRate >= 0;
   const activePrice = orderMethod === 'LIMIT' ? (Number(limitPrice) || 0) : stockPrice;
@@ -113,7 +123,7 @@ function StockOrderContent() {
   };
 
   const openPin = () => {
-    if (quantity <= 0) return;
+    if (quantity <= 0 || !accountId) return;
     setPin('');
     setPinError('');
     setShowPin(true);
@@ -162,7 +172,7 @@ function StockOrderContent() {
         quantity,
         price: activePrice,
       };
-      await createOrder(TEMP_ACCOUNT_ID, body);
+      await createOrder(accountId!, body);
       setSuccess(true);
       setQuantity(0);
       setTimeout(() => router.push('/stocks?tab=orders'), 1500);
