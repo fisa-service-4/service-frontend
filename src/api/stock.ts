@@ -19,7 +19,6 @@ export const getStockAccounts = () =>
     },
   });
 
-export const TEMP_ACCOUNT_ID = 1;
 
 export interface Holding {
   stockCode: string;

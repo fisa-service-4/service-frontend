@@ -7,6 +7,7 @@ import BottomNav from '@/components/main/BottomNav';
 import NotificationPanel from '@/components/main/NotificationPanel';
 import StockChart from '@/components/stock/StockChart';
 import {
+  getStockAccounts,
   getHoldings,
   getReturns,
   getOrders,
@@ -15,7 +16,6 @@ import {
   removeFavorite,
   getStockChart,
   searchStocks,
-  TEMP_ACCOUNT_ID,
   type Holding,
   type Returns,
   type Order,
@@ -58,6 +58,7 @@ function StocksContent() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as 'holdings' | 'orders' | 'favorites') ?? 'holdings';
 
+  const [accountId, setAccountId] = useState<number | null>(null);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [returns, setReturns] = useState<Returns>({ dailyReturnRate: 0, monthlyReturnRate: 0, yearlyReturnRate: 0 });
   const [orders, setOrders] = useState<Order[]>([]);
@@ -75,9 +76,14 @@ function StocksContent() {
   useEffect(() => {
     (async () => {
       try {
+        const accountsRes = await getStockAccounts();
+        const id = accountsRes.accounts[0]?.accountId ?? null;
+        setAccountId(id);
+        if (!id) return;
+
         const [holdingRes, returnsRes, favRes] = await Promise.all([
-          getHoldings(TEMP_ACCOUNT_ID),
-          getReturns(TEMP_ACCOUNT_ID),
+          getHoldings(id),
+          getReturns(id),
           getFavorites(),
         ]);
         setHoldings(holdingRes.holdings);
@@ -101,16 +107,16 @@ function StocksContent() {
   }, []);
 
   useEffect(() => {
-    if (tab !== 'orders') return;
+    if (tab !== 'orders' || !accountId) return;
     (async () => {
       try {
-        const res = await getOrders(TEMP_ACCOUNT_ID);
+        const res = await getOrders(accountId);
         setOrders(res.content);
       } catch (e) {
         console.error(e);
       }
     })();
-  }, [tab]);
+  }, [tab, accountId]);
 
   useEffect(() => {
     if (tab !== 'favorites') return;
