@@ -35,7 +35,7 @@ export default function HomePage() {
           setError(
             err instanceof Error
               ? err.message
-              : "데이터를 불러오는 데 실패했습니다.",
+              : "데이터를 불러올 수 없습니다.",
           );
       })
       .finally(() => {
@@ -67,22 +67,22 @@ export default function HomePage() {
     <div className="flex flex-col h-screen bg-bg">
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* 헤더 */}
-        <div className="flex items-center justify-end px-5 py-4 shrink-0">
+        <div className="flex items-center justify-end px-5 py-3 bg-bg shrink-0">
           <button className="p-1" onClick={() => setShowNotification(true)}>
             <Bell size={22} className="text-gray-800" />
           </button>
         </div>
 
         {/* 스크롤 영역 */}
-        <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-4 relative">
-          {/* 에러 배너 */}
+        <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-5 pb-4 relative">
+          {/* 오류 메시지 */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
               {error}
             </div>
           )}
 
-          {/* 카드 탭 → 가상월급 설정 페이지 */}
+          {/* 카드 클릭 시 가상월급 설정으로 이동 */}
           <div
             onClick={() => router.push("/mypage/virtual-salary")}
             className="cursor-pointer"
@@ -101,7 +101,7 @@ export default function HomePage() {
           />
         </div>
 
-        {/* AI 상담사 플로팅 버튼 */}
+        {/* AI 챗봇 플로팅 버튼 */}
         <button
           onClick={() => router.push("/chat")}
           className="absolute bottom-6 right-5 z-10 flex flex-col items-center drop-shadow-xl"

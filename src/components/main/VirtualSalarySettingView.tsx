@@ -163,8 +163,10 @@ export default function VirtualSalarySettingView() {
 
   const applyAiRecommendation = () => {
     if (!aiData) return;
+    const sAmt = aiData.recommendedTargetSalary || 0;
     const eAmt = aiData.recommendedEmergencyAmount || 0;
     const iAmt = hasStockAccount ? aiData.recommendedInvestmentAmount || 0 : 0;
+    if (sAmt > 0) setTargetSalary(sAmt.toLocaleString());
     setEmergencyTransfer(eAmt > 0 ? eAmt.toLocaleString() : '');
     setInvestmentTransfer(iAmt > 0 ? iAmt.toLocaleString() : '');
     setShowAiModal(false);
@@ -173,7 +175,7 @@ export default function VirtualSalarySettingView() {
   const openPin = () => {
     const paydayNum = Number(payday);
     if (!rawSalary || paydayNum < 1 || paydayNum > 31) {
-      setError('월급 금액과 월급일(1~31)을 올바르게 입력해주세요.');
+      setError('목표 금액과 월급일(1~31)을 올바르게 입력해주세요.');
       return;
     }
     setError(null);
@@ -251,7 +253,7 @@ export default function VirtualSalarySettingView() {
             narrow
           />
           <FieldInput
-            label="월급액"
+            label="목표액"
             value={targetSalary}
             onChange={handleAmountInput(setTargetSalary)}
             placeholder="3,000,000"
@@ -288,10 +290,10 @@ export default function VirtualSalarySettingView() {
             placeholder={hasStockAccount ? '300,000' : '0'}
             suffix="원"
             disabled={!hasStockAccount}
-            onDisabledClick={() => showToast('투자 계좌가 연결되어 있지 않아요. 마이데이터에서 연결해주세요.')}
+            onDisabledClick={() => showToast('증권 계좌가 연결되어 있지 않아요. 마이페이지에서 연결해주세요.')}
           />
           {!hasStockAccount && (
-            <span className="self-end text-[10px] text-amber-500 pb-2 shrink-0">계좌 미연결</span>
+            <span className="self-end text-[10px] text-amber-500 pb-2 shrink-0">계좌 미연동</span>
           )}
         </>
       );
@@ -322,6 +324,7 @@ export default function VirtualSalarySettingView() {
     );
   };
 
+  const aiTargetSalary  = aiData ? aiData.recommendedTargetSalary     : 0;
   const aiEmergencyAmt  = aiData ? aiData.recommendedEmergencyAmount  : 0;
   const aiInvestmentAmt = aiData && hasStockAccount ? aiData.recommendedInvestmentAmount : 0;
 
@@ -340,7 +343,7 @@ export default function VirtualSalarySettingView() {
     <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="relative flex items-center px-5 py-4 bg-bg-card shrink-0 border-b border-gray-100">
+      <div className="relative flex items-center px-5 py-3 bg-bg shrink-0 border-b border-gray-100">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
@@ -349,11 +352,11 @@ export default function VirtualSalarySettingView() {
 
       <div className="flex-1 overflow-y-auto px-4 space-y-4 pb-6 pt-4">
 
-        {/* 항목별 설정 */}
+        {/* 분배 설정 */}
         <div className="bg-bg-card shadow-md rounded-2xl p-4">
-          <h2 className="text-base font-bold text-gray-900 mb-0.5">항목별 설정</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-0.5">분배 설정</h2>
           <p className="text-xs text-gray-400 mb-3">
-            ≡ 아이콘을 드래그해 분배 우선순위를 바꿀 수 있어요
+            각 항목의 이체액을 드래그해 분배 우선순위를 바꿀 수 있어요
           </p>
           {priorityOrder.map((item, idx) => renderRow(item, idx))}
         </div>
@@ -366,7 +369,7 @@ export default function VirtualSalarySettingView() {
             </div>
             <div>
               <p className="text-sm font-bold text-gray-900">AI 추천</p>
-              <p className="text-xs text-gray-400">수입 패턴과 지출 분석을 바탕으로 최적의 분배 비율을 제안합니다</p>
+              <p className="text-xs text-gray-400">소비 습관과 수입 분석을 바탕으로 최적의 분배 금액을 추천합니다</p>
             </div>
           </div>
           {aiError && <p className="text-red-500 text-xs mb-3">{aiError}</p>}
@@ -380,7 +383,7 @@ export default function VirtualSalarySettingView() {
           </button>
         </div>
 
-        {/* 에러 */}
+        {/* 오류 */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
             {error}
@@ -393,7 +396,7 @@ export default function VirtualSalarySettingView() {
           disabled={saving}
           className="w-full py-3.5 bg-primary-500 text-white font-bold rounded-2xl text-sm disabled:opacity-50"
         >
-          {saving ? '저장 중...' : hasSetting ? '수정하기' : '저장하기'}
+          {saving ? '저장 중...' : hasSetting ? '저장하기' : '저장하기'}
         </button>
 
       </div>
@@ -421,17 +424,17 @@ export default function VirtualSalarySettingView() {
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-900">AI 추천</p>
-                <p className="text-xs text-gray-400">소비 패턴 분석 결과</p>
+                <p className="text-xs text-gray-400">분석 결과 기반 추천</p>
               </div>
             </div>
 
             <p className="text-sm text-gray-600 leading-relaxed mb-4">{aiData.summary}</p>
 
             <div className="space-y-2 mb-5">
-              <div className="flex items-center justify-between px-3 py-2.5 bg-gray-50 rounded-xl">
-                <span className="text-sm text-gray-500">현재 월급액</span>
-                <span className="text-sm font-bold text-gray-900">
-                  {rawSalary > 0 ? rawSalary.toLocaleString() + ' 원' : '미설정'}
+              <div className="flex items-center justify-between px-3 py-2.5 bg-primary-50 border border-primary-100 rounded-xl">
+                <span className="text-sm text-gray-600">추천 목표액</span>
+                <span className="text-sm font-bold text-primary-700">
+                  {aiTargetSalary > 0 ? aiTargetSalary.toLocaleString() + ' 원' : '-'}
                 </span>
               </div>
               <div className="flex items-center justify-between px-3 py-2.5 bg-primary-50 border border-primary-100 rounded-xl">
@@ -447,7 +450,7 @@ export default function VirtualSalarySettingView() {
                     {aiInvestmentAmt > 0 ? aiInvestmentAmt.toLocaleString() + ' 원' : '-'}
                   </span>
                 ) : (
-                  <span className="text-sm text-amber-500 font-medium">계좌 미연결</span>
+                  <span className="text-sm text-amber-500 font-medium">계좌 미연동</span>
                 )}
               </div>
             </div>
@@ -474,7 +477,7 @@ export default function VirtualSalarySettingView() {
       {/* PIN 오버레이 */}
       {showPin && (
         <div className="absolute inset-0 bg-bg-card z-50 flex flex-col">
-          <div className="flex items-center px-5 py-4 shrink-0 relative border-b border-gray-100">
+          <div className="flex items-center px-5 py-3 bg-bg-card shrink-0 relative border-b border-gray-100">
             <button onClick={() => setShowPin(false)}>
               <X size={22} className="text-gray-800" />
             </button>
@@ -486,7 +489,7 @@ export default function VirtualSalarySettingView() {
           <div className="flex-1 flex flex-col items-center pt-12 px-4">
             <div className="bg-gray-700 rounded-full px-6 py-2.5 mb-10">
               <p className="text-white text-sm font-medium">
-                설정 저장을 위해 PIN을 입력해주세요
+                설정을 저장하기 위해 PIN을 입력해주세요
               </p>
             </div>
 

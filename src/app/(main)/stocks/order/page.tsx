@@ -177,7 +177,7 @@ function StockOrderContent() {
     <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="flex items-center px-5 py-4 bg-bg-card shrink-0 relative border-b border-gray-100">
+      <div className="flex items-center px-5 py-3 bg-bg shrink-0 relative border-b border-gray-100">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
@@ -186,7 +186,7 @@ function StockOrderContent() {
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
 
         {/* 종목 정보 카드 */}
         <div className="bg-bg-card shadow-md rounded-2xl p-4 mb-4">
@@ -209,7 +209,7 @@ function StockOrderContent() {
           }
         </div>
 
-        {/* 매수 / 매도 토글 */}
+        {/* 매수 / 매도 선택 */}
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => handleSideChange('BUY')}
@@ -232,9 +232,9 @@ function StockOrderContent() {
         {/* 주문 폼 */}
         <div className="bg-gray-100 shadow-md rounded-2xl p-4 mb-4 space-y-4">
 
-          {/* 주문 유형 */}
+          {/* 주문 방법 */}
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-500">주문 유형</span>
+            <span className="text-sm text-gray-500">주문 방법</span>
               <div className="relative">
                 <button
                   onClick={() => setMethodOpen((o) => !o)}
@@ -332,14 +332,14 @@ function StockOrderContent() {
             ))}
           </div>
 
-          {/* 예상 금액 / 예수금 */}
+          {/* 예상 금액 / 잔액 */}
           <div className="border-t border-gray-200 pt-3 space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">예상 금액</span>
               <span className="text-sm font-bold text-gray-900">{fmtWon(estimate)}</span>
             </div>
             <p className={`text-xs text-primary-500 text-right ${orderMethod === 'MARKET' ? 'visible' : 'invisible'}`}>
-              시장가는 현재가로 즉시 체결됩니다.
+              시장가는 현재가로 대략 체결됩니다.
             </p>
             <div className="flex justify-between">
               {side === 'SELL' ? (
@@ -349,7 +349,7 @@ function StockOrderContent() {
                 </>
               ) : (
                 <>
-                  <span className="text-sm text-gray-500">주문 가능 예수금</span>
+                  <span className="text-sm text-gray-500">주문 가능 금액</span>
                   <span className="text-sm font-bold text-gray-900">{fmtWon(availableBalance ?? 0)}</span>
                 </>
               )}
@@ -357,17 +357,17 @@ function StockOrderContent() {
           </div>
         </div>
 
-        {/* 에러 메시지 */}
+        {/* 오류 메시지 */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 text-center">
             <p className="text-xs text-red-500">{error}</p>
           </div>
         )}
 
-        {/* 주문 성공 */}
+        {/* 주문 완료 */}
         {success && (
           <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4 text-center">
-            <p className="text-xs text-green-600">주문이 성공적으로 접수되었습니다.</p>
+            <p className="text-xs text-green-600">주문이 정상적으로 접수되었습니다.</p>
           </div>
         )}
 
@@ -390,7 +390,7 @@ function StockOrderContent() {
         <div className="absolute inset-0 bg-white z-50 flex flex-col">
 
           {/* 헤더 */}
-          <div className="flex items-center px-5 py-4 shrink-0 relative border-b border-gray-100">
+          <div className="flex items-center px-5 py-3 bg-white shrink-0 relative border-b border-gray-100">
             <button onClick={() => setShowPin(false)}>
               <X size={22} className="text-gray-800" />
             </button>
@@ -420,7 +420,7 @@ function StockOrderContent() {
               ))}
             </div>
 
-            {/* 에러 메시지 */}
+            {/* 오류 메시지 */}
             {pinError && (
               <p className="text-sm text-error mb-6">{pinError}</p>
             )}

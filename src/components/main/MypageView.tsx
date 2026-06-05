@@ -35,7 +35,7 @@ export default function MypageView() {
     <div className="flex flex-col h-screen bg-gray-50">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-end px-5 py-4 bg-white shrink-0">
+      <div className="flex items-center justify-end px-5 py-3 bg-gray-50 shrink-0">
         <button className="p-1" onClick={() => setShowNotification(true)}>
           <Bell size={22} className="text-gray-800" />
         </button>
@@ -44,8 +44,8 @@ export default function MypageView() {
       <div className="flex-1 overflow-y-auto">
 
         {/* 프로필 섹션 */}
-        <div className="bg-slate-900 px-5 pb-6 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-slate-700 border-2 border-sky-500 flex items-center justify-center mb-3 mt-2">
+        <div className="bg-slate-900 px-5 pt-4 pb-4 flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full bg-slate-700 border-2 border-sky-500 flex items-center justify-center mb-3">
             <User size={32} className="text-sky-400" />
           </div>
           <p className="text-white font-bold text-lg mb-1">{user?.userName ?? '-'}</p>

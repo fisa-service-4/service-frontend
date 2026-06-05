@@ -79,11 +79,11 @@ export default function PinChangeView() {
     <div className="flex flex-col h-screen bg-white">
 
       {/* 헤더 */}
-      <div className="flex items-center px-5 py-4 shrink-0 relative">
+      <div className="flex items-center px-5 py-3 bg-white shrink-0 relative">
         <button onClick={() => router.back()} className="absolute left-5">
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
-<span className="w-full text-center text-base font-bold text-gray-900">PIN 변경</span>
+        <span className="w-full text-center text-base font-bold text-gray-900">PIN 변경</span>
       </div>
 
       <div className="flex-1 flex flex-col items-center pt-8 px-4">
@@ -103,9 +103,9 @@ export default function PinChangeView() {
           ))}
         </div>
 
-        {/* 에러 메시지 */}
+        {/* 오류 메시지 */}
         <p className={`text-sm text-red-500 mb-6 transition-opacity ${errorMsg ? 'opacity-100' : 'opacity-0'}`}>
-          {errorMsg || ' '}
+          {errorMsg || ' '}
         </p>
 
         {/* 키패드 */}
@@ -115,7 +115,7 @@ export default function PinChangeView() {
 
       <BottomNav />
 
-      {/* 성공 모달 */}
+      {/* 완료 모달 */}
       {showModal && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl mx-6 p-6 flex flex-col items-center">

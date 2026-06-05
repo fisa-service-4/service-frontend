@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { ArrowLeft, ChevronDown, Check, Info } from 'lucide-react';
@@ -135,11 +135,11 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
   if (step === 'form') {
     return (
       <div className="flex flex-col h-screen bg-white relative">
-        <div className="flex items-center px-5 py-4 shrink-0 border-b border-gray-100">
-          <button onClick={onBack} className="mr-3">
+        <div className="relative flex items-center px-5 py-3 bg-white shrink-0 border-b border-gray-100">
+          <button onClick={onBack}>
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
-          <h1 className="text-base font-bold text-gray-900">이체</h1>
+          <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">이체</span>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 pb-4">
@@ -313,11 +313,11 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
   if (step === 'confirm') {
     return (
       <div className="flex flex-col h-screen bg-white">
-        <div className="flex items-center px-5 py-4 shrink-0 border-b border-gray-100">
-          <button onClick={() => setStep('form')} className="mr-3">
+        <div className="relative flex items-center px-5 py-3 bg-white shrink-0 border-b border-gray-100">
+          <button onClick={() => setStep('form')}>
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
-          <h1 className="text-base font-bold text-gray-900">이체 확인</h1>
+          <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">이체 확인</span>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
@@ -390,11 +390,11 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
   if (step === 'pin') {
     return (
       <div className="flex flex-col h-screen bg-white">
-        <div className="flex items-center px-5 py-4 shrink-0 border-b border-gray-100">
-          <button onClick={() => { setPin(''); setStep('confirm'); }} className="mr-3">
+        <div className="relative flex items-center px-5 py-3 bg-white shrink-0 border-b border-gray-100">
+          <button onClick={() => { setPin(''); setStep('confirm'); }}>
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
-          <h1 className="text-base font-bold text-gray-900">PIN 번호 입력</h1>
+          <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">PIN 번호 입력</span>
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center px-5">
@@ -435,11 +435,11 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
   /* ════════════════ STEP: COMPLETE ════════════════ */
   return (
     <div className="flex flex-col h-screen bg-white">
-      <div className="flex items-center px-5 py-4 shrink-0 border-b border-gray-100">
-        <button onClick={onBack} className="mr-3">
+      <div className="relative flex items-center px-5 py-3 bg-white shrink-0 border-b border-gray-100">
+        <button onClick={onBack}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
-        <h1 className="text-base font-bold text-gray-900">이체 완료</h1>
+        <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">이체 완료</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">

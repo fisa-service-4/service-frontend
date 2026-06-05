@@ -60,6 +60,7 @@ export interface HomeSummary {
 }
 
 export interface AiRecommendation {
+  recommendedTargetSalary: number;
   recommendedEmergencyAmount: number;
   recommendedInvestmentAmount: number;
   summary: string;

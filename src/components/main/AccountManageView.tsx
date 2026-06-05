@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -161,7 +161,7 @@ export default function AccountManageView() {
     <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="flex items-center px-5 py-4 bg-white shrink-0 relative border-b border-gray-100">
+      <div className="flex items-center px-5 py-3 bg-bg shrink-0 relative border-b border-gray-100">
         <button onClick={() => mode === 'edit' ? cancelEdit() : router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
