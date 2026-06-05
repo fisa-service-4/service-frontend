@@ -25,7 +25,7 @@ import {
 } from '@/api/stock';
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
-  REQUESTED: '주문접수',
+  REQUESTED: '주문요청',
   PARTIAL_FILLED: '부분체결',
   FILLED: '체결완료',
   CANCELLED: '취소',
@@ -175,13 +175,13 @@ function StocksContent() {
 
   return (
     <div className="flex flex-col h-screen bg-bg">
-      <div className="flex items-center justify-end px-5 py-4 shrink-0">
+      <div className="flex items-center justify-end px-5 py-3 bg-bg shrink-0">
         <button className="p-1" onClick={() => setShowNotification(true)}>
           <Bell size={22} className="text-gray-800" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
 
         {/* 검색창 */}
         <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-3 mb-4">
@@ -193,7 +193,7 @@ function StocksContent() {
             onChange={(e) => setQuery(e.target.value)}
           />
           {query && (
-            <button onClick={() => setQuery('')} className="text-gray-400 text-xs">✕</button>
+            <button onClick={() => setQuery('')} className="text-gray-400 text-xs">×</button>
           )}
         </div>
 

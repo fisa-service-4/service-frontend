@@ -31,10 +31,10 @@ function getContractBadge(contract: Contract): { label: string; style: string } 
   const tbcStart = new Date(pay); tbcStart.setDate(pay.getDate() - 2);
   const tbcEnd   = new Date(pay); tbcEnd.setDate(pay.getDate() + 2);
 
-  if (today > tbcEnd)    return { label: '실패',    style: 'bg-red-100 text-red-600'     };
+  if (today > tbcEnd)    return { label: '지연',    style: 'bg-red-100 text-red-600'     };
   if (today >= tbcStart) return { label: '확인 중', style: 'bg-amber-100 text-amber-600' };
-  if (contract.contractStatus === 'DELAYED') return { label: '실패', style: 'bg-red-100 text-red-600' };
-  return { label: '입금 전', style: 'bg-primary-100 text-primary-700' };
+  if (contract.contractStatus === 'DELAYED') return { label: '지연', style: 'bg-red-100 text-red-600' };
+  return { label: '입금 대기', style: 'bg-primary-100 text-primary-700' };
 }
 
 const _today = new Date();
@@ -127,7 +127,7 @@ export default function ContractListView() {
     <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="relative flex items-center px-5 py-4 shrink-0">
+      <div className="relative flex items-center px-5 py-3 bg-bg shrink-0">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
@@ -154,12 +154,12 @@ export default function ContractListView() {
       </div>
 
       {/* 리스트 */}
-      <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-5 min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 space-y-5 min-h-0">
         {loading ? (
           <div className="text-sm text-gray-400 text-center py-12">불러오는 중...</div>
         ) : contracts.length === 0 ? (
           <div className="text-sm text-gray-400 text-center py-12 bg-gray-50 rounded-2xl">
-            등록된 계약이 없어요
+            등록된 계약이 없습니다
           </div>
         ) : (
           <>
@@ -184,7 +184,7 @@ export default function ContractListView() {
             {completed.length > 0 && (
               <div className="bg-bg-card shadow-md rounded-2xl px-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                  <h2 className="text-sm font-bold text-gray-900">계약 완료</h2>
+                  <h2 className="text-sm font-bold text-gray-900">완료된 계약</h2>
                   <span className="text-xs text-gray-400">{completed.length}건</span>
                 </div>
                 <div className="divide-y divide-gray-100">

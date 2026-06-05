@@ -189,7 +189,7 @@ export default function ContractDetailView({ contractId }: Props) {
   if (loading) {
     return (
       <div className="flex flex-col h-screen bg-bg">
-        <div className="flex items-center px-5 py-4 shrink-0">
+        <div className="flex items-center px-5 py-3 bg-bg shrink-0">
           <button onClick={() => router.back()}>
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
@@ -205,7 +205,7 @@ export default function ContractDetailView({ contractId }: Props) {
   if (!contract) {
     return (
       <div className="flex flex-col h-screen bg-bg">
-        <div className="flex items-center px-5 py-4 shrink-0">
+        <div className="flex items-center px-5 py-3 bg-bg shrink-0">
           <button onClick={() => router.back()}>
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
@@ -292,14 +292,14 @@ export default function ContractDetailView({ contractId }: Props) {
   return (
     <div className="flex flex-col h-screen bg-bg">
       {/* 헤더 */}
-      <div className="px-5 py-4 shrink-0">
+      <div className="px-5 py-3 bg-bg shrink-0">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
       </div>
 
       {/* 컨텐츠 */}
-      <div className="flex-1 overflow-y-auto px-5 pb-6">
+      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-6">
         {/* 헤더: 클라이언트명 + 배지 */}
         <div className="flex items-center justify-between mb-1">
           <h1 className="text-lg font-bold text-gray-900">

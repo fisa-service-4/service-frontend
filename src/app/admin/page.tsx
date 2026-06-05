@@ -32,7 +32,7 @@ export default function AdminPage() {
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onNavChange={handleNavChange} />
 
         {/* 헤더 */}
-        <div className="px-5 py-4 shrink-0 bg-gradient-to-r from-slate-800 to-slate-900">
+        <div className="px-5 py-3 shrink-0 bg-gradient-to-r from-slate-800 to-slate-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button className="p-1" onClick={() => setSidebarOpen(true)}>

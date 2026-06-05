@@ -18,7 +18,7 @@ const TYPE_LABEL: Record<string, string> = {
   DELAYED:         '지연',
   SALARY:          '월급',
   BALANCE_WARNING: '잔액경고',
-  'AI-BRIEFING':   '행동제안',
+  'AI-BRIEFING':   'AI브리핑',
   SYSTEM:          '시스템',
 };
 
@@ -66,11 +66,11 @@ export default function NotificationPanel({ onClose }: Props) {
       {/* 어두운 배경 */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
 
-      {/* 우측 알림 패널 */}
+      {/* 오른쪽 알림 패널 */}
       <div className="relative w-4/5 bg-white h-full flex flex-col shadow-xl">
 
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-4 py-4 shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 bg-white shrink-0">
           <div className="w-7" />
           <span className="text-base font-bold text-gray-900">알림</span>
           <button onClick={onClose} className="p-1">
@@ -78,7 +78,7 @@ export default function NotificationPanel({ onClose }: Props) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 pb-6">
+        <div className="flex-1 overflow-y-auto px-4 pt-4 pb-6">
           {grouped.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-sm text-gray-400">알림이 없습니다</p>

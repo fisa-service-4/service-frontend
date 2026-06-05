@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Menu, ArrowRight, PlusCircle } from 'lucide-react';
@@ -285,11 +285,11 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
         )}
 
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-5 py-4 shrink-0">
+        <div className="relative flex items-center justify-between px-5 py-3 bg-white shrink-0">
           <button onClick={() => setSidebar(true)}>
             <Menu size={24} className="text-gray-800" />
           </button>
-          <span className="text-lg font-bold text-gray-900">AI 챗봇</span>
+          <span className="absolute left-1/2 -translate-x-1/2 text-lg font-bold text-gray-900">AI 챗봇</span>
           <button onClick={onClose}>
             <X size={24} className="text-gray-800" />
           </button>
@@ -348,7 +348,7 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
 
         {/* 입력창 */}
         {!requirePin && (
-          <div className="px-4 py-4 shrink-0">
+          <div className="px-4 py-3 shrink-0">
             <div className="flex items-end gap-2 bg-gray-100 rounded-3xl px-4 py-2.5">
               <textarea
                 value={input}

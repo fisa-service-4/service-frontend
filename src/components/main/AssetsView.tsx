@@ -31,7 +31,7 @@ const BANK_NAME: Record<string, string> = Object.fromEntries(
 );
 
 const ACCOUNT_ROLE_LABEL: Record<string, string> = {
-  DEPOSIT:   '입출금',
+  DEPOSIT:   '입금',
   SALARY:    '월급',
   EMERGENCY: '비상금',
   STOCK:     '주식',
@@ -96,7 +96,7 @@ export default function AssetsView() {
       setDashboard(dash);
       setSubView('overview');
     } catch (err) {
-      setConnectError(err instanceof Error ? err.message : '연동 중 오류가 발생했습니다.');
+      setConnectError(err instanceof Error ? err.message : '연결 중 오류가 발생했습니다.');
     } finally {
       setConnectLoading(false);
     }
@@ -123,11 +123,11 @@ export default function AssetsView() {
   if (subView === 'connect') {
     return (
       <div className="flex flex-col h-screen bg-bg">
-        <div className="flex items-center px-5 py-4 shrink-0 border-b border-gray-100">
+        <div className="relative flex items-center px-5 py-3 bg-bg shrink-0 border-b border-gray-100">
           <button onClick={() => { setSubView('overview'); setConnectError(''); }} className="mr-3">
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
-          <h1 className="text-base font-bold text-gray-900">계좌 연결</h1>
+          <span className="absolute left-1/2 -translate-x-1/2 text-base font-bold text-gray-900">계좌 연결</span>
         </div>
 
         <div className="flex-1 overflow-y-auto px-5 py-5">
@@ -148,7 +148,7 @@ export default function AssetsView() {
             <p className="text-xs text-red-500 mt-4 text-center">{connectError}</p>
           )}
           {connectLoading && (
-            <p className="text-xs text-gray-400 mt-4 text-center">연동 중...</p>
+            <p className="text-xs text-gray-400 mt-4 text-center">연결 중...</p>
           )}
         </div>
         <BottomNav />
@@ -173,15 +173,15 @@ export default function AssetsView() {
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
       {/* 헤더 */}
-      <div className="flex items-center justify-end px-5 py-4 shrink-0">
+      <div className="flex items-center justify-end px-5 py-3 bg-bg shrink-0">
         <button className="p-1" onClick={() => setShowNotification(true)}>
           <Bell size={22} className="text-gray-800" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-5 pb-6">
 
-        {/* ── 총 자산 카드 ── */}
+        {/* 통합 총 자산 카드 상단 */}
         <div className="bg-bg-card shadow-md rounded-2xl p-5">
           {loading ? (
             <div className="space-y-3">
@@ -200,17 +200,17 @@ export default function AssetsView() {
                 {formatKRW(dashboard?.totalAssetAmount ?? 0)}
               </p>
               <span className="inline-flex items-center gap-1 bg-sky-50 text-sky-600 text-xs font-bold px-2.5 py-1 rounded-lg border border-sky-200 mb-4">
-                지난달 대비 -
+                데이터 없음 -
               </span>
               <div className="flex gap-3">
                 <div className="flex-1 bg-gray-100 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 mb-1">은행 잔액</p>
+                  <p className="text-xs text-gray-400 mb-1">은행 자산</p>
                   <p className="text-sm font-bold text-gray-900">
                     {formatKRW(dashboard?.totalBankAssetAmount ?? 0)}
                   </p>
                 </div>
                 <div className="flex-1 bg-gray-100 rounded-xl p-3">
-                  <p className="text-xs text-gray-400 mb-1">증권 평가 금액</p>
+                  <p className="text-xs text-gray-400 mb-1">투자 총 금액</p>
                   <p className="text-sm font-bold text-gray-900">
                     {formatKRW(dashboard?.totalStockAssetAmount ?? 0)}
                   </p>
@@ -220,9 +220,9 @@ export default function AssetsView() {
           )}
         </div>
 
-        {/* ── 자산 구성 ── */}
+        {/* 자산 비율 분포 표시 */}
         <div>
-          <h2 className="text-base font-bold text-gray-900 mb-3">자산 구성</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-3">자산 분포</h2>
           <div className="bg-bg-card shadow-md rounded-2xl p-5 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" />
@@ -239,7 +239,7 @@ export default function AssetsView() {
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full bg-sky-200 shrink-0" />
-              <span className="text-sm text-gray-700 w-8 shrink-0">증권</span>
+              <span className="text-sm text-gray-700 w-8 shrink-0">투자</span>
               <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-sky-300 rounded-full transition-all duration-500"
@@ -253,7 +253,7 @@ export default function AssetsView() {
           </div>
         </div>
 
-        {/* ── 탭 ── */}
+        {/* 필터 탭 전환 */}
         <div className="bg-gray-100 rounded-xl p-1 flex gap-1">
           {(['all', 'bank', 'stock'] as AssetTab[]).map((tab) => (
             <button
@@ -265,16 +265,16 @@ export default function AssetsView() {
                   : 'text-gray-400'
               }`}
             >
-              {tab === 'all' ? '전체' : tab === 'bank' ? '은행' : '증권'}
+              {tab === 'all' ? '전체' : tab === 'bank' ? '은행' : '투자'}
             </button>
           ))}
         </div>
 
-        {/* ── 증권 탭: 보유 종목 ── */}
+        {/* 보유종목 탭: 보유주식 목록 */}
         {activeTab === 'stock' && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-bold text-gray-900">보유 종목</h2>
+              <h2 className="text-base font-bold text-gray-900">보유 주식</h2>
               {stockReturns && stockReturns.dailyReturnRate != null && (
                 <span className="text-xs text-gray-500">
                   일간 <span className={stockReturns.dailyReturnRate >= 0 ? 'text-red-500 font-bold' : 'text-blue-500 font-bold'}>
@@ -290,7 +290,7 @@ export default function AssetsView() {
                   <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
                 </>
               ) : holdings.length === 0 ? (
-                <p className="text-center text-sm text-gray-400 py-8">보유 종목이 없습니다.</p>
+                <p className="text-center text-sm text-gray-400 py-8">보유 주식이 없습니다.</p>
               ) : (
                 holdings.map((holding) => (
                   <div
@@ -314,11 +314,11 @@ export default function AssetsView() {
           </div>
         )}
 
-        {/* ── 연동 계좌 (전체/은행 탭) ── */}
+        {/* 계좌 목록 영역 (전체/은행 탭) 표시 */}
         {activeTab !== 'stock' && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold text-gray-900">연동 계좌</h2>
+            <h2 className="text-base font-bold text-gray-900">계좌 목록</h2>
             {activeTab === 'bank' ? (
               <button
                 onClick={() => setSubView('transfer')}
@@ -345,7 +345,7 @@ export default function AssetsView() {
                 </>
               ) : displayAccounts.length === 0 ? (
                 <p className="text-center text-sm text-gray-400 py-8">
-                  해당 유형의 계좌가 없습니다.
+                  해당 탭에 계좌가 없습니다.
                 </p>
               ) : (
                 displayAccounts.map((account) => (
@@ -358,7 +358,7 @@ export default function AssetsView() {
                         {BANK_NAME[account.bankCode] ?? account.bankCode}
                       </p>
                       <p className="text-sm font-medium text-gray-800 mt-0.5">
-                        {ACCOUNT_ROLE_LABEL[account.accountRole ?? ''] ?? '입출금'}{' '}
+                        {ACCOUNT_ROLE_LABEL[account.accountRole ?? ''] ?? '기타'}{' '}
                         · {account.accountNumber}
                       </p>
                     </div>
@@ -382,11 +382,11 @@ export default function AssetsView() {
                   />
                 </svg>
               </div>
-              <p className="text-base font-bold text-gray-900 mb-1">계좌를 연동해주세요</p>
+              <p className="text-base font-bold text-gray-900 mb-1">계좌를 연결해주세요</p>
               <p className="text-xs text-gray-400 mb-5">
-                계좌 연동 시 모든 금융·자산을
+                은행 계좌 및 증권 계좌를 연동해두면
                 <br />
-                한눈에 볼 수 있어요
+                자산을 한눈에 볼 수 있어요
               </p>
               <button
                 onClick={() => setSubView('connect')}
