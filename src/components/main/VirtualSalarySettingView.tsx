@@ -8,7 +8,6 @@ import { authApi } from '@/api/auth';
 import {
   getVirtualSalarySetting,
   saveVirtualSalarySetting,
-  updateVirtualSalarySetting,
   getAiRecommendation,
 } from '@/api/virtualSalary';
 import { getStockAccounts } from '@/api/stock';
@@ -112,11 +111,11 @@ export default function VirtualSalarySettingView() {
           setEmergencyTargetAmt(
             data.emergencyTargetAmount != null ? data.emergencyTargetAmount.toLocaleString() : '',
           );
-          if (data.emergencyRatio != null && salary > 0) {
-            setEmergencyTransfer(Math.round(salary * data.emergencyRatio / 100).toLocaleString());
+          if (data.emergencyAmount != null) {
+            setEmergencyTransfer(data.emergencyAmount.toLocaleString());
           }
-          if (data.investmentRatio != null && salary > 0) {
-            setInvestmentTransfer(Math.round(salary * data.investmentRatio / 100).toLocaleString());
+          if (data.investmentAmount != null) {
+            setInvestmentTransfer(data.investmentAmount.toLocaleString());
           }
           setPriorityOrder(data.priorityOrder.length > 0 ? data.priorityOrder : DEFAULT_PRIORITY);
           setHasSetting(true);
@@ -219,21 +218,15 @@ export default function VirtualSalarySettingView() {
     setError(null);
     try {
       const paydayNum = Number(payday);
-      const emoRatio = rawSalary > 0 ? Math.round((rawEmergencyTransfer  / rawSalary) * 10000) / 100 : 0;
-      const invRatio = rawSalary > 0 ? Math.round((rawInvestmentTransfer / rawSalary) * 10000) / 100 : 0;
       const body = {
         targetSalary: rawSalary,
         payday: paydayNum,
-        ...(rawEmergencyTarget > 0 && { emergencyTargetAmount: rawEmergencyTarget }),
-        ...(emoRatio > 0           && { emergencyRatio: emoRatio }),
-        ...(invRatio > 0           && { investmentRatio: invRatio }),
+        ...(rawEmergencyTarget    > 0 && { emergencyTargetAmount: rawEmergencyTarget }),
+        ...(rawEmergencyTransfer  > 0 && { emergencyAmount: rawEmergencyTransfer }),
+        ...(rawInvestmentTransfer > 0 && { investmentAmount: rawInvestmentTransfer }),
         priorityOrder,
       };
-      if (hasSetting) {
-        await updateVirtualSalarySetting(body);
-      } else {
-        await saveVirtualSalarySetting(body);
-      }
+      await saveVirtualSalarySetting(body);
       router.push('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : '저장에 실패했습니다.');

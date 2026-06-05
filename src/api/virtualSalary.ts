@@ -28,12 +28,6 @@ export const saveVirtualSalarySetting = (body: SaveVirtualSalarySettingRequest) 
     body: JSON.stringify(body),
   });
 
-export const updateVirtualSalarySetting = (body: Partial<SaveVirtualSalarySettingRequest>) =>
-  apiRequest<{ saved: boolean }>('/virtual-salary', {
-    method: 'PATCH',
-    body: JSON.stringify(body),
-  });
-
 export const getAiRecommendation = () =>
   apiRequest<AiRecommendation>('/virtual-salary/recommendation');
 

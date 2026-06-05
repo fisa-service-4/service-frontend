@@ -34,8 +34,8 @@ export interface VirtualSalarySetting {
   targetSalary: number;
   payday: number;
   emergencyTargetAmount: number | null;
-  emergencyRatio: number | null;
-  investmentRatio: number | null;
+  emergencyAmount: number | null;
+  investmentAmount: number | null;
   priorityOrder: PriorityItem[];
   updatedAt: string;
 }
@@ -76,8 +76,8 @@ export interface SaveVirtualSalarySettingRequest {
   targetSalary: number;
   payday: number;
   emergencyTargetAmount?: number;
-  emergencyRatio?: number;
-  investmentRatio?: number;
+  emergencyAmount?: number;
+  investmentAmount?: number;
   priorityOrder?: PriorityItem[];
 }
 
