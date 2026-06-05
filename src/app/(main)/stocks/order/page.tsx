@@ -172,7 +172,10 @@ function StockOrderContent() {
         quantity,
         price: activePrice,
       };
-      await createOrder(accountId!, body);
+      if (!accountId) {
+        throw new Error('증권 계좌 ID를 찾을 수 없습니다.');
+      }
+      await createOrder(accountId, body);
       setSuccess(true);
       setQuantity(0);
       setTimeout(() => router.push('/stocks?tab=orders'), 1500);
