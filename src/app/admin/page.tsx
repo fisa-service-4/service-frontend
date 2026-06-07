@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Menu, User } from 'lucide-react';
+import { adminTokenUtils } from '@/utils/token';
 import Sidebar from '@/components/admin/Sidebar';
 import DashboardView from '@/components/admin/DashboardView';
 import LogsView from '@/components/admin/LogsView';
@@ -15,8 +17,15 @@ import type { NavItem } from '@/types/admin';
 type LogSubView = 'login' | 'ai' | 'transaction' | 'notification' | 'error' | 'api' | null;
 
 export default function AdminPage() {
+  const router = useRouter();
   const [selectedDate]                  = useState('2026-05-24');
   const [activeNav, setActiveNav]       = useState<NavItem>('dashboard');
+
+  useEffect(() => {
+    if (!adminTokenUtils.getAccessToken()) {
+      router.replace('/admin/login');
+    }
+  }, [router]);
   const [sidebarOpen, setSidebarOpen]   = useState(false);
   const [logSubView, setLogSubView]     = useState<LogSubView>(null);
 
