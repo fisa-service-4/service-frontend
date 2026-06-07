@@ -19,7 +19,7 @@ const nextConfig: NextConfig = {
             },
             {
                 source: "/baas/:path*",
-                destination: `${process.env.TRANSACTION_URL ?? "http://10.10.4.107:8083"}/baas/:path*`,
+                destination: `${process.env.TRANSACTION_URL ?? "http://transaction-server:8083"}/baas/:path*`
             },
         ];
     },
