@@ -7,7 +7,7 @@ import StatCard from './StatCard';
 import ErrorLogList from './ErrorLogList';
 import ApiStatusList from './ApiStatusList';
 import AdminActivityList from './AdminActivityList';
-import { apiRequest } from '@/utils/apiClient';
+import { adminApiRequest } from '@/utils/apiClient';
 
 const recentErrors: ErrorLog[]         = [];
 const apiStatuses: ApiStatus[]         = [];
@@ -25,7 +25,7 @@ export default function DashboardView({ selectedDate }: DashboardViewProps) {
   const [totalUsers, setTotalUsers] = useState<string>('-');
 
   useEffect(() => {
-    apiRequest<PagedResponse>('/admin/users?page=0&size=1')
+    adminApiRequest<PagedResponse>('/admin/users?page=0&size=1')
       .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
       .catch(() => {});
   }, []);
