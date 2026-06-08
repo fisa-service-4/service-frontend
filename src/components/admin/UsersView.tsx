@@ -45,10 +45,6 @@ interface PagedResponse {
   totalElements: number;
 }
 
-interface DashboardStats {
-  activeSessionCount: number;
-}
-
 const statCards = [
   { label: '전체 사용자' },
   { label: '활성 회원'   },
@@ -72,8 +68,8 @@ export default function UsersView() {
         .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
         .catch(() => {});
 
-      adminApiRequest<DashboardStats>('/admin/monitoring/dashboard')
-        .then((data) => setActiveSessions(data.activeSessionCount != null ? data.activeSessionCount.toLocaleString() : '-'))
+      adminApiRequest<PagedResponse>('/admin/users?loginStatus=ONLINE&page=0&size=1')
+        .then((data) => setActiveSessions(data.totalElements.toLocaleString()))
         .catch(() => {});
     };
 

@@ -35,3 +35,9 @@ export function redirectToLogin() {
   tokenUtils.clearTokens();
   window.location.href = '/login';
 }
+
+export function dispatchSessionExpired() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('session-expired'));
+  }
+}
