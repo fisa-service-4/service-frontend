@@ -38,6 +38,7 @@ export function redirectToLogin() {
 
 export function dispatchSessionExpired() {
   if (typeof window !== 'undefined') {
+    tokenUtils.clearTokens();
     window.dispatchEvent(new CustomEvent('session-expired'));
   }
 }
