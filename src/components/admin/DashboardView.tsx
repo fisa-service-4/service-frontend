@@ -25,6 +25,7 @@ interface DashboardStats {
   todayApiCalls: number;
   todayErrors: number;
   avgApiResponseMs: number | null;
+  activeSessionCount: number;
 }
 
 interface DashboardViewProps {
@@ -41,13 +42,19 @@ export default function DashboardView({ selectedDate, onDateChange }: DashboardV
   const calendarRef                   = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    adminApiRequest<PagedResponse>('/admin/users?page=0&size=1')
-      .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
-      .catch(() => {});
+    const fetchData = () => {
+      adminApiRequest<PagedResponse>('/admin/users?page=0&size=1')
+        .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
+        .catch(() => {});
 
-    adminApiRequest<DashboardStats>('/admin/monitoring/dashboard')
-      .then((data) => setStats(data))
-      .catch(() => {});
+      adminApiRequest<DashboardStats>('/admin/monitoring/dashboard')
+        .then((data) => setStats(data))
+        .catch(() => {});
+    };
+
+    fetchData();
+    const timer = setInterval(fetchData, 10000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -82,9 +89,9 @@ export default function DashboardView({ selectedDate, onDateChange }: DashboardV
 
   const statCards: StatCardType[] = [
     { title: '총 사용자 수', value: totalUsers,                                                                           icon: <Users size={24} className="text-white" />,         gradient: 'from-sky-400 to-sky-500'    },
-    { title: 'AI 호출 수',   value: '-',                                                                                  icon: <Zap size={24} className="text-white" />,           gradient: 'from-cyan-400 to-cyan-500'  },
+    { title: 'AI 호출 수',   value: stats ? stats.todayAiRequests.toLocaleString() : '-',                                icon: <Zap size={24} className="text-white" />,           gradient: 'from-cyan-400 to-cyan-500'  },
     { title: 'API 응답속도', value: stats ? (stats.avgApiResponseMs != null ? `${stats.avgApiResponseMs}ms` : '-') : '-', icon: <Activity size={24} className="text-white" />,      gradient: 'from-blue-400 to-blue-500'  },
-    { title: '오류 수',      value: '-',                                                                                  icon: <AlertTriangle size={24} className="text-white" />, gradient: 'from-slate-400 to-slate-500'},
+    { title: '오류 수',      value: stats ? stats.todayErrors.toLocaleString() : '-',                                    icon: <AlertTriangle size={24} className="text-white" />, gradient: 'from-slate-400 to-slate-500'},
   ];
 
   return (
