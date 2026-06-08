@@ -28,6 +28,8 @@ export default function SettingsView() {
   const [slackAlert, setSlackAlert]     = useState(true);
   const [dailyReport, setDailyReport]   = useState(true);
   const [twoFactor, setTwoFactor]       = useState(true);
+  const adminEmail = adminTokenUtils.getUserEmail() ?? '-';
+  const adminName  = adminTokenUtils.getUserName()  ?? '-';
   const [adminEmail, setAdminEmail] = useState('-');
   const [adminName, setAdminName] = useState('-');
 
