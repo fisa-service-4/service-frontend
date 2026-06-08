@@ -331,7 +331,25 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
         {/* PIN 키패드 */}
         {requirePin && (
           <div className="shrink-0 bg-white border-t border-gray-100 px-4 pt-4 pb-2">
-            <p className="text-center text-sm font-semibold text-gray-700 mb-3">PIN 번호를 입력해주세요</p>
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-8" />
+              <p className="text-sm font-semibold text-gray-700">PIN 번호를 입력해주세요</p>
+              <button
+                onClick={() => {
+                  if (isSending) return;
+                  setRequirePin(false);
+                  setPin('');
+                  setMessages((prev) => [
+                    ...prev,
+                    { id: Date.now(), role: 'ai', content: '주문이 취소되었습니다.' },
+                  ]);
+                }}
+                disabled={isSending}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50"
+              >
+                <X size={18} className="text-gray-500" />
+              </button>
+            </div>
             <div className="flex justify-center gap-4 mb-4">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div
