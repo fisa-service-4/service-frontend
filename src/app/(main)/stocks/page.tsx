@@ -11,6 +11,7 @@ import {
   getHoldings,
   getReturns,
   getOrders,
+  cancelOrder,
   getFavorites,
   addFavorite,
   removeFavorite,
@@ -23,6 +24,8 @@ import {
   type StockSearchItem,
   type ChartCandle,
 } from '@/api/stock';
+import { authApi } from '@/api/auth';
+import PinKeypad from '@/components/PinKeypad';
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
   REQUESTED: '주문요청',
@@ -71,6 +74,11 @@ function StocksContent() {
   const [loading, setLoading] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
   const [chartMap, setChartMap] = useState<Record<string, ChartCandle[]>>({});
+  const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
+  const [showCancelPin, setShowCancelPin] = useState(false);
+  const [cancelPin, setCancelPin] = useState('');
+  const [cancelPinError, setCancelPinError] = useState('');
+  const [cancelPinLoading, setCancelPinLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -167,6 +175,46 @@ function StocksContent() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const openCancelPin = (orderId: number) => {
+    setCancelTargetId(orderId);
+    setCancelPin('');
+    setCancelPinError('');
+    setShowCancelPin(true);
+  };
+
+  const handleCancelPinPress = async (value: string) => {
+    if (cancelPinLoading) return;
+    setCancelPinError('');
+    if (value === 'backspace') {
+      setCancelPin((p) => p.slice(0, -1));
+      return;
+    }
+    if (cancelPin.length >= 6) return;
+    const next = cancelPin + value;
+    setCancelPin(next);
+    if (next.length < 6) return;
+    setTimeout(async () => {
+      setCancelPinLoading(true);
+      try {
+        await authApi.verifyPin(next);
+        setShowCancelPin(false);
+        setCancelPin('');
+        if (cancelTargetId !== null) {
+          await cancelOrder(cancelTargetId);
+          if (accountId) {
+            const res = await getOrders(accountId);
+            setOrders(res.content);
+          }
+        }
+      } catch {
+        setCancelPinError('PIN번호가 올바르지 않습니다. 다시 입력해주세요.');
+        setCancelPin('');
+      } finally {
+        setCancelPinLoading(false);
+      }
+    }, 200);
   };
 
   const totalValue = holdings.reduce((sum, h) => sum + (h.evaluationAmount ?? 0), 0);
@@ -405,6 +453,14 @@ function StocksContent() {
                           <p className="text-sm font-bold text-gray-900 mt-1">{ORDER_STATUS_LABEL[o.status] ?? o.status}</p>
                         </div>
                       </div>
+                      {(o.status === 'REQUESTED' || o.status === 'PARTIAL_FILLED') && (
+                        <button
+                          className="mt-3 w-full py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-600 active:bg-gray-50"
+                          onClick={() => openCancelPin(o.orderId)}
+                        >
+                          주문 취소
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -414,6 +470,26 @@ function StocksContent() {
         )}
       </div>
 
+      {showCancelPin && (
+        <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowCancelPin(false)}>
+          <div className="w-full bg-white rounded-t-2xl p-6" onClick={(e) => e.stopPropagation()}>
+            <p className="text-center text-base font-bold text-gray-900 mb-1">주문 취소</p>
+            <p className="text-center text-sm text-gray-500 mb-4">PIN번호를 입력해주세요</p>
+            <div className="flex justify-center gap-3 mb-4">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={`w-3 h-3 rounded-full ${i < cancelPin.length ? 'bg-primary-500' : 'bg-gray-200'}`}
+                />
+              ))}
+            </div>
+            {cancelPinError && (
+              <p className="text-center text-xs text-error mb-3">{cancelPinError}</p>
+            )}
+            <PinKeypad onPress={handleCancelPinPress} showAsterisk />
+          </div>
+        </div>
+      )}
       {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
       <BottomNav />
     </div>
