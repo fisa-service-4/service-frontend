@@ -199,8 +199,16 @@ function StocksContent() {
       setCancelPinLoading(true);
       try {
         await authApi.verifyPin(next);
-        setShowCancelPin(false);
+      } catch {
+        setCancelPinError('PIN번호가 올바르지 않습니다. 다시 입력해주세요.');
         setCancelPin('');
+        setCancelPinLoading(false);
+        return;
+      }
+
+      setShowCancelPin(false);
+      setCancelPin('');
+      try {
         if (cancelTargetId !== null) {
           await cancelOrder(cancelTargetId);
           if (accountId) {
@@ -209,8 +217,7 @@ function StocksContent() {
           }
         }
       } catch {
-        setCancelPinError('PIN번호가 올바르지 않습니다. 다시 입력해주세요.');
-        setCancelPin('');
+        alert('주문 취소에 실패했습니다. 다시 시도해주세요.');
       } finally {
         setCancelPinLoading(false);
       }
