@@ -74,7 +74,7 @@ export default function UserDetailView({ user, onBack }: UserDetailViewProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-gray-900">{user.name}</span>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${ONLINE_STYLE[onlineLabel]}`}>{onlineLabel}</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${ONLINE_STYLE[String(isOnline)]}`}>{onlineLabel}</span>
             </div>
             <span className="text-sm text-gray-500">{user.email}</span>
           </div>
