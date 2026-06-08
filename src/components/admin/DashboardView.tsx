@@ -47,7 +47,7 @@ export default function DashboardView({ selectedDate, onDateChange }: DashboardV
         .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
         .catch(() => {});
 
-      adminApiRequest<DashboardStats>('/admin/monitoring/dashboard')
+      adminApiRequest<DashboardStats>(`/admin/monitoring/dashboard?date=${selectedDate}`)
         .then((data) => setStats(data))
         .catch(() => {});
     };
@@ -55,7 +55,7 @@ export default function DashboardView({ selectedDate, onDateChange }: DashboardV
     fetchData();
     const timer = setInterval(fetchData, 10000);
     return () => clearInterval(timer);
-  }, []);
+  }, [selectedDate]);
 
   useEffect(() => {
     if (!showCalendar) return;
