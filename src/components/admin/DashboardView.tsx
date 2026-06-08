@@ -53,7 +53,7 @@ export default function DashboardView({ selectedDate, onDateChange }: DashboardV
     };
 
     fetchData();
-    const timer = setInterval(fetchData, 10000);
+    const timer = setInterval(fetchData, 3000);
     return () => clearInterval(timer);
   }, [selectedDate]);
 
