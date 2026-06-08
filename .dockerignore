@@ -1,6 +1,8 @@
-.git
-.next
 node_modules
+.next
+.git
+.env
+README.md
 .idea
 .vscode
 .env.local

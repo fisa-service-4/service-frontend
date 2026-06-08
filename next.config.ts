@@ -1,26 +1,28 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: "/api/v1/ai/:path*",
-        destination: "http://service-ai-server:8000/api/v1/ai/:path*",
-      },
-      {
-        source: "/api/:path*",
-        destination: "http://service-backend:8080/api/:path*",
-      },
-      {
-        source: "/mydata/:path*",
-        destination: "http://mydata-server:8084/mydata/:path*",
-      },
-      {
-        source: "/baas/:path*",
-        destination: "http://transaction-server:8083/baas/:path*",
-      },
-    ];
-  },
+    output: "standalone",
+
+    async rewrites() {
+        return [
+            {
+                source: "/api/v1/ai/:path*",
+                destination: `${process.env.AI_SERVER_URL ?? "http://service-ai-server:8000"}/api/v1/ai/:path*`,
+            },
+            {
+                source: "/api/:path*",
+                destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/:path*`,
+            },
+            {
+                source: "/mydata/:path*",
+                destination: `${process.env.MYDATA_URL ?? "http://mydata-server:8084"}/mydata/:path*`,
+            },
+            {
+                source: "/baas/:path*",
+                destination: `${process.env.TRANSACTION_URL ?? "http://transaction-server:8083"}/baas/:path*`
+            },
+        ];
+    },
 };
 
 export default nextConfig;

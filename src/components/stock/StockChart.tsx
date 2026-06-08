@@ -9,19 +9,22 @@ interface StockChartProps {
   height?: number;
 }
 
-export default function StockChart({ data, height = 200 }: StockChartProps) {
+export default function StockChart({
+      data,
+      height = 200,
+    }: StockChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current || data.length === 0) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const chart = createChart(containerRef.current, {
+    const chartOptions = {
       width: containerRef.current.clientWidth,
       height,
       attributionLogo: false,
       localization: {
-        priceFormatter: (price: number) => price.toLocaleString('ko-KR'),
+        priceFormatter: (price: number) =>
+          price.toLocaleString('ko-KR'),
       },
       layout: {
         background: { color: 'transparent' },
@@ -38,7 +41,12 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
         borderColor: '#e5e7eb',
         timeVisible: true,
       },
-    } as any);
+    };
+
+    const chart = createChart(
+      containerRef.current,
+      chartOptions
+    );
 
     const candleSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#22c55e',
@@ -63,9 +71,12 @@ export default function StockChart({ data, height = 200 }: StockChartProps) {
 
     const handleResize = () => {
       if (containerRef.current) {
-        chart.applyOptions({ width: containerRef.current.clientWidth });
+        chart.applyOptions({
+          width: containerRef.current.clientWidth,
+        });
       }
     };
+
     window.addEventListener('resize', handleResize);
 
     return () => {
