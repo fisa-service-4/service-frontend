@@ -30,6 +30,13 @@ export default function SettingsView() {
   const [twoFactor, setTwoFactor]       = useState(true);
   const adminEmail = adminTokenUtils.getUserEmail() ?? '-';
   const adminName  = adminTokenUtils.getUserName()  ?? '-';
+  const [adminEmail, setAdminEmail] = useState('-');
+  const [adminName, setAdminName] = useState('-');
+
+  useEffect(() => {
+    setAdminEmail(adminTokenUtils.getUserEmail() ?? '-');
+    setAdminName(adminTokenUtils.getUserName() ?? '-');
+  }, []);
 
   function handleLogout() {
     adminTokenUtils.clearTokens();
