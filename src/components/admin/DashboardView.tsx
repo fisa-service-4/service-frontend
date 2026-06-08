@@ -1,26 +1,54 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import { ChevronDown, Users, Zap, Activity, AlertTriangle } from 'lucide-react';
 import { StatCard as StatCardType, ErrorLog, ApiStatus, AdminActivity } from '@/types/admin';
 import StatCard from './StatCard';
 import ErrorLogList from './ErrorLogList';
 import ApiStatusList from './ApiStatusList';
 import AdminActivityList from './AdminActivityList';
+import { adminApiRequest } from '@/utils/apiClient';
 
-const statCards: StatCardType[] = [
-  { title: '총 사용자 수', value: '-', icon: <Users size={24} className="text-white" />,          gradient: 'from-sky-400 to-sky-500'    },
-  { title: 'AI 호출 수',   value: '-', icon: <Zap size={24} className="text-white" />,            gradient: 'from-cyan-400 to-cyan-500'  },
-  { title: 'API 응답속도', value: '-', icon: <Activity size={24} className="text-white" />,       gradient: 'from-blue-400 to-blue-500'  },
-  { title: '오류 수',      value: '-', icon: <AlertTriangle size={24} className="text-white" />,  gradient: 'from-slate-400 to-slate-500'},
-];
-
-const recentErrors: ErrorLog[]      = [];
-const apiStatuses: ApiStatus[]       = [];
+const recentErrors: ErrorLog[]         = [];
+const apiStatuses: ApiStatus[]         = [];
 const adminActivities: AdminActivity[] = [];
+
+interface PagedResponse {
+  totalElements: number;
+}
+
+interface DashboardStats {
+  todayAiRequests: number;
+  todayApiCalls: number;
+  todayErrors: number;
+  avgApiResponseMs: number | null;
+}
 
 interface DashboardViewProps {
   selectedDate: string;
 }
 
 export default function DashboardView({ selectedDate }: DashboardViewProps) {
+  const [totalUsers, setTotalUsers] = useState<string>('-');
+  const [stats, setStats]           = useState<DashboardStats | null>(null);
+
+  useEffect(() => {
+    adminApiRequest<PagedResponse>('/admin/users?page=0&size=1')
+      .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
+      .catch(() => {});
+
+    adminApiRequest<DashboardStats>('/admin/monitoring/dashboard')
+      .then((data) => setStats(data))
+      .catch(() => {});
+  }, []);
+
+  const statCards: StatCardType[] = [
+    { title: '총 사용자 수', value: totalUsers,                                                                                    icon: <Users size={24} className="text-white" />,         gradient: 'from-sky-400 to-sky-500'    },
+    { title: 'AI 호출 수',   value: '-',                                                                                           icon: <Zap size={24} className="text-white" />,           gradient: 'from-cyan-400 to-cyan-500'  },
+    { title: 'API 응답속도', value: stats ? (stats.avgApiResponseMs != null ? `${stats.avgApiResponseMs}ms` : '-') : '-',          icon: <Activity size={24} className="text-white" />,      gradient: 'from-blue-400 to-blue-500'  },
+    { title: '오류 수',      value: '-',                                                                                           icon: <AlertTriangle size={24} className="text-white" />, gradient: 'from-slate-400 to-slate-500'},
+  ];
+
   return (
     <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-slate-50">
       <div className="px-5 pt-5 pb-3">

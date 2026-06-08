@@ -7,6 +7,7 @@ import BottomNav from '@/components/main/BottomNav';
 import NotificationPanel from '@/components/main/NotificationPanel';
 import StockChart from '@/components/stock/StockChart';
 import {
+  getStockAccounts,
   getHoldings,
   getReturns,
   getOrders,
@@ -15,7 +16,6 @@ import {
   removeFavorite,
   getStockChart,
   searchStocks,
-  TEMP_ACCOUNT_ID,
   type Holding,
   type Returns,
   type Order,
@@ -25,7 +25,7 @@ import {
 } from '@/api/stock';
 
 const ORDER_STATUS_LABEL: Record<string, string> = {
-  REQUESTED: '주문접수',
+  REQUESTED: '주문요청',
   PARTIAL_FILLED: '부분체결',
   FILLED: '체결완료',
   CANCELLED: '취소',
@@ -58,6 +58,7 @@ function StocksContent() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as 'holdings' | 'orders' | 'favorites') ?? 'holdings';
 
+  const [accountId, setAccountId] = useState<number | null>(null);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [returns, setReturns] = useState<Returns>({ dailyReturnRate: 0, monthlyReturnRate: 0, yearlyReturnRate: 0 });
   const [orders, setOrders] = useState<Order[]>([]);
@@ -75,16 +76,26 @@ function StocksContent() {
   useEffect(() => {
     (async () => {
       try {
-        const [holdingRes, returnsRes, favRes] = await Promise.all([
-          getHoldings(TEMP_ACCOUNT_ID),
-          getReturns(TEMP_ACCOUNT_ID),
+        const [accountsRes, favRes] = await Promise.all([
+          getStockAccounts(),
           getFavorites(),
         ]);
-        setHoldings(holdingRes.holdings);
-        setReturns(returnsRes);
+
+        const id = accountsRes.accounts[0]?.accountId ?? null;
+        setAccountId(id);
+
         const map: Record<string, number> = {};
         favRes.favorites.forEach((f) => { map[f.stockCode] = f.favoriteId; });
         setFavoriteMap(map);
+
+        if (!id) return;
+
+        const [holdingRes, returnsRes] = await Promise.all([
+          getHoldings(id),
+          getReturns(id),
+        ]);
+        setHoldings(holdingRes.holdings);
+        setReturns(returnsRes);
 
         const charts = await Promise.all(
           holdingRes.holdings.map((h) => getStockChart(h.stockCode, 'DAILY'))
@@ -101,16 +112,16 @@ function StocksContent() {
   }, []);
 
   useEffect(() => {
-    if (tab !== 'orders') return;
+    if (tab !== 'orders' || !accountId) return;
     (async () => {
       try {
-        const res = await getOrders(TEMP_ACCOUNT_ID);
+        const res = await getOrders(accountId);
         setOrders(res.content);
       } catch (e) {
         console.error(e);
       }
     })();
-  }, [tab]);
+  }, [tab, accountId]);
 
   useEffect(() => {
     if (tab !== 'favorites') return;
@@ -164,13 +175,13 @@ function StocksContent() {
 
   return (
     <div className="flex flex-col h-screen bg-bg">
-      <div className="flex items-center justify-end px-5 py-4 shrink-0">
+      <div className="flex items-center justify-end px-5 py-3 bg-bg shrink-0">
         <button className="p-1" onClick={() => setShowNotification(true)}>
           <Bell size={22} className="text-gray-800" />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
 
         {/* 검색창 */}
         <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-3 mb-4">
@@ -182,7 +193,7 @@ function StocksContent() {
             onChange={(e) => setQuery(e.target.value)}
           />
           {query && (
-            <button onClick={() => setQuery('')} className="text-gray-400 text-xs">✕</button>
+            <button onClick={() => setQuery('')} className="text-gray-400 text-xs">×</button>
           )}
         </div>
 

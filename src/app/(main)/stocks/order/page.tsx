@@ -7,11 +7,11 @@ import BottomNav from '@/components/main/BottomNav';
 import PinKeypad from '@/components/PinKeypad';
 import { authApi } from '@/api/auth';
 import {
+  getStockAccounts,
   getCashBalance,
   createOrder,
   getStockChart,
   getHoldings,
-  TEMP_ACCOUNT_ID,
   type OrderCreateRequest,
   type ChartCandle,
 } from '@/api/stock';
@@ -60,7 +60,9 @@ function StockOrderContent() {
 
   const [orderMethod, setOrderMethod] = useState<'MARKET' | 'LIMIT'>('MARKET');
   const [quantity, setQuantity] = useState(0);
+  const [limitPrice, setLimitPrice] = useState<number | ''>(stockPrice);
   const [methodOpen, setMethodOpen] = useState(false);
+  const [accountId, setAccountId] = useState<number | null>(null);
   const [availableBalance, setAvailableBalance] = useState<number | null>(null);
   const [holdingQty, setHoldingQty] = useState(urlHoldingQty);
   const [chartData, setChartData] = useState<ChartCandle[]>([]);
@@ -74,9 +76,18 @@ function StockOrderContent() {
   const [pinLoading, setPinLoading] = useState(false);
 
   useEffect(() => {
-    getCashBalance(TEMP_ACCOUNT_ID)
-      .then((res) => setAvailableBalance(res.availableBalance))
-      .catch(console.error);
+    (async () => {
+      try {
+        const accountsRes = await getStockAccounts();
+        const id = accountsRes.accounts[0]?.accountId ?? null;
+        setAccountId(id);
+        if (!id) return;
+        const res = await getCashBalance(id);
+        setAvailableBalance(res.availableBalance);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
 
     if (stockCode) {
       getStockChart(stockCode, 'DAILY')
@@ -86,22 +97,23 @@ function StockOrderContent() {
   }, [stockCode]);
 
   useEffect(() => {
-    if (urlHoldingQty > 0 || !stockCode) return;
-    getHoldings(TEMP_ACCOUNT_ID)
+    if (urlHoldingQty > 0 || !stockCode || !accountId) return;
+    getHoldings(accountId)
       .then((res) => {
         const matched = res.holdings.find((h) => h.stockCode === stockCode);
         setHoldingQty(matched?.quantity ?? 0);
       })
       .catch(console.error);
-  }, [stockCode, urlHoldingQty]);
+  }, [stockCode, urlHoldingQty, accountId]);
 
   const up = changeRate >= 0;
-  const estimate = quantity * stockPrice;
+  const activePrice = orderMethod === 'LIMIT' ? (Number(limitPrice) || 0) : stockPrice;
+  const estimate = quantity * activePrice;
 
   const maxQty = useMemo(() => {
     if (side === 'SELL') return holdingQty;
-    return stockPrice > 0 && availableBalance !== null ? Math.floor(availableBalance / stockPrice) : 0;
-  }, [side, holdingQty, availableBalance, stockPrice]);
+    return activePrice > 0 && availableBalance !== null ? Math.floor(availableBalance / activePrice) : 0;
+  }, [side, holdingQty, availableBalance, activePrice]);
 
   const setByRatio = (ratio: number) => setQuantity(Math.floor(maxQty * ratio));
 
@@ -111,7 +123,7 @@ function StockOrderContent() {
   };
 
   const openPin = () => {
-    if (quantity <= 0) return;
+    if (quantity <= 0 || !accountId) return;
     setPin('');
     setPinError('');
     setShowPin(true);
@@ -158,9 +170,12 @@ function StockOrderContent() {
         orderType: side,
         orderMethod,
         quantity,
-        price: orderMethod === 'LIMIT' ? stockPrice : null,
+        price: activePrice,
       };
-      await createOrder(TEMP_ACCOUNT_ID, body);
+      if (!accountId) {
+        throw new Error('증권 계좌 ID를 찾을 수 없습니다.');
+      }
+      await createOrder(accountId, body);
       setSuccess(true);
       setQuantity(0);
       setTimeout(() => router.push('/stocks?tab=orders'), 1500);
@@ -175,7 +190,7 @@ function StockOrderContent() {
     <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="flex items-center px-5 py-4 bg-bg-card shrink-0 relative border-b border-gray-100">
+      <div className="flex items-center px-5 py-3 bg-bg shrink-0 relative border-b border-gray-100">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
@@ -184,7 +199,7 @@ function StockOrderContent() {
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
 
         {/* 종목 정보 카드 */}
         <div className="bg-bg-card shadow-md rounded-2xl p-4 mb-4">
@@ -207,7 +222,7 @@ function StockOrderContent() {
           }
         </div>
 
-        {/* 매수 / 매도 토글 */}
+        {/* 매수 / 매도 선택 */}
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => handleSideChange('BUY')}
@@ -230,9 +245,9 @@ function StockOrderContent() {
         {/* 주문 폼 */}
         <div className="bg-gray-100 shadow-md rounded-2xl p-4 mb-4 space-y-4">
 
-          {/* 주문 유형 */}
+          {/* 주문 방법 */}
           <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-500">주문 유형</span>
+            <span className="text-sm text-gray-500">주문 방법</span>
               <div className="relative">
                 <button
                   onClick={() => setMethodOpen((o) => !o)}
@@ -246,7 +261,7 @@ function StockOrderContent() {
                     {ORDER_METHODS.map((m) => (
                       <button
                         key={m.value}
-                        onClick={() => { setOrderMethod(m.value as 'MARKET' | 'LIMIT'); setMethodOpen(false); }}
+                        onClick={() => { setOrderMethod(m.value as 'MARKET' | 'LIMIT'); setLimitPrice(stockPrice); setMethodOpen(false); }}
                         className={`w-full text-left px-4 py-2.5 text-sm font-medium ${
                           orderMethod === m.value ? 'text-primary-500' : 'text-gray-700'
                         }`}
@@ -258,6 +273,34 @@ function StockOrderContent() {
                 )}
               </div>
             </div>
+
+          {/* 지정가 입력 */}
+          {orderMethod === 'LIMIT' && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">지정 가격</span>
+              <div className="flex items-center bg-bg-card border border-gray-200 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setLimitPrice((p) => Math.max(0, (Number(p) || 0) - 100))}
+                  className="w-10 h-10 flex items-center justify-center text-gray-500"
+                >
+                  <Minus size={16} />
+                </button>
+                <input
+                  type="number"
+                  value={limitPrice}
+                  min={0}
+                  onChange={(e) => setLimitPrice(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-28 text-center text-sm font-bold text-gray-900 outline-none bg-transparent"
+                />
+                <button
+                  onClick={() => setLimitPrice((p) => (Number(p) || 0) + 100)}
+                  className="w-10 h-10 flex items-center justify-center text-gray-500"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* 수량 */}
           <div className="flex justify-between items-center">
@@ -302,14 +345,14 @@ function StockOrderContent() {
             ))}
           </div>
 
-          {/* 예상 금액 / 예수금 */}
+          {/* 예상 금액 / 잔액 */}
           <div className="border-t border-gray-200 pt-3 space-y-2">
             <div className="flex justify-between">
               <span className="text-sm text-gray-500">예상 금액</span>
               <span className="text-sm font-bold text-gray-900">{fmtWon(estimate)}</span>
             </div>
             <p className={`text-xs text-primary-500 text-right ${orderMethod === 'MARKET' ? 'visible' : 'invisible'}`}>
-              시장가는 현재가로 즉시 체결됩니다.
+              시장가는 현재가로 대략 체결됩니다.
             </p>
             <div className="flex justify-between">
               {side === 'SELL' ? (
@@ -319,7 +362,7 @@ function StockOrderContent() {
                 </>
               ) : (
                 <>
-                  <span className="text-sm text-gray-500">주문 가능 예수금</span>
+                  <span className="text-sm text-gray-500">주문 가능 금액</span>
                   <span className="text-sm font-bold text-gray-900">{fmtWon(availableBalance ?? 0)}</span>
                 </>
               )}
@@ -327,17 +370,17 @@ function StockOrderContent() {
           </div>
         </div>
 
-        {/* 에러 메시지 */}
+        {/* 오류 메시지 */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4 text-center">
             <p className="text-xs text-red-500">{error}</p>
           </div>
         )}
 
-        {/* 주문 성공 */}
+        {/* 주문 완료 */}
         {success && (
           <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4 text-center">
-            <p className="text-xs text-green-600">주문이 성공적으로 접수되었습니다.</p>
+            <p className="text-xs text-green-600">주문이 정상적으로 접수되었습니다.</p>
           </div>
         )}
 
@@ -360,7 +403,7 @@ function StockOrderContent() {
         <div className="absolute inset-0 bg-white z-50 flex flex-col">
 
           {/* 헤더 */}
-          <div className="flex items-center px-5 py-4 shrink-0 relative border-b border-gray-100">
+          <div className="flex items-center px-5 py-3 bg-white shrink-0 relative border-b border-gray-100">
             <button onClick={() => setShowPin(false)}>
               <X size={22} className="text-gray-800" />
             </button>
@@ -390,7 +433,7 @@ function StockOrderContent() {
               ))}
             </div>
 
-            {/* 에러 메시지 */}
+            {/* 오류 메시지 */}
             {pinError && (
               <p className="text-sm text-error mb-6">{pinError}</p>
             )}

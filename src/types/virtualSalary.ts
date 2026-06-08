@@ -1,5 +1,5 @@
 export type ContractStatus = 'PENDING' | 'PAID' | 'DELAYED' | 'CANCELLED';
-export type MatchingStatus = 'TBC' | 'MATCHED' | 'MANUAL_MATCHED' | 'FAILED';
+export type MatchingStatus = 'TBC' | 'MATCHED' | 'FAILED';
 export type TaxType = 'BUSINESS' | 'ETC' | 'ARTIST';
 export type PriorityItem = 'SALARY' | 'EMERGENCY' | 'INVESTMENT';
 
@@ -12,6 +12,7 @@ export interface Contract {
   contractId: number;
   clientName: string;
   contractAmount: number;
+  actualIncome?: number;
   taxType: TaxType;
   expectedPaymentDate: string;
   contractStatus: ContractStatus;
@@ -33,8 +34,8 @@ export interface VirtualSalarySetting {
   targetSalary: number;
   payday: number;
   emergencyTargetAmount: number | null;
-  emergencyRatio: number | null;
-  investmentRatio: number | null;
+  emergencyAmount: number | null;
+  investmentAmount: number | null;
   priorityOrder: PriorityItem[];
   updatedAt: string;
 }
@@ -59,8 +60,9 @@ export interface HomeSummary {
 }
 
 export interface AiRecommendation {
-  recommendedEmergencyRatio: number;
-  recommendedInvestmentRatio: number;
+  recommendedTargetSalary: number;
+  recommendedEmergencyAmount: number;
+  recommendedInvestmentAmount: number;
   summary: string;
 }
 
@@ -75,8 +77,8 @@ export interface SaveVirtualSalarySettingRequest {
   targetSalary: number;
   payday: number;
   emergencyTargetAmount?: number;
-  emergencyRatio?: number;
-  investmentRatio?: number;
+  emergencyAmount?: number;
+  investmentAmount?: number;
   priorityOrder?: PriorityItem[];
 }
 

@@ -50,17 +50,17 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
       });
       onSubmit();
     } catch (err) {
-      setError(err instanceof Error ? err.message : '계약 등록에 실패했습니다.');
+      setError(err instanceof Error ? err.message : '저장 중에 오류가 발생했습니다.');
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="flex items-center px-5 py-4 shrink-0 relative">
+      <div className="flex items-center px-5 py-3 bg-bg shrink-0 relative">
         <button onClick={onBack}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
@@ -70,7 +70,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
       </div>
 
       {/* 스크롤 영역 */}
-      <div className="flex-1 overflow-y-auto px-5 pb-4 space-y-6">
+      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-4 space-y-6">
 
         {/* 계약 정보 입력 */}
         <div>
@@ -80,7 +80,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             {/* 거래처 명 */}
             <div>
               <label className="text-sm text-gray-700 mb-1.5 block">
-                거래처 명 <span className="text-sky-500">*</span>
+                거래처 명 <span className="text-primary-500">*</span>
               </label>
               <input
                 type="text"
@@ -94,7 +94,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             {/* 계약 금액 */}
             <div>
               <label className="text-sm text-gray-700 mb-1.5 block">
-                계약 금액 <span className="text-sky-500">*</span>
+                계약 금액 <span className="text-primary-500">*</span>
               </label>
               <input
                 type="text"
@@ -109,19 +109,19 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
             {/* 입금 예정일 */}
             <div>
               <label className="text-sm text-gray-700 mb-1.5 block">
-                입금 예정일 <span className="text-sky-500">*</span>
+                입금 예정일 <span className="text-primary-500">*</span>
               </label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-gray-500 text-white placeholder:text-gray-300 rounded-xl px-4 py-3 text-sm outline-none [color-scheme:dark]"
+                className="w-full bg-gray-500 text-white placeholder:text-gray-300 rounded-xl px-4 py-3 text-sm outline-none scheme-dark"
               />
             </div>
 
-            {/* 세금 유형 선택 */}
+            {/* 세금 공제 방식 */}
             <div>
-              <label className="text-sm text-gray-700 mb-2 block">세금 유형 선택</label>
+              <label className="text-sm text-gray-700 mb-2 block">세금 공제 방식</label>
               <div className="flex gap-2">
                 {TAX_OPTIONS.map(opt => (
                   <button
@@ -129,7 +129,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
                     onClick={() => setTaxType(opt.value)}
                     className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                       taxType === opt.value
-                        ? 'bg-sky-500 text-white'
+                        ? 'bg-primary-500 text-white'
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >
@@ -141,16 +141,16 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
           </div>
         </div>
 
-        {/* 실수령액 미리보기 */}
+        {/* 세전 실수령액 미리보기 */}
         <div>
-          <h2 className="text-lg font-bold text-gray-900 mb-3">실수령액 미리보기</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-3">세전 실수령액 미리보기</h2>
           <div className="bg-gray-500 rounded-2xl px-5 py-4 text-white space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-300">계약 금액</span>
               <span>{fmt(rawAmount)}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-300">공제율 ({(selectedTax.rate * 100).toFixed(1)}%)</span>
+              <span className="text-gray-300">공제액 ({(selectedTax.rate * 100).toFixed(1)}%)</span>
               <span>{deduction > 0 ? `- ${deduction.toLocaleString()} 원` : '-'}</span>
             </div>
             <div className="h-px bg-gray-400 my-1" />
@@ -161,7 +161,7 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
           </div>
         </div>
 
-        {/* 에러 메시지 */}
+        {/* 오류 메시지 */}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
             {error}
@@ -180,9 +180,9 @@ export default function ContractRegisterView({ onBack, onSubmit }: ContractRegis
           <button
             onClick={handleSubmit}
             disabled={!isValid || submitting}
-            className="flex-1 py-3 bg-sky-500 text-white font-semibold rounded-2xl text-sm disabled:opacity-50"
+            className="flex-1 py-3 bg-primary-500 text-white font-semibold rounded-2xl text-sm disabled:opacity-50"
           >
-            {submitting ? '등록 중...' : '등록'}
+            {submitting ? '저장 중...' : '저장'}
           </button>
         </div>
 

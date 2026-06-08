@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Menu, User } from 'lucide-react';
+import { adminTokenUtils } from '@/utils/token';
 import Sidebar from '@/components/admin/Sidebar';
 import DashboardView from '@/components/admin/DashboardView';
 import LogsView from '@/components/admin/LogsView';
@@ -15,8 +17,15 @@ import type { NavItem } from '@/types/admin';
 type LogSubView = 'login' | 'ai' | 'transaction' | 'notification' | 'error' | 'api' | null;
 
 export default function AdminPage() {
+  const router = useRouter();
   const [selectedDate]                  = useState('2026-05-24');
   const [activeNav, setActiveNav]       = useState<NavItem>('dashboard');
+
+  useEffect(() => {
+    if (!adminTokenUtils.getAccessToken()) {
+      router.replace('/admin/login');
+    }
+  }, [router]);
   const [sidebarOpen, setSidebarOpen]   = useState(false);
   const [logSubView, setLogSubView]     = useState<LogSubView>(null);
 
@@ -32,7 +41,7 @@ export default function AdminPage() {
         <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onNavChange={handleNavChange} />
 
         {/* 헤더 */}
-        <div className="px-5 py-4 shrink-0 bg-gradient-to-r from-slate-800 to-slate-900">
+        <div className="px-5 py-3 shrink-0 bg-gradient-to-r from-slate-800 to-slate-900">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button className="p-1" onClick={() => setSidebarOpen(true)}>
