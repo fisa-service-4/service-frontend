@@ -50,7 +50,7 @@ export interface Order {
   quantity: number;
   filledQuantity: number;
   remainingQuantity: number;
-  price: number;
+  price: number | null;
   status: string;
   orderedAt: string;
 }
@@ -103,6 +103,14 @@ export const createOrder = (accountId: number, body: OrderCreateRequest) =>
   apiRequest<OrderResponse>(`/orders?accountId=${accountId}`, {
     method: 'POST',
     body: JSON.stringify(body),
+    headers: {
+      'Idempotency-Key': crypto.randomUUID(),
+    },
+  });
+
+export const cancelOrder = (orderId: number) =>
+  apiRequest<{ orderId: number; status: string }>(`/orders/${orderId}/cancel`, {
+    method: 'POST',
     headers: {
       'Idempotency-Key': crypto.randomUUID(),
     },
