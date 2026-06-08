@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserCircle2, Bell, Mail, ShieldCheck, ChevronRight } from 'lucide-react';
 import { adminTokenUtils } from '@/utils/token';
@@ -28,8 +28,6 @@ export default function SettingsView() {
   const [slackAlert, setSlackAlert]     = useState(true);
   const [dailyReport, setDailyReport]   = useState(true);
   const [twoFactor, setTwoFactor]       = useState(true);
-  const adminEmail = adminTokenUtils.getUserEmail() ?? '-';
-  const adminName  = adminTokenUtils.getUserName()  ?? '-';
   const [adminEmail, setAdminEmail] = useState('-');
   const [adminName, setAdminName] = useState('-');
 
