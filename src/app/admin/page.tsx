@@ -18,7 +18,7 @@ type LogSubView = 'login' | 'ai' | 'transaction' | 'notification' | 'error' | 'a
 
 export default function AdminPage() {
   const router = useRouter();
-  const [selectedDate]                  = useState('2026-05-24');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [activeNav, setActiveNav]       = useState<NavItem>('dashboard');
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function AdminPage() {
         </div>
 
         {/* 메인 콘텐츠 */}
-        {activeNav === 'dashboard' && <DashboardView selectedDate={selectedDate} />}
+        {activeNav === 'dashboard' && <DashboardView selectedDate={selectedDate} onDateChange={setSelectedDate} />}
 
         {activeNav === 'logs' && logSubView === null && (
           <LogsView onSelect={(key) => setLogSubView(key)} />

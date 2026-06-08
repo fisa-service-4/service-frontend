@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
+
 export interface StatCard {
   title: string;
   value: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   gradient: string;
 }
 

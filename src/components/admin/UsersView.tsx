@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight, UserCircle2 } from 'lucide-react';
+import { adminApiRequest } from '@/utils/apiClient';
 import UserDetailView from './UserDetailView';
 
 type StatusFilter = '전체' | '활성' | '비활성';
@@ -27,6 +28,14 @@ const users: User[] = [
   { id: 3, name: '-', email: '-', status: '활성'   },
 ];
 
+interface PagedResponse {
+  totalElements: number;
+}
+
+interface DashboardStats {
+  activeSessionCount: number;
+}
+
 const statCards = [
   { label: '전체 사용자' },
   { label: '활성 회원'   },
@@ -39,7 +48,25 @@ export default function UsersView() {
   const [search, setSearch]         = useState('');
   const [page, setPage]             = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const totalPages                  = 1;
+  const [totalUsers, setTotalUsers]       = useState<string>('-');
+  const [activeSessions, setActiveSessions] = useState<string>('-');
+  const totalPages                          = 1;
+
+  useEffect(() => {
+    const fetchData = () => {
+      adminApiRequest<PagedResponse>('/admin/users?page=0&size=1')
+        .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
+        .catch(() => {});
+
+      adminApiRequest<DashboardStats>('/admin/monitoring/dashboard')
+        .then((data) => setActiveSessions(data.activeSessionCount != null ? data.activeSessionCount.toLocaleString() : '-'))
+        .catch(() => {});
+    };
+
+    fetchData();
+    const timer = setInterval(fetchData, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (selectedUser) {
     return <UserDetailView user={selectedUser} onBack={() => setSelectedUser(null)} />;
@@ -59,7 +86,9 @@ export default function UsersView() {
         {statCards.map((card) => (
           <div key={card.label} className="bg-slate-100 rounded-2xl px-4 py-4">
             <p className="text-xs text-gray-500 mb-1">{card.label}</p>
-            <p className="text-xl font-bold text-gray-900">-</p>
+            <p className="text-xl font-bold text-gray-900">
+              {card.label === '전체 사용자' ? totalUsers : card.label === '활성 회원' ? activeSessions : '-'}
+            </p>
           </div>
         ))}
       </div>

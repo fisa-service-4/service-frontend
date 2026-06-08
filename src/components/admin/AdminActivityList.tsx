@@ -9,7 +9,7 @@ export default function AdminActivityList({ activities }: AdminActivityListProps
   return (
     <div className="bg-white rounded-2xl p-4 shadow-md border border-slate-200 mb-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-gray-800">최근 관리자 활동</h3>
+        <h3 className="font-semibold text-gray-800">최근 사용자 활동</h3>
         <button className="text-xs text-sky-600 flex items-center gap-1">
           더보기 <ChevronRight size={14} />
         </button>
