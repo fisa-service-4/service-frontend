@@ -17,24 +17,36 @@ interface PagedResponse {
   totalElements: number;
 }
 
+interface DashboardStats {
+  todayAiRequests: number;
+  todayApiCalls: number;
+  todayErrors: number;
+  avgApiResponseMs: number | null;
+}
+
 interface DashboardViewProps {
   selectedDate: string;
 }
 
 export default function DashboardView({ selectedDate }: DashboardViewProps) {
   const [totalUsers, setTotalUsers] = useState<string>('-');
+  const [stats, setStats]           = useState<DashboardStats | null>(null);
 
   useEffect(() => {
     adminApiRequest<PagedResponse>('/admin/users?page=0&size=1')
       .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
       .catch(() => {});
+
+    adminApiRequest<DashboardStats>('/admin/monitoring/dashboard')
+      .then((data) => setStats(data))
+      .catch(() => {});
   }, []);
 
   const statCards: StatCardType[] = [
-    { title: '총 사용자 수', value: totalUsers, icon: <Users size={24} className="text-white" />,         gradient: 'from-sky-400 to-sky-500'    },
-    { title: 'AI 호출 수',   value: '-',        icon: <Zap size={24} className="text-white" />,           gradient: 'from-cyan-400 to-cyan-500'  },
-    { title: 'API 응답속도', value: '-',        icon: <Activity size={24} className="text-white" />,      gradient: 'from-blue-400 to-blue-500'  },
-    { title: '오류 수',      value: '-',        icon: <AlertTriangle size={24} className="text-white" />, gradient: 'from-slate-400 to-slate-500'},
+    { title: '총 사용자 수', value: totalUsers,                                                                                    icon: <Users size={24} className="text-white" />,         gradient: 'from-sky-400 to-sky-500'    },
+    { title: 'AI 호출 수',   value: '-',                                                                                           icon: <Zap size={24} className="text-white" />,           gradient: 'from-cyan-400 to-cyan-500'  },
+    { title: 'API 응답속도', value: stats ? (stats.avgApiResponseMs != null ? `${stats.avgApiResponseMs}ms` : '-') : '-',          icon: <Activity size={24} className="text-white" />,      gradient: 'from-blue-400 to-blue-500'  },
+    { title: '오류 수',      value: '-',                                                                                           icon: <AlertTriangle size={24} className="text-white" />, gradient: 'from-slate-400 to-slate-500'},
   ];
 
   return (
