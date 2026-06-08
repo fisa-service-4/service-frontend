@@ -336,6 +336,7 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
               <p className="text-sm font-semibold text-gray-700">PIN 번호를 입력해주세요</p>
               <button
                 onClick={() => {
+                  if (isSending) return;
                   setRequirePin(false);
                   setPin('');
                   setMessages((prev) => [
@@ -343,7 +344,8 @@ export default function ChatBotView({ onClose }: ChatBotViewProps) {
                     { id: Date.now(), role: 'ai', content: '주문이 취소되었습니다.' },
                   ]);
                 }}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                disabled={isSending}
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 disabled:opacity-50"
               >
                 <X size={18} className="text-gray-500" />
               </button>
