@@ -5,8 +5,8 @@ import { ArrowLeft, UserCircle2, ChevronUp, ChevronDown } from 'lucide-react';
 import { adminApiRequest } from '@/utils/apiClient';
 
 const ONLINE_STYLE: Record<string, string> = {
-  온라인:   'bg-green-500 text-white',
-  오프라인: 'bg-slate-400 text-white',
+  true:   'bg-green-500 text-white',
+  false:  'bg-slate-400 text-white',
 };
 
 const ACTIVITY_BADGE: Record<string, string> = {
