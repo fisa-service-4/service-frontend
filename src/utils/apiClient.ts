@@ -1,6 +1,6 @@
 import type { ApiResponse } from '@/types/auth';
 import { tokenUtils, adminTokenUtils } from './token';
-import { tryRefreshToken, redirectToLogin } from './tokenRefresh';
+import { tryRefreshToken, dispatchSessionExpired } from './tokenRefresh';
 
 export async function apiRequest<T>(
   path: string,
@@ -25,7 +25,7 @@ export async function apiRequest<T>(
   if (response.status === 401 && !skipAuth) {
     const refreshed = await tryRefreshToken();
     if (!refreshed) {
-      redirectToLogin();
+      dispatchSessionExpired();
       throw new Error('세션이 만료되었습니다. 다시 로그인해 주세요.');
     }
     const retry = await fetch(`/api/v1${path}`, {

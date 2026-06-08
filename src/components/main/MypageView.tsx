@@ -6,6 +6,8 @@ import { Bell, ChevronRight, User } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import NotificationPanel from '@/components/main/NotificationPanel';
 import { userApi } from '@/api/user';
+import { tokenUtils } from '@/utils/token';
+import { apiRequest } from '@/utils/apiClient';
 import type { UserProfile } from '@/types/auth';
 
 export default function MypageView() {
@@ -13,6 +15,8 @@ export default function MypageView() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [alarmOn, setAlarmOn] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     userApi.getMe().then((profile) => {
@@ -28,6 +32,18 @@ export default function MypageView() {
       await userApi.updateAlarm(next);
     } catch {
       setAlarmOn(!next);
+    }
+  }
+
+  async function handleLogoutConfirm() {
+    setLogoutLoading(true);
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } catch {
+      // 실패해도 로그아웃 처리
+    } finally {
+      tokenUtils.clearTokens();
+      router.replace('/login');
     }
   }
 
@@ -173,7 +189,10 @@ export default function MypageView() {
           <div>
             <p className="text-sm font-semibold text-gray-500 mb-2 px-1">기타</p>
             <div className="bg-white rounded-2xl divide-y divide-gray-100">
-              <button className="w-full flex items-center gap-3 px-4 py-4">
+              <button
+                onClick={() => setShowLogoutModal(true)}
+                className="w-full flex items-center gap-3 px-4 py-4"
+              >
                 <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
                   <span className="text-lg">🚪</span>
                 </div>
@@ -201,6 +220,32 @@ export default function MypageView() {
       </div>
 
       {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl px-6 py-6 mx-6 shadow-xl w-72">
+            <p className="text-base font-semibold text-gray-900 mb-1 text-center">로그아웃</p>
+            <p className="text-sm text-gray-500 text-center mb-5">로그아웃 하시겠습니까?</p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                disabled={logoutLoading}
+                className="flex-1 py-3 border border-gray-200 text-gray-600 text-sm font-semibold rounded-xl"
+              >
+                아니오
+              </button>
+              <button
+                onClick={handleLogoutConfirm}
+                disabled={logoutLoading}
+                className="flex-1 py-3 bg-sky-500 text-white text-sm font-semibold rounded-xl disabled:opacity-60"
+              >
+                {logoutLoading ? '처리 중...' : '네'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </div>
   );
