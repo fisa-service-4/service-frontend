@@ -2,9 +2,8 @@ name: CI
 
 on:
   push:
-#    branches:
-#      - develop
-#      - main
+    branches:
+      - develop
 
 permissions:
   contents: read
@@ -30,6 +29,8 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:develop
+          build-args: |
+            TRANSACTION_URL=${{ vars.TRANSACTION_URL }}
 
   deploy:
     runs-on: ubuntu-latest

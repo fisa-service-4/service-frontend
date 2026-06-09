@@ -8,6 +8,9 @@ RUN npm ci
 
 COPY . .
 
+ARG TRANSACTION_URL
+ENV TRANSACTION_URL=$TRANSACTION_URL
+
 RUN npm run build
 
 FROM node:22-alpine
