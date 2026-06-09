@@ -2,6 +2,13 @@ import type { ApiResponse } from '@/types/auth';
 import { tokenUtils, adminTokenUtils } from './token';
 import { tryRefreshToken, dispatchSessionExpired } from './tokenRefresh';
 
+export class ApiError extends Error {
+  constructor(public readonly code: string, message: string) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 export async function apiRequest<T>(
   path: string,
   options: RequestInit & { skipAuth?: boolean } = {}
@@ -33,12 +40,12 @@ export async function apiRequest<T>(
       headers: buildHeaders(),
     });
     const retryJson: ApiResponse<T> = await retry.json();
-    if (!retryJson.success) throw new Error(retryJson.error?.message ?? '요청 처리 중 오류가 발생했습니다.');
+    if (!retryJson.success) throw new ApiError(retryJson.error?.code ?? 'UNKNOWN', retryJson.error?.message ?? '요청 처리 중 오류가 발생했습니다.');
     return retryJson.data;
   }
 
   const json: ApiResponse<T> = await response.json();
-  if (!json.success) throw new Error(json.error?.message ?? '요청 처리 중 오류가 발생했습니다.');
+  if (!json.success) throw new ApiError(json.error?.code ?? 'UNKNOWN', json.error?.message ?? '요청 처리 중 오류가 발생했습니다.');
   return json.data;
 }
 
@@ -63,6 +70,6 @@ export async function adminApiRequest<T>(
   });
 
   const json: ApiResponse<T> = await response.json();
-  if (!json.success) throw new Error(json.error?.message ?? '요청 처리 중 오류가 발생했습니다.');
+  if (!json.success) throw new ApiError(json.error?.code ?? 'UNKNOWN', json.error?.message ?? '요청 처리 중 오류가 발생했습니다.');
   return json.data;
 }

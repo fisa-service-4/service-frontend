@@ -25,6 +25,8 @@ interface DashboardStats {
   todayErrors: number;
   avgApiResponseMs: number | null;
   activeSessionCount: number;
+  suspendedUserCount: number;
+  todayNewUserCount: number;
 }
 
 interface DashboardViewProps {

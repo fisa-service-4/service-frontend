@@ -3,6 +3,7 @@
 import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/api/auth';
+import { ApiError } from '@/utils/apiClient';
 import PinKeypad from '@/components/PinKeypad';
 
 const PIN_LENGTH   = 6;
@@ -13,11 +14,12 @@ function PinVerifyContent() {
   const searchParams = useSearchParams();
   const redirectTo   = searchParams.get('redirect') ?? '/home';
 
-  const [pin, setPin]           = useState('');
-  const [failCount, setFailCount] = useState(0);
-  const [errorMsg, setErrorMsg] = useState('');
-  const [locked, setLocked]     = useState(false);
-  const [loading, setLoading]   = useState(false);
+  const [pin, setPin]                           = useState('');
+  const [failCount, setFailCount]               = useState(0);
+  const [errorMsg, setErrorMsg]                 = useState('');
+  const [locked, setLocked]                     = useState(false);
+  const [loading, setLoading]                   = useState(false);
+  const [showPinLockedModal, setShowPinLockedModal] = useState(false);
 
   const filled = pin.length;
 
@@ -39,19 +41,25 @@ function PinVerifyContent() {
       await authApi.verifyPin(pin);
       router.push(redirectTo);
     } catch (err) {
-      const next = failCount + 1;
-      setFailCount(next);
       setPin('');
 
-      if (next >= MAX_ATTEMPTS) {
+      if (err instanceof ApiError && err.code === 'AUTH_009') {
         setLocked(true);
-        setErrorMsg(`${MAX_ATTEMPTS}회 입력 오류입니다.\n계정이 잠겼습니다.`);
+        setFailCount(MAX_ATTEMPTS);
+        setShowPinLockedModal(true);
       } else {
-        setErrorMsg(
-          err instanceof Error
-            ? err.message
-            : 'PIN번호를 잘못 입력하셨습니다. 다시 입력하세요.'
-        );
+        const next = failCount + 1;
+        setFailCount(next);
+        if (next >= MAX_ATTEMPTS) {
+          setLocked(true);
+          setErrorMsg(`${MAX_ATTEMPTS}회 입력 오류입니다.\n계정이 잠겼습니다.`);
+        } else {
+          setErrorMsg(
+            err instanceof Error
+              ? err.message
+              : 'PIN번호를 잘못 입력하셨습니다. 다시 입력하세요.'
+          );
+        }
       }
     } finally {
       setLoading(false);
@@ -118,7 +126,7 @@ function PinVerifyContent() {
         )}
 
         <div className="mt-auto pb-4">
-          <PinKeypad onPress={handleKey} showAsterisk />
+          <PinKeypad onPress={handleKey} showAsterisk disabled={locked} />
         </div>
       </div>
 
@@ -139,6 +147,25 @@ function PinVerifyContent() {
           {loading ? '확인 중...' : '완료'}
         </button>
       </div>
+
+      {/* PIN 잠금 모달 */}
+      {showPinLockedModal && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl mx-6 p-6 flex flex-col items-center">
+            <p className="text-base font-bold text-gray-900 mb-2">PIN 잠금</p>
+            <p className="text-sm text-gray-500 mb-6 text-center">
+              PIN이 잠겼습니다.<br />고객센터에 문의해주세요.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="w-full py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
