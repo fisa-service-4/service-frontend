@@ -17,8 +17,14 @@ export interface ErrorLog {
 export interface ApiStatus {
   id: number;
   endpoint: string;
-  status: 'online' | 'slow' | 'offline';
-  responseTime: string;
+  status: 'online' | 'offline';
+  error?: string;
+}
+
+export interface ServiceHealth {
+  serviceName: string;
+  status: 'UP' | 'DOWN';
+  error?: string;
 }
 
 export interface AdminActivity {
