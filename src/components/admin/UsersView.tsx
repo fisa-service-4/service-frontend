@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight, UserCircle2 } from 'lucide-react';
 import { adminApiRequest } from '@/utils/apiClient';
 import UserDetailView from './UserDetailView';
+import LockedUsersView from './LockedUsersView';
 
 type StatusFilter = '전체' | '활성' | '비활성';
 
@@ -63,6 +64,7 @@ export default function UsersView() {
   const [totalUsers, setTotalUsers]         = useState<string>('-');
   const [activeSessions, setActiveSessions] = useState<string>('-');
   const [lockedUsers, setLockedUsers]       = useState<string>('-');
+  const [showLockedView, setShowLockedView] = useState(false);
 
   useEffect(() => {
     const fetchStats = () => {
@@ -111,6 +113,11 @@ export default function UsersView() {
     setPage(0);
   };
 
+
+  if (showLockedView) {
+    return <LockedUsersView onBack={() => setShowLockedView(false)} />;
+  }
+
   if (selectedUser) {
     return (
       <UserDetailView
@@ -131,17 +138,27 @@ export default function UsersView() {
 
       {/* 통계 카드 2×2 */}
       <div className="px-5 pt-5 pb-4 grid grid-cols-2 gap-3">
-        {statCards.map((card) => (
-          <div key={card.label} className="bg-slate-100 rounded-2xl px-4 py-4">
-            <p className="text-xs text-gray-500 mb-1">{card.label}</p>
-            <p className="text-xl font-bold text-gray-900">
-              {card.label === '전체 사용자' ? totalUsers
-               : card.label === '활성 회원'  ? activeSessions
-               : card.label === '정지 회원'  ? lockedUsers
-               : '-'}
-            </p>
-          </div>
-        ))}
+        {statCards.map((card) => {
+          const isLocked = card.label === '정지 회원';
+          return (
+            <div
+              key={card.label}
+              onClick={isLocked ? () => setShowLockedView(true) : undefined}
+              className={`bg-slate-100 rounded-2xl px-4 py-4 ${isLocked ? 'cursor-pointer active:bg-slate-200' : ''}`}
+            >
+              <p className="text-xs text-gray-500 mb-1">{card.label}</p>
+              <p className="text-xl font-bold text-gray-900">
+                {card.label === '전체 사용자' ? totalUsers
+                 : card.label === '활성 회원'  ? activeSessions
+                 : card.label === '정지 회원'  ? lockedUsers
+                 : '-'}
+              </p>
+              {isLocked && (
+                <p className="text-[10px] text-slate-400 mt-1">탭하여 목록 보기</p>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* 검색바 */}
@@ -233,6 +250,7 @@ export default function UsersView() {
           <ChevronRight size={18} />
         </button>
       </div>
+
 
     </div>
   );
