@@ -49,6 +49,11 @@ export const authApi = {
       body: JSON.stringify({ pin }),
     }),
 
+  getPinStatus: () =>
+    apiRequest<{ lockedYn: boolean; failCount: number }>('/auth/pin/status', {
+      method: 'GET',
+    }),
+
   changePin: (currentPin: string, newPin: string) =>
     apiRequest<string>('/auth/pin', {
       method: 'PATCH',

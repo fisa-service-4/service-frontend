@@ -22,9 +22,10 @@ export default function PinChangeView() {
   const [pin, setPin]             = useState('');
   const [currentPin, setCurrentPin] = useState('');
   const [newPin, setNewPin]       = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [errorMsg, setErrorMsg]   = useState('');
-  const [pinLocked, setPinLocked] = useState(false);
+  const [showModal, setShowModal]               = useState(false);
+  const [errorMsg, setErrorMsg]                 = useState('');
+  const [pinLocked, setPinLocked]               = useState(false);
+  const [showPinLockedModal, setShowPinLockedModal] = useState(false);
 
   async function handlePress(value: string) {
     if (pinLocked) return;
@@ -50,7 +51,7 @@ export default function PinChangeView() {
         } catch (err) {
           if (err instanceof ApiError && err.code === 'AUTH_009') {
             setPinLocked(true);
-            setErrorMsg('PIN이 잠겼습니다. 고객센터에 문의해주세요.');
+            setShowPinLockedModal(true);
           } else {
             setErrorMsg('현재 PIN이 올바르지 않습니다. 다시 입력해주세요.');
             setTimeout(() => setErrorMsg(''), 1000);
@@ -133,6 +134,24 @@ export default function PinChangeView() {
             </p>
             <button
               onClick={() => router.push('/mypage')}
+              className="w-full py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* PIN 잠금 모달 */}
+      {showPinLockedModal && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl mx-6 p-6 flex flex-col items-center">
+            <p className="text-base font-bold text-gray-900 mb-2">PIN 잠금</p>
+            <p className="text-sm text-gray-500 mb-6 text-center">
+              PIN이 잠겼습니다.<br />고객센터에 문의해주세요.
+            </p>
+            <button
+              onClick={() => router.back()}
               className="w-full py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm"
             >
               확인

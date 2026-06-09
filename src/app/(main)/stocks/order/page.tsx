@@ -76,6 +76,7 @@ function StockOrderContent() {
   const [pinError, setPinError] = useState('');
   const [pinLoading, setPinLoading] = useState(false);
   const [pinLocked, setPinLocked] = useState(false);
+  const [showPinLockedModal, setShowPinLockedModal] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -124,10 +125,19 @@ function StockOrderContent() {
     setQuantity(0);
   };
 
-  const openPin = () => {
+  const openPin = async () => {
     if (quantity <= 0 || !accountId) return;
     setPin('');
     setPinError('');
+    try {
+      const statusRes = await authApi.getPinStatus();
+      if (statusRes.lockedYn) {
+        setPinLocked(true);
+        setShowPinLockedModal(true);
+      }
+    } catch {
+      // 상태 조회 실패 시 그냥 모달 오픈
+    }
     setShowPin(true);
   };
 
@@ -156,7 +166,7 @@ function StockOrderContent() {
       } catch (err) {
         if (err instanceof ApiError && err.code === 'AUTH_009') {
           setPinLocked(true);
-          setPinError('PIN이 잠겼습니다. 고객센터에 문의해주세요.');
+          setShowPinLockedModal(true);
         } else {
           setPinError('PIN번호가 올바르지 않습니다. 다시 입력해주세요.');
         }
@@ -393,7 +403,7 @@ function StockOrderContent() {
 
         {/* 주문 버튼 */}
         <button
-          onClick={openPin}
+          onClick={() => void openPin()}
           disabled={quantity <= 0 || submitting}
           className={`w-full py-4 rounded-2xl text-white text-base font-bold transition-opacity ${
             side === 'BUY' ? 'bg-primary-500' : 'bg-red-500'
@@ -448,6 +458,23 @@ function StockOrderContent() {
             <div className="mt-auto pb-8 w-full">
               <PinKeypad onPress={handlePinPress} disabled={pinLocked} />
             </div>
+          </div>
+        </div>
+      )}
+
+      {showPinLockedModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-2xl mx-6 p-6 flex flex-col items-center">
+            <p className="text-base font-bold text-gray-900 mb-2">PIN 잠금</p>
+            <p className="text-sm text-gray-500 mb-6 text-center">
+              PIN이 잠겼습니다.<br />고객센터에 문의해주세요.
+            </p>
+            <button
+              onClick={() => router.back()}
+              className="w-full py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm"
+            >
+              확인
+            </button>
           </div>
         </div>
       )}

@@ -88,11 +88,12 @@ export default function VirtualSalarySettingView() {
   const [aiData,      setAiData]      = useState<AiRecommendation | null>(null);
   const [aiError,     setAiError]     = useState<string | null>(null);
 
-  const [showPin,    setShowPin]    = useState(false);
-  const [pin,        setPin]        = useState('');
-  const [pinError,   setPinError]   = useState('');
-  const [pinLoading, setPinLoading] = useState(false);
-  const [pinLocked,  setPinLocked]  = useState(false);
+  const [showPin,           setShowPin]           = useState(false);
+  const [pin,               setPin]               = useState('');
+  const [pinError,          setPinError]          = useState('');
+  const [pinLoading,        setPinLoading]        = useState(false);
+  const [pinLocked,         setPinLocked]         = useState(false);
+  const [showPinLockedModal, setShowPinLockedModal] = useState(false);
 
   const [toast,    setToast]    = useState<string | null>(null);
   const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -210,7 +211,7 @@ export default function VirtualSalarySettingView() {
       } catch (err) {
         if (err instanceof ApiError && err.code === 'AUTH_009') {
           setPinLocked(true);
-          setPinError('PIN이 잠겼습니다. 고객센터에 문의해주세요.');
+          setShowPinLockedModal(true);
         } else {
           setPinError('PIN번호가 올바르지 않습니다. 다시 입력해주세요.');
         }
@@ -521,6 +522,23 @@ export default function VirtualSalarySettingView() {
             <div className="mt-auto pb-8 w-full">
               <PinKeypad onPress={handlePinPress} disabled={pinLocked} />
             </div>
+          </div>
+        </div>
+      )}
+
+      {showPinLockedModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-2xl mx-6 p-6 flex flex-col items-center">
+            <p className="text-base font-bold text-gray-900 mb-2">PIN 잠금</p>
+            <p className="text-sm text-gray-500 mb-6 text-center">
+              PIN이 잠겼습니다.<br />고객센터에 문의해주세요.
+            </p>
+            <button
+              onClick={() => router.back()}
+              className="w-full py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm"
+            >
+              확인
+            </button>
           </div>
         </div>
       )}

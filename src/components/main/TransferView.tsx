@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronDown, Check, Info } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import PinKeypad from '@/components/PinKeypad';
 import { apiRequest, ApiError } from '@/utils/apiClient';
+import { authApi } from '@/api/auth';
 import { createTransfer, approveTransfer } from '@/api/bank';
 import type { BankAccount } from '@/types/bank';
 
@@ -55,10 +56,11 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
   const [showFromDrop, setShowFromDrop] = useState(false);
   const [showBankSheet, setShowBankSheet] = useState(false);
 
-  const [pin, setPin]               = useState('');
-  const [pinError, setPinError]     = useState('');
-  const [pinLoading, setPinLoading] = useState(false);
-  const [pinLocked, setPinLocked]   = useState(false);
+  const [pin, setPin]                         = useState('');
+  const [pinError, setPinError]               = useState('');
+  const [pinLoading, setPinLoading]           = useState(false);
+  const [pinLocked, setPinLocked]             = useState(false);
+  const [showPinLockedModal, setShowPinLockedModal] = useState(false);
 
   const [completedAt, setCompletedAt] = useState('');
   const [formError, setFormError]     = useState('');
@@ -127,7 +129,7 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
     } catch (err) {
       if (err instanceof ApiError && err.code === 'AUTH_009') {
         setPinLocked(true);
-        setPinError('PIN이 잠겼습니다. 고객센터에 문의해주세요.');
+        setShowPinLockedModal(true);
       } else {
         setPinError(err instanceof Error ? err.message : '이체 처리 중 오류가 발생했습니다.');
       }
@@ -375,7 +377,20 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
 
         <div className="px-5 pb-6 space-y-3 shrink-0">
           <button
-            onClick={() => { setPinError(''); setPin(''); setStep('pin'); }}
+            onClick={async () => {
+              setPinError('');
+              setPin('');
+              try {
+                const statusRes = await authApi.getPinStatus();
+                if (statusRes.lockedYn) {
+                  setPinLocked(true);
+                  setShowPinLockedModal(true);
+                }
+              } catch {
+                // 상태 조회 실패 시 그냥 PIN 단계로 이동
+              }
+              setStep('pin');
+            }}
             className="w-full py-4 bg-gray-900 text-white rounded-2xl font-bold text-base"
           >
             이체하기
@@ -434,6 +449,23 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
           <PinKeypad onPress={handlePinPress} disabled={pinLocked} />
         </div>
         <BottomNav />
+
+        {showPinLockedModal && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl mx-6 p-6 flex flex-col items-center">
+              <p className="text-base font-bold text-gray-900 mb-2">PIN 잠금</p>
+              <p className="text-sm text-gray-500 mb-6 text-center">
+                PIN이 잠겼습니다.<br />고객센터에 문의해주세요.
+              </p>
+              <button
+                onClick={onBack}
+                className="w-full py-3 bg-sky-500 text-white font-semibold rounded-xl text-sm"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
