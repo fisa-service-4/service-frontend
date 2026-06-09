@@ -59,7 +59,6 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
   const [pinError, setPinError]     = useState('');
   const [pinLoading, setPinLoading] = useState(false);
   const [pinLocked, setPinLocked]   = useState(false);
-  const [pinFailCount, setPinFailCount] = useState(0);
 
   const [completedAt, setCompletedAt] = useState('');
   const [formError, setFormError]     = useState('');
