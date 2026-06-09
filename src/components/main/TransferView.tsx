@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ArrowLeft, ChevronDown, Check, Info } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import PinKeypad from '@/components/PinKeypad';
-import { apiRequest } from '@/utils/apiClient';
+import { apiRequest, ApiError } from '@/utils/apiClient';
 import { createTransfer, approveTransfer } from '@/api/bank';
 import type { BankAccount } from '@/types/bank';
 
@@ -55,9 +55,11 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
   const [showFromDrop, setShowFromDrop] = useState(false);
   const [showBankSheet, setShowBankSheet] = useState(false);
 
-  const [pin, setPin]           = useState('');
-  const [pinError, setPinError] = useState('');
+  const [pin, setPin]               = useState('');
+  const [pinError, setPinError]     = useState('');
   const [pinLoading, setPinLoading] = useState(false);
+  const [pinLocked, setPinLocked]   = useState(false);
+  const [pinFailCount, setPinFailCount] = useState(0);
 
   const [completedAt, setCompletedAt] = useState('');
   const [formError, setFormError]     = useState('');
@@ -102,7 +104,7 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
 
   /* ── PIN 입력 ── */
   async function handlePinPress(value: string) {
-    if (pinLoading) return;
+    if (pinLoading || pinLocked) return;
     if (value === 'backspace') { setPin((p) => p.slice(0, -1)); return; }
     if (pin.length >= 6) return;
     const next = pin + value;
@@ -124,7 +126,12 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
       setCompletedAt(approved.completedAt ?? '');
       setStep('complete');
     } catch (err) {
-      setPinError(err instanceof Error ? err.message : '이체 처리 중 오류가 발생했습니다.');
+      if (err instanceof ApiError && err.code === 'AUTH_009') {
+        setPinLocked(true);
+        setPinError('PIN이 잠겼습니다. 고객센터에 문의해주세요.');
+      } else {
+        setPinError(err instanceof Error ? err.message : '이체 처리 중 오류가 발생했습니다.');
+      }
       setPin('');
     } finally {
       setPinLoading(false);
@@ -425,7 +432,7 @@ export default function TransferView({ accounts, onBack, onComplete }: TransferV
         </div>
 
         <div className="pb-6 shrink-0">
-          <PinKeypad onPress={handlePinPress} />
+          <PinKeypad onPress={handlePinPress} disabled={pinLocked} />
         </div>
         <BottomNav />
       </div>

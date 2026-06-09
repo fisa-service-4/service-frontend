@@ -3,6 +3,7 @@
 import { useState, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi } from '@/api/auth';
+import { ApiError } from '@/utils/apiClient';
 import PinKeypad from '@/components/PinKeypad';
 
 const PIN_LENGTH   = 6;
@@ -39,19 +40,25 @@ function PinVerifyContent() {
       await authApi.verifyPin(pin);
       router.push(redirectTo);
     } catch (err) {
-      const next = failCount + 1;
-      setFailCount(next);
       setPin('');
 
-      if (next >= MAX_ATTEMPTS) {
+      if (err instanceof ApiError && err.code === 'AUTH_009') {
         setLocked(true);
-        setErrorMsg(`${MAX_ATTEMPTS}회 입력 오류입니다.\n계정이 잠겼습니다.`);
+        setFailCount(MAX_ATTEMPTS);
+        setErrorMsg('PIN이 잠겼습니다. 고객센터에 문의해주세요.');
       } else {
-        setErrorMsg(
-          err instanceof Error
-            ? err.message
-            : 'PIN번호를 잘못 입력하셨습니다. 다시 입력하세요.'
-        );
+        const next = failCount + 1;
+        setFailCount(next);
+        if (next >= MAX_ATTEMPTS) {
+          setLocked(true);
+          setErrorMsg(`${MAX_ATTEMPTS}회 입력 오류입니다.\n계정이 잠겼습니다.`);
+        } else {
+          setErrorMsg(
+            err instanceof Error
+              ? err.message
+              : 'PIN번호를 잘못 입력하셨습니다. 다시 입력하세요.'
+          );
+        }
       }
     } finally {
       setLoading(false);
@@ -118,7 +125,7 @@ function PinVerifyContent() {
         )}
 
         <div className="mt-auto pb-4">
-          <PinKeypad onPress={handleKey} showAsterisk />
+          <PinKeypad onPress={handleKey} showAsterisk disabled={locked} />
         </div>
       </div>
 

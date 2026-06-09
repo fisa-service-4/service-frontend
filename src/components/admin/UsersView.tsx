@@ -18,6 +18,7 @@ const ACCOUNT_STATUS_MAP: Record<string, '활성' | '비활성' | '정지'> = {
   ACTIVE:    '활성',
   INACTIVE:  '비활성',
   SUSPENDED: '정지',
+  LOCKED:    '정지',
   WITHDRAW:  '비활성',
 };
 
@@ -61,6 +62,7 @@ export default function UsersView() {
   const [selectedUser, setSelectedUser]     = useState<ApiUser | null>(null);
   const [totalUsers, setTotalUsers]         = useState<string>('-');
   const [activeSessions, setActiveSessions] = useState<string>('-');
+  const [lockedUsers, setLockedUsers]       = useState<string>('-');
 
   useEffect(() => {
     const fetchStats = () => {
@@ -70,6 +72,10 @@ export default function UsersView() {
 
       adminApiRequest<PagedResponse>('/admin/users?loginStatus=ONLINE&page=0&size=1')
         .then((data) => setActiveSessions(data.totalElements.toLocaleString()))
+        .catch(() => {});
+
+      adminApiRequest<PagedResponse>('/admin/users?status=LOCKED&page=0&size=1')
+        .then((data) => setLockedUsers(data.totalElements.toLocaleString()))
         .catch(() => {});
     };
 
@@ -131,6 +137,7 @@ export default function UsersView() {
             <p className="text-xl font-bold text-gray-900">
               {card.label === '전체 사용자' ? totalUsers
                : card.label === '활성 회원'  ? activeSessions
+               : card.label === '정지 회원'  ? lockedUsers
                : '-'}
             </p>
           </div>

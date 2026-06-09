@@ -3,6 +3,7 @@
 interface PinKeypadProps {
   onPress: (value: string) => void;
   showAsterisk?: boolean;
+  disabled?: boolean;
 }
 
 const ROWS = [
@@ -11,9 +12,9 @@ const ROWS = [
   ['7', '8', '9'],
 ];
 
-export default function PinKeypad({ onPress, showAsterisk = false }: PinKeypadProps) {
+export default function PinKeypad({ onPress, showAsterisk = false, disabled = false }: PinKeypadProps) {
   return (
-    <div className="grid grid-cols-3 gap-2 w-full px-4">
+    <div className={`grid grid-cols-3 gap-2 w-full px-4 ${disabled ? 'pointer-events-none opacity-40' : ''}`}>
       {ROWS.flat().map((num) => (
         <button
           key={num}

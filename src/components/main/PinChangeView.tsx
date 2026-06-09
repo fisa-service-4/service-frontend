@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import PinKeypad from '@/components/PinKeypad';
 import BottomNav from '@/components/main/BottomNav';
 import { authApi } from '@/api/auth';
+import { ApiError } from '@/utils/apiClient';
 
 type Step = 'current' | 'new' | 'confirm';
 
@@ -23,8 +24,10 @@ export default function PinChangeView() {
   const [newPin, setNewPin]       = useState('');
   const [showModal, setShowModal] = useState(false);
   const [errorMsg, setErrorMsg]   = useState('');
+  const [pinLocked, setPinLocked] = useState(false);
 
   async function handlePress(value: string) {
+    if (pinLocked) return;
     if (value === 'backspace') {
       setPin((p) => p.slice(0, -1));
       setErrorMsg('');
@@ -44,10 +47,15 @@ export default function PinChangeView() {
           setCurrentPin(next);
           setStep('new');
           setPin('');
-        } catch {
-          setErrorMsg('현재 PIN이 올바르지 않습니다. 다시 입력해주세요.');
+        } catch (err) {
+          if (err instanceof ApiError && err.code === 'AUTH_009') {
+            setPinLocked(true);
+            setErrorMsg('PIN이 잠겼습니다. 고객센터에 문의해주세요.');
+          } else {
+            setErrorMsg('현재 PIN이 올바르지 않습니다. 다시 입력해주세요.');
+            setTimeout(() => setErrorMsg(''), 1000);
+          }
           setPin('');
-          setTimeout(() => setErrorMsg(''), 1000);
         }
       } else if (step === 'new') {
         setNewPin(next);
@@ -109,7 +117,7 @@ export default function PinChangeView() {
         </p>
 
         {/* 키패드 */}
-        <PinKeypad onPress={handlePress} />
+        <PinKeypad onPress={handlePress} disabled={pinLocked} />
 
       </div>
 
