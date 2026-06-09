@@ -15,7 +15,7 @@ const navItems = [
 
 export default function BottomNav({ activeNav, onNavChange }: BottomNavProps) {
   return (
-    <div className="bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-3 border-t border-slate-700 shrink-0">
+    <div className="relative z-50 bg-gradient-to-r from-slate-800 to-slate-900 px-6 py-3 border-t border-slate-700 shrink-0">
       <div className="flex justify-around items-center">
         {navItems.map(({ key, label, icon: Icon }) => (
           <button
