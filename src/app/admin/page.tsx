@@ -9,6 +9,7 @@ import DashboardView from '@/components/admin/DashboardView';
 import LogsView from '@/components/admin/LogsView';
 import LoginLogView from '@/components/admin/LoginLogView';
 import AiAgentLogView from '@/components/admin/AiAgentLogView';
+import ErrorLogPage from '@/components/admin/ErrorLogPage';
 import UsersView from '@/components/admin/UsersView';
 import SettingsView from '@/components/admin/SettingsView';
 import BottomNav from '@/components/admin/BottomNav';
@@ -67,7 +68,10 @@ export default function AdminPage() {
         {activeNav === 'logs' && logSubView === 'ai' && (
           <AiAgentLogView onBack={() => setLogSubView(null)} />
         )}
-        {activeNav === 'logs' && logSubView !== null && logSubView !== 'login' && logSubView !== 'ai' && (
+        {activeNav === 'logs' && logSubView === 'error' && (
+          <ErrorLogPage onBack={() => setLogSubView(null)} />
+        )}
+        {activeNav === 'logs' && logSubView !== null && logSubView !== 'login' && logSubView !== 'ai' && logSubView !== 'error' && (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-gray-500">준비 중</p>
           </div>
