@@ -113,6 +113,7 @@ export default function UsersView() {
           name: selectedUser.name,
           email: selectedUser.email,
           status: ACCOUNT_STATUS_MAP[selectedUser.status] ?? '비활성',
+          isOnline: selectedUser.isOnline,
         }}
         onBack={() => setSelectedUser(null)}
       />

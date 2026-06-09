@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ArrowLeft, UserCircle2, ChevronUp, ChevronDown } from 'lucide-react';
+import { adminApiRequest } from '@/utils/apiClient';
 
-const STATUS_STYLE: Record<string, string> = {
-  활성:   'bg-green-500 text-white',
-  비활성: 'bg-slate-400 text-white',
-  정지:   'bg-red-400 text-white',
+const ONLINE_STYLE: Record<string, string> = {
+  true:   'bg-green-500 text-white',
+  false:  'bg-slate-400 text-white',
 };
 
 const ACTIVITY_BADGE: Record<string, string> = {
@@ -20,6 +20,7 @@ interface User {
   name: string;
   email: string;
   status: '활성' | '비활성' | '정지';
+  isOnline: boolean;
 }
 
 interface UserDetailViewProps {
@@ -27,14 +28,28 @@ interface UserDetailViewProps {
   onBack: () => void;
 }
 
+interface UserDetailResponse {
+  isOnline: boolean;
+}
+
 export default function UserDetailView({ user, onBack }: UserDetailViewProps) {
   const [accountsExpanded, setAccountsExpanded] = useState(true);
+  const [isOnline, setIsOnline] = useState(user.isOnline);
+
+  useEffect(() => {
+    adminApiRequest<UserDetailResponse>(`/admin/users/${user.id}`)
+      .then((data) => setIsOnline(data.isOnline))
+      .catch(() => {});
+  }, [user.id]);
+
+  const onlineLabel = isOnline ? '온라인' : '오프라인';
 
   const infoRows = [
-    { label: '이메일',   value: '-' },
-    { label: '연락처',   value: '-' },
-    { label: '업종',     value: '-' },
-    { label: '가입일',   value: '-' },
+    { label: '이메일',    value: user.email },
+    { label: '계정 상태', value: user.status },
+    { label: '연락처',    value: '-' },
+    { label: '업종',      value: '-' },
+    { label: '가입일',    value: '-' },
     { label: '최종 접속', value: '-' },
   ];
 
@@ -59,7 +74,7 @@ export default function UserDetailView({ user, onBack }: UserDetailViewProps) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-gray-900">{user.name}</span>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${STATUS_STYLE[user.status]}`}>{user.status}</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${ONLINE_STYLE[String(isOnline)]}`}>{onlineLabel}</span>
             </div>
             <span className="text-sm text-gray-500">{user.email}</span>
           </div>
