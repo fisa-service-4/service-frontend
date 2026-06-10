@@ -11,6 +11,7 @@ import LoginLogView from '@/components/admin/LoginLogView';
 import AiAgentLogView from '@/components/admin/AiAgentLogView';
 import ErrorLogPage from '@/components/admin/ErrorLogPage';
 import ApiCallLogView from '@/components/admin/ApiCallLogView';
+import TransactionLogView from '@/components/admin/TransactionLogView';
 import UsersView from '@/components/admin/UsersView';
 import SettingsView from '@/components/admin/SettingsView';
 import BottomNav from '@/components/admin/BottomNav';
@@ -75,7 +76,10 @@ export default function AdminPage() {
         {activeNav === 'logs' && logSubView === 'api' && (
           <ApiCallLogView onBack={() => setLogSubView(null)} />
         )}
-        {activeNav === 'logs' && logSubView !== null && logSubView !== 'login' && logSubView !== 'ai' && logSubView !== 'error' && logSubView !== 'api' && (
+        {activeNav === 'logs' && logSubView === 'transaction' && (
+          <TransactionLogView onBack={() => setLogSubView(null)} />
+        )}
+        {activeNav === 'logs' && logSubView !== null && logSubView !== 'login' && logSubView !== 'ai' && logSubView !== 'error' && logSubView !== 'api' && logSubView !== 'transaction' && (
           <div className="flex-1 flex items-center justify-center">
             <p className="text-gray-500">준비 중</p>
           </div>
