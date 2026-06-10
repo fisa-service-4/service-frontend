@@ -7,22 +7,22 @@ import BottomNav from '@/components/main/BottomNav';
 import NotificationPanel from '@/components/main/NotificationPanel';
 import StockChart from '@/components/stock/StockChart';
 import {
-  addFavorite,
-  cancelOrder,
-  type ChartCandle,
-  type FavoriteStock,
-  getFavorites,
-  getHoldings,
-  getOrders,
-  getReturns,
-  getStockAccounts,
-  getStockChart,
-  type Holding,
-  type Order,
-  removeFavorite,
-  type Returns,
-  searchStocks,
-  type StockSearchItem,
+    addFavorite,
+    cancelOrder,
+    type ChartCandle,
+    type FavoriteStock,
+    getFavorites,
+    getHoldings,
+    getOrders,
+    getReturns,
+    getStockAccounts,
+    getStockChart,
+    type Holding,
+    type Order,
+    removeFavorite,
+    type Returns,
+    searchStocks,
+    type StockSearchItem,
 } from '@/api/stock';
 import {authApi} from '@/api/auth';
 import PinKeypad from '@/components/PinKeypad';
@@ -413,27 +413,26 @@ function StocksContent() {
                             ) : (
                                 <div className="space-y-2.5">
                                     {favorites.map((s) => {
-                                        // API 스펙에 맞게 상승/하락 유무 판별 (기본값 0 처리)
                                         const currentPrice = s.currentPrice ?? 0;
                                         const changeRate = s.changeRate ?? 0;
-                                        const market = s.market ?? '';
                                         const up = changeRate >= 0;
 
                                         return (
                                             <div
                                                 key={s.favoriteId}
                                                 className="bg-bg-card shadow-md rounded-2xl p-4.5 flex justify-between items-center cursor-pointer border border-gray-100/30 active:scale-[0.99] transition-transform"
-                                                // 카드 클릭 시 파라미터를 들고 주문 페이지(StockOrderPage)로 이동
                                                 onClick={() =>
+                                                    // s.market 대신 빈 문자열('')을 직접 넘겨줍니다.
                                                     router.push(
-                                                        `/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${currentPrice}&changeRate=${changeRate}&market=${market}`
+                                                        `/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${currentPrice}&changeRate=${changeRate}&market=`
                                                     )
                                                 }
                                             >
                                                 <div>
                                                     <p className="text-sm font-bold text-gray-900">{s.stockName}</p>
+                                                    {/* 타포그래피에서도 market 출력을 생략하거나 종목코드만 깔끔하게 노출 */}
                                                     <p className="text-xs font-semibold text-gray-400 mt-1">
-                                                        {s.stockCode} {market && `· ${market}`}
+                                                        {s.stockCode}
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-3.5">
@@ -445,7 +444,6 @@ function StocksContent() {
                                                             {signRate(changeRate)}
                                                         </p>
                                                     </div>
-                                                    {/* 별표 아이콘 클릭 시 카드 클릭 이벤트가 전파되어 페이지가 이동하는 버그 방지 (stopPropagation) */}
                                                     <button
                                                         onClick={(e) => toggleFavorite(s.stockCode, e)}
                                                         className="p-1.5 rounded-full hover:bg-gray-50 transition-colors"
