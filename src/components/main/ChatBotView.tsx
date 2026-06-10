@@ -243,7 +243,6 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
 
     const loadSession = async (session: SessionSummary) => {
         setSidebar(false);
-        setCurrentSession(session.sessionId);
         try {
             const data = await apiRequest<any>(`/ai/chat/sessions/${session.sessionId}/messages`);
 
@@ -256,7 +255,9 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 content: m.content || m.message || '',
             }));
             setMessages(msgs.length > 0 ? msgs : [GREETING]);
+            setCurrentSession(session.sessionId);
         } catch {
+            setCurrentSession(null);
             setMessages([GREETING]);
         }
     };
