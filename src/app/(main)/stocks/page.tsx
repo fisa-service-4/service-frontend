@@ -176,6 +176,7 @@ function StocksContent() {
                     delete next[stockCode];
                     return next;
                 });
+                setFavorites((prev) => prev.filter((f) => f.stockCode !== stockCode));
             } else {
                 const res = await addFavorite(stockCode);
                 setFavoriteMap((prev) => ({...prev, [stockCode]: res.favoriteId}));
