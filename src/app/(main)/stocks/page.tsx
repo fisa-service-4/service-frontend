@@ -5,18 +5,15 @@ import {useRouter, useSearchParams} from 'next/navigation';
 import {Bell, Search, Star, TrendingDown, TrendingUp} from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import NotificationPanel from '@/components/main/NotificationPanel';
-import StockChart from '@/components/stock/StockChart';
 import {
     addFavorite,
     cancelOrder,
-    type ChartCandle,
     type FavoriteStock,
     getFavorites,
     getHoldings,
     getOrders,
     getReturns,
     getStockAccounts,
-    getStockChart,
     type Holding,
     type Order,
     removeFavorite,
@@ -101,7 +98,6 @@ function StocksContent() {
     const [favoriteMap, setFavoriteMap] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
     const [showNotification, setShowNotification] = useState(false);
-    const [chartMap, setChartMap] = useState<Record<string, ChartCandle[]>>({});
     const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
     const [showCancelPin, setShowCancelPin] = useState(false);
     const [cancelPin, setCancelPin] = useState('');
@@ -134,15 +130,6 @@ function StocksContent() {
                 ]);
                 setHoldings(holdingRes.holdings);
                 setReturns(returnsRes);
-
-                const charts = await Promise.all(
-                    holdingRes.holdings.map((h) => getStockChart(h.stockCode, 'DAILY'))
-                );
-                const chartData: Record<string, ChartCandle[]> = {};
-                holdingRes.holdings.forEach((h, i) => {
-                    chartData[h.stockCode] = charts[i];
-                });
-                setChartMap(chartData);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -387,46 +374,35 @@ function StocksContent() {
                                     {holdings.map((s) => {
                                         const up = (s.profitRate ?? 0) >= 0;
                                         return (
-                                            <div key={s.stockCode} className="bg-bg-card shadow-md rounded-2xl p-4">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <div>
+                                            <div
+                                                key={s.stockCode}
+                                                className="bg-bg-card shadow-md rounded-2xl p-4 cursor-pointer active:bg-gray-50"
+                                                onClick={() => router.push("/stocks/order?code=" + s.stockCode + "&name=" + encodeURIComponent(s.stockName) + "&price=" + s.currentPrice + "&changeRate=" + (s.profitRate ?? 0) + "&market=")}
+                                            >
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div className="flex items-center gap-2">
                                                         <p className="text-base font-bold text-gray-900">{s.stockName}</p>
-                                                        <p className="text-xs text-gray-400 mt-0.5">{s.stockCode}</p>
+                                                        <p className="text-xs text-gray-400">{s.stockCode}</p>
                                                     </div>
-                                                    <p className="text-base font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                                                    <div className="text-right">
+                                                        <p className="text-base font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                                                        <div className="flex items-center justify-end gap-1 mt-0.5">
+                                                            <p className="text-xs text-gray-400">보유수량</p>
+                                                            <p className="text-xs font-bold text-primary-500">{s.quantity}주</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
-
-                                                {chartMap[s.stockCode]?.length > 0
-                                                    ? <StockChart data={chartMap[s.stockCode]} height={100}/>
-                                                    : <div className="h-[100px]"/>
-                                                }
-
-                                                <div className="flex justify-between items-start mt-3 mb-4">
+                                                <div className="flex justify-between items-start">
                                                     <div>
                                                         <p className="text-xs text-gray-400">평가손익</p>
                                                         <p className={`text-sm font-bold mt-1 ${up ? 'text-success' : 'text-error'}`}>
                                                             {signWon(s.unrealizedProfit)} ({signRate(s.profitRate)})
                                                         </p>
                                                     </div>
-                                                    <div className="flex items-center gap-1">
-                                                        <p className="text-xs text-gray-400">보유수량</p>
-                                                        <p className="text-xs font-bold text-gray-900">{s.quantity}주</p>
+                                                    <div className="text-right">
+                                                        <p className="text-xs text-gray-400">평균단가</p>
+                                                        <p className="text-sm font-bold text-gray-900 mt-1">{fmtWon(s.averagePrice)}</p>
                                                     </div>
-                                                </div>
-
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        className="flex-1 py-3 rounded-xl bg-primary-500 text-white text-sm font-bold"
-                                                        onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=BUY`)}
-                                                    >
-                                                        매수
-                                                    </button>
-                                                    <button
-                                                        className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold"
-                                                        onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=&side=SELL&holdingQty=${s.quantity}`)}
-                                                    >
-                                                        매도
-                                                    </button>
                                                 </div>
                                             </div>
                                         );
