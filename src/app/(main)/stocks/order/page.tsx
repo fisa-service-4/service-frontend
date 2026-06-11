@@ -369,7 +369,7 @@ function StockOrderContent() {
               <span className="text-sm font-bold text-gray-900">{fmtWon(estimate)}</span>
             </div>
             <p className={`text-xs text-primary-500 text-right ${orderMethod === 'MARKET' ? 'visible' : 'invisible'}`}>
-              시장가는 현재가로 대략 체결됩니다.
+              시장가는 현재가 기준으로 체결됩니다.
             </p>
             <div className="flex justify-between">
               {side === 'SELL' ? (
