@@ -38,28 +38,28 @@ const ORDER_STATUS_LABEL: Record<string, string> = {
 const fmtDate = (dateString: string | null | undefined) => {
     if (!dateString) return '-';
     try {
-        // 1. 뒤에 Z가 없더라도 UTC 시간임을 명시하기 위해 끝에 'Z'를 강제로 붙여줍니다.
-        const utcString = dateString.endsWith('Z') ? dateString : `${dateString}Z`;
+        const hasTimezone = /Z|[+-]\d{2}:?\d{2}$/.test(dateString);
+        const utcString = hasTimezone ? dateString : dateString + 'Z';
         const d = new Date(utcString);
 
-        // 올바른 날짜가 아니라면 원본 반환
         if (isNaN(d.getTime())) return dateString;
 
-        // 2. 한국 시간(KST)은 UTC보다 9시간 빠르므로, 9시간에 해당하는 밀리초를 더해줍니다.
-        // 9시간 = 9 * 60 * 60 * 1000 밀리초
-        const KOREA_TIME_OFFSET = 9 * 60 * 60 * 1000;
-        const koreaDate = new Date(d.getTime() + KOREA_TIME_OFFSET);
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hourCycle: 'h23',
+        });
 
-        // 3. 9시간이 더해진 로컬 날짜에서 년, 월, 일, 시, 분 추출
-        const year = koreaDate.getUTCFullYear();
-        const month = String(koreaDate.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(koreaDate.getUTCDate()).padStart(2, '0');
-        const hours = String(koreaDate.getUTCHours()).padStart(2, '0');
-        const minutes = String(koreaDate.getUTCMinutes()).padStart(2, '0');
+        const parts = formatter.formatToParts(d);
+        const partMap = Object.fromEntries(parts.map((p) => [p.type, p.value]));
 
-        return `${year}.${month}.${day} ${hours}:${minutes}`;
+        return partMap.year + '.' + partMap.month + '.' + partMap.day + ' ' + partMap.hour + ':' + partMap.minute;
     } catch {
-        return dateString; // 에러 발생 시 안전하게 원본 데이터 노출
+        return dateString;
     }
 };
 
