@@ -41,8 +41,9 @@ interface AiAgentLogViewProps {
 const PAGE_SIZE = 20;
 
 function formatDate(iso: string) {
+  if (!iso) return '';
   const [datePart, timePart] = iso.split('T');
-  return `${datePart} ${timePart?.substring(0, 5) ?? ''}`;
+  return timePart ? `${datePart} ${timePart.substring(0, 5)}` : datePart;
 }
 
 function getPageNumbers(current: number, total: number): number[] {
