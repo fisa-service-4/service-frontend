@@ -380,13 +380,18 @@ function StocksContent() {
                                                 onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=`)}
                                             >
                                                 <div className="flex justify-between items-start mb-3">
-                                                    <div>
+                                                    <div className="flex items-center gap-2">
                                                         <p className="text-base font-bold text-gray-900">{s.stockName}</p>
-                                                        <p className="text-xs text-gray-400 mt-0.5">{s.stockCode}</p>
+                                                        <p className="text-xs text-gray-400">{s.stockCode}</p>
                                                     </div>
-                                                    <p className="text-base font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                                                    <div className="text-right">
+                                                        <p className="text-base font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
+                                                        <div className="flex items-center justify-end gap-1 mt-0.5">
+                                                            <p className="text-xs text-gray-400">보유수량</p>
+                                                            <p className="text-xs font-bold text-primary-500">{s.quantity}주</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
-
                                                 <div className="flex justify-between items-start">
                                                     <div>
                                                         <p className="text-xs text-gray-400">평가손익</p>
@@ -397,12 +402,6 @@ function StocksContent() {
                                                     <div className="text-right">
                                                         <p className="text-xs text-gray-400">평균단가</p>
                                                         <p className="text-sm font-bold text-gray-900 mt-1">{fmtWon(s.averagePrice)}</p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-end mt-2">
-                                                    <div className="flex items-center gap-1">
-                                                        <p className="text-xs text-gray-400">보유수량</p>
-                                                        <p className="text-xs font-bold text-primary-500">{s.quantity}주</p>
                                                     </div>
                                                 </div>
                                             </div>
