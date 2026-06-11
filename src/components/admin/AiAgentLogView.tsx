@@ -1,60 +1,91 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
+import { adminApiRequest } from '@/utils/apiClient';
 
-type IntentFilter = '전체' | '지출 분석' | '투자 조언' | '자산 요약';
-type LogStatus    = '성공' | 'TIMEOUT' | '실패';
+type SessionType = 'CHAT' | 'TRANSFER' | 'STOCK' | 'ANALYSIS';
+type FilterType  = '전체' | SessionType;
 
-const FILTERS: IntentFilter[] = ['전체', '지출 분석', '투자 조언', '자산 요약'];
+const FILTERS: FilterType[] = ['전체', 'CHAT', 'TRANSFER', 'STOCK', 'ANALYSIS'];
 
-const STATUS_STYLE: Record<LogStatus, string> = {
-  '성공':    'bg-green-500 text-white',
-  'TIMEOUT': 'bg-red-400 text-white',
-  '실패':    'bg-red-400 text-white',
+const SESSION_TYPE_STYLE: Record<SessionType, string> = {
+  CHAT:     'bg-sky-100 text-sky-700',
+  TRANSFER: 'bg-blue-100 text-blue-700',
+  STOCK:    'bg-emerald-100 text-emerald-700',
+  ANALYSIS: 'bg-purple-100 text-purple-700',
 };
 
-const INTENT_STYLE: Record<string, string> = {
-  '투자 조언': 'bg-sky-100 text-sky-700',
-  '지출 분석': 'bg-purple-100 text-purple-700',
-  '자산 요약': 'bg-amber-100 text-amber-700',
-};
-
-interface AiLog {
-  id: number;
-  userName: string;
-  userId: string;
-  intent: string;
-  message: string;
-  tokens: string;
-  status: LogStatus;
-  loggedAt: string;
+interface AiChatSession {
+  sessionId:       number;
+  userId:          number;
+  userName:        string;
+  email:           string;
+  sessionType:     string;
+  lastUserMessage: string | null;
+  updatedAt:       string;
 }
 
-const logs: AiLog[] = [
-  { id: 1, userName: '-', userId: '-', intent: '투자 조언', message: '-', tokens: '-', status: '성공',   loggedAt: '-' },
-  { id: 2, userName: '-', userId: '-', intent: '지출 분석', message: '-', tokens: '-', status: 'TIMEOUT', loggedAt: '-' },
-];
-
-const statCards = [
-  { label: '총 질의'  },
-  { label: '에러 응답' },
-  { label: '평균 토큰' },
-  { label: '오늘 누적' },
-];
+interface PageResponse {
+  content:       AiChatSession[];
+  page:          number;
+  size:          number;
+  totalElements: number;
+  totalPages:    number;
+}
 
 interface AiAgentLogViewProps {
   onBack: () => void;
 }
 
-export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
-  const [filter, setFilter] = useState<IntentFilter>('전체');
-  const [page, setPage]     = useState(1);
-  const totalPages          = 1;
+const PAGE_SIZE = 20;
 
-  const filtered = logs.filter(
-    (log) => filter === '전체' || log.intent === filter,
-  );
+function formatDate(iso: string) {
+  if (!iso) return '';
+  const [datePart, timePart] = iso.split('T');
+  return timePart ? `${datePart} ${timePart.substring(0, 5)}` : datePart;
+}
+
+function getPageNumbers(current: number, total: number): number[] {
+  const max  = 5;
+  const half = Math.floor(max / 2);
+  let start  = Math.max(0, current - half);
+  let end    = start + max - 1;
+  if (end >= total) { end = total - 1; start = Math.max(0, end - max + 1); }
+  const pages: number[] = [];
+  for (let i = start; i <= end; i++) pages.push(i);
+  return pages;
+}
+
+export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
+  const [filter,        setFilter]        = useState<FilterType>('전체');
+  const [page,          setPage]          = useState(0);
+  const [sessions,      setSessions]      = useState<AiChatSession[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages,    setTotalPages]    = useState(1);
+  const [loading,       setLoading]       = useState(false);
+
+  const fetchLogs = useCallback(() => {
+    setLoading(true);
+    const params = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) });
+    if (filter !== '전체') params.set('sessionType', filter);
+
+    adminApiRequest<PageResponse>(`/admin/logs/ai?${params}`)
+      .then((data) => {
+        setSessions(data.content);
+        setTotalElements(data.totalElements);
+        setTotalPages(Math.max(1, data.totalPages));
+      })
+      .catch((err) => console.error('[AiAgentLogView]', err))
+      .finally(() => setLoading(false));
+  }, [filter, page]);
+
+  useEffect(() => { fetchLogs(); }, [fetchLogs]);
+
+  const handleFilterChange = (f: FilterType) => {
+    setFilter(f);
+    setPage(0);
+  };
 
   return (
     <div className="flex-1 overflow-y-auto bg-white flex flex-col">
@@ -67,17 +98,7 @@ export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
           </button>
           <h2 className="text-xl font-bold text-gray-900">AI 에이전트 로그</h2>
         </div>
-        <p className="text-sm text-gray-500 mt-0.5 pl-7">전체 -건</p>
-      </div>
-
-      {/* 통계 카드 2×2 */}
-      <div className="px-5 mb-4 grid grid-cols-2 gap-3">
-        {statCards.map((card) => (
-          <div key={card.label} className="bg-slate-100 rounded-2xl px-4 py-4">
-            <p className="text-xs text-gray-500 mb-1">{card.label}</p>
-            <p className="text-xl font-bold text-gray-900">-</p>
-          </div>
-        ))}
+        <p className="text-sm text-gray-500 mt-0.5 pl-7">전체 {totalElements.toLocaleString()}건</p>
       </div>
 
       {/* 필터 탭 */}
@@ -85,7 +106,7 @@ export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
         {FILTERS.map((f) => (
           <button
             key={f}
-            onClick={() => { setFilter(f); setPage(1); }}
+            onClick={() => handleFilterChange(f)}
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
               filter === f
                 ? 'bg-slate-700 text-white'
@@ -100,40 +121,45 @@ export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
       {/* 로그 목록 */}
       <div className="flex-1 px-5">
         <div className="bg-slate-100 rounded-2xl overflow-hidden">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="flex items-center justify-center h-32 text-sm text-gray-400">
+              불러오는 중...
+            </div>
+          ) : sessions.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-sm text-gray-400">
               데이터 없음
             </div>
           ) : (
-            filtered.map((log, idx) => (
-              <div key={log.id}>
-                <div className={`px-4 py-3 ${log.status !== '성공' ? 'bg-red-50' : ''}`}>
-                  {/* 첫 번째 줄: 이름 · ID · 토큰 */}
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-semibold text-gray-900">{log.userName}</span>
-                      <span className="text-sm font-medium text-sky-500">{log.userId}</span>
+            sessions.map((session, idx) => (
+              <div key={session.sessionId}>
+                <div className="px-4 py-4">
+                  {/* 1행: 이름 */}
+                  <p className="text-sm font-semibold text-gray-900 mb-1">{session.userName}</p>
+                  {/* 2행: 세션 타입 배지 */}
+                  {(() => {
+                    const badge = (filter !== '전체' ? filter : session.sessionType) as SessionType;
+                    return (
+                      <span className={`inline-block text-xs px-2 py-0.5 rounded-md font-medium mb-1 ${SESSION_TYPE_STYLE[badge] ?? 'bg-slate-200 text-slate-700'}`}>
+                        {badge}
+                      </span>
+                    );
+                  })()}
+                  {/* 3행: 질문 내용 · 이메일 · 일시 */}
+                  <div className="flex items-end justify-between gap-2">
+                    <p className="text-xs text-gray-900 flex-1">
+                      {session.lastUserMessage
+                        ? session.lastUserMessage.length > 50
+                          ? session.lastUserMessage.slice(0, 50) + '...'
+                          : session.lastUserMessage
+                        : ''}
+                    </p>
+                    <div className="flex flex-col items-end gap-0.5 shrink-0">
+                      <span className="text-xs text-gray-900">{session.email}</span>
+                      <span className="text-xs text-gray-900">{formatDate(session.updatedAt)}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-700">{log.tokens}tok</span>
-                  </div>
-
-                  {/* 두 번째 줄: 인텐트 배지 · 메시지 */}
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-xs px-2 py-0.5 rounded-md font-medium shrink-0 ${INTENT_STYLE[log.intent] ?? 'bg-slate-200 text-slate-700'}`}>
-                      {log.intent}
-                    </span>
-                    <span className="text-sm text-gray-700 truncate">{log.message}</span>
-                  </div>
-
-                  {/* 세 번째 줄: 상태 배지 · 날짜 */}
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-0.5 rounded-md font-semibold ${STATUS_STYLE[log.status]}`}>
-                      {log.status}
-                    </span>
-                    <span className="text-xs text-gray-400">{log.loggedAt}</span>
                   </div>
                 </div>
-                {idx < filtered.length - 1 && <div className="mx-4 h-px bg-slate-200" />}
+                {idx < sessions.length - 1 && <div className="mx-4 h-px bg-slate-200" />}
               </div>
             ))
           )}
@@ -143,20 +169,28 @@ export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
       {/* 페이지네이션 */}
       <div className="flex items-center justify-center gap-1 py-5">
         <button
-          onClick={() => setPage((p) => Math.max(1, p - 1))}
-          disabled={page === 1}
+          onClick={() => setPage((p) => Math.max(0, p - 1))}
+          disabled={page === 0}
           className="p-1 text-gray-500 disabled:text-gray-300"
         >
           <ChevronLeft size={18} />
         </button>
 
-        <button className="w-8 h-8 rounded-full text-sm font-medium bg-slate-700 text-white">
-          1
-        </button>
+        {getPageNumbers(page, totalPages).map((p) => (
+          <button
+            key={p}
+            onClick={() => setPage(p)}
+            className={`w-8 h-8 rounded-full text-sm font-medium transition-colors ${
+              p === page ? 'bg-slate-700 text-white' : 'text-gray-500 hover:bg-slate-100'
+            }`}
+          >
+            {p + 1}
+          </button>
+        ))}
 
         <button
-          onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-          disabled={page === totalPages}
+          onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+          disabled={page >= totalPages - 1}
           className="p-1 text-gray-500 disabled:text-gray-300"
         >
           <ChevronRight size={18} />
