@@ -35,6 +35,34 @@ const ORDER_STATUS_LABEL: Record<string, string> = {
     FAILED: '실패',
 };
 
+const fmtDate = (dateString: string | null | undefined) => {
+    if (!dateString) return '-';
+    try {
+        const hasTimezone = /Z|[+-]\d{2}:?\d{2}$/.test(dateString);
+        const utcString = hasTimezone ? dateString : dateString + 'Z';
+        const d = new Date(utcString);
+
+        if (isNaN(d.getTime())) return dateString;
+
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hourCycle: 'h23',
+        });
+
+        const parts = formatter.formatToParts(d);
+        const partMap = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+
+        return partMap.year + '.' + partMap.month + '.' + partMap.day + ' ' + partMap.hour + ':' + partMap.minute;
+    } catch {
+        return dateString;
+    }
+};
+
 const fmtWon = (n: number | null) => {
     if (n === null || n === undefined) return '-';
     return n.toLocaleString('ko-KR') + ' 원';
@@ -468,9 +496,17 @@ function StocksContent() {
                                 <div className="space-y-3">
                                     {orders.map((o) => (
                                         <div key={o.orderId} className="bg-bg-card shadow-md rounded-2xl p-4">
+
+                                            {/* 상단: 종목 정보 & 주문 날짜 & 주문 타입 */}
                                             <div className="flex justify-between items-start mb-3">
                                                 <div>
-                                                    <p className="text-base font-bold text-gray-900">{o.stockName}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-base font-bold text-gray-900">{o.stockName}</p>
+                                                        {/* 💡 백엔드에서 받은 orderedAt 필드를 포맷팅하여 렌더링 */}
+                                                        <span className="text-[11px] text-gray-400 font-medium mt-0.5">
+                                    {fmtDate(o.orderedAt)}
+                                </span>
+                                                    </div>
                                                     <p className="text-xs text-gray-400 mt-0.5">{o.stockCode}</p>
                                                 </div>
                                                 <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${
@@ -478,10 +514,12 @@ function StocksContent() {
                                                         ? 'bg-primary-50 text-primary-700 border border-primary-100'
                                                         : 'bg-red-50 text-error border border-red-200'
                                                 }`}>
-                          {o.orderType === 'BUY' ? '매수' : '매도'}
+                            {o.orderType === 'BUY' ? '매수' : '매도'}
                         </span>
                                             </div>
-                                            <div className="flex justify-between">
+
+                                            {/* 중단: 수량, 가격, 상태 */}
+                                            <div className="flex justify-between bg-gray-50/50 rounded-xl p-3">
                                                 <div>
                                                     <p className="text-xs text-gray-400">주문수량</p>
                                                     <p className="text-sm font-bold text-gray-900 mt-1">{o.quantity}주</p>
@@ -495,6 +533,8 @@ function StocksContent() {
                                                     <p className="text-sm font-bold text-gray-900 mt-1">{ORDER_STATUS_LABEL[o.status] ?? o.status}</p>
                                                 </div>
                                             </div>
+
+                                            {/* 하단: 취소 버튼 */}
                                             {(o.status === 'REQUESTED' || o.status === 'PARTIAL_FILLED') && (
                                                 <button
                                                     className="mt-3 w-full py-2.5 rounded-xl border border-gray-300 text-sm font-semibold text-gray-600 active:bg-gray-50"
