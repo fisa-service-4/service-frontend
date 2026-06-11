@@ -167,7 +167,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 content: string;
                 actionRequired: boolean;
                 requirePin?: boolean;
-            }>('/ai/chat/messages', {
+            }>('/ai/chat/run', {
                 method: 'POST',
                 body: JSON.stringify({sessionId, message: text}),
             });
@@ -222,7 +222,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                     content: string;
                     actionRequired: boolean;
                     requirePin?: boolean;
-                }>('/ai/chat/messages', {
+                }>('/ai/chat/run', {
                     method: 'POST',
                     body: JSON.stringify({sessionId, message: next, isPin: true}),
                 });
