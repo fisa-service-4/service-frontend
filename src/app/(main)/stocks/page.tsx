@@ -377,7 +377,7 @@ function StocksContent() {
                                             <div
                                                 key={s.stockCode}
                                                 className="bg-bg-card shadow-md rounded-2xl p-4 cursor-pointer active:bg-gray-50"
-                                                onClick={() => router.push(`/stocks/order?code=${s.stockCode}&name=${encodeURIComponent(s.stockName)}&price=${s.currentPrice}&changeRate=${s.profitRate}&market=`)}
+                                                onClick={() => router.push("/stocks/order?code=" + s.stockCode + "&name=" + encodeURIComponent(s.stockName) + "&price=" + s.currentPrice + "&changeRate=" + (s.profitRate ?? 0) + "&market=")}
                                             >
                                                 <div className="flex justify-between items-start mb-3">
                                                     <div className="flex items-center gap-2">
