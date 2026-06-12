@@ -164,14 +164,14 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
             const data = await apiRequest<{
                 messageId: number;
                 role: string;
-                content: string;
+                content: string | null;
                 actionRequired: boolean;
                 requirePin?: boolean;
-            }>('/ai/chat/messages', {
+            }>('/ai/chat/run', {
                 method: 'POST',
                 body: JSON.stringify({sessionId, message: text}),
             });
-            setMessages((prev) => [...prev, {id: data.messageId, role: 'ai', content: data.content}]);
+            setMessages((prev) => [...prev, {id: data.messageId, role: 'ai', content: data.content ?? ''}]);
 
             if (data.requirePin || data.actionRequired) {
                 setRequirePin(true);
@@ -219,16 +219,16 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 const data = await apiRequest<{
                     messageId: number;
                     role: string;
-                    content: string;
+                    content: string | null;
                     actionRequired: boolean;
                     requirePin?: boolean;
-                }>('/ai/chat/messages', {
+                }>('/ai/chat/run', {
                     method: 'POST',
                     body: JSON.stringify({sessionId, message: next, isPin: true}),
                 });
                 setRequirePin(false);
                 setPin('');
-                setMessages((prev) => [...prev, {id: data.messageId, role: 'ai', content: data.content}]);
+                setMessages((prev) => [...prev, {id: data.messageId, role: 'ai', content: data.content ?? ''}]);
                 if (data.requirePin || data.actionRequired) {
                     setRequirePin(true);
                     setPin('');
