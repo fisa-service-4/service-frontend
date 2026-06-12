@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccounts, getAccountsWithRoles } from '@/api/bank';
 import { connectMyData } from '@/api/mydata';
@@ -9,7 +9,6 @@ import type { BankAccount } from '@/types/bank';
 import { getStockAccounts, getCashBalance } from '@/api/stock';
 import type { StockAccount } from '@/api/stock';
 import TransferView from '@/components/main/TransferView';
-import NotificationPanel from '@/components/main/NotificationPanel';
 
 type AssetTab = 'all' | 'bank' | 'stock';
 type SubView = 'overview' | 'transfer' | 'connect';
@@ -62,7 +61,6 @@ export default function AssetsView() {
   const [accounts, setAccounts]                 = useState<BankAccount[]>([]);
 
   const [loading, setLoading]                   = useState(true);
-  const [showNotification, setShowNotification] = useState(false);
   const [stockAccounts, setStockAccounts]       = useState<StockAccountWithBalance[]>([]);
   const [connectLoading, setConnectLoading]     = useState(false);
   const [connectError, setConnectError]         = useState('');
@@ -173,13 +171,9 @@ export default function AssetsView() {
   return (
     <div className="flex flex-col h-screen bg-bg">
       <div className="flex-1 flex flex-col relative overflow-hidden">
-        
+
         {/* 헤더 */}
-        <div className="flex items-center justify-end px-5 py-4 shrink-0">
-          <button className="p-1" onClick={() => setShowNotification(true)}>
-            <Bell size={22} className="text-gray-800" />
-          </button>
-        </div>
+        <div className="px-5 py-3 shrink-0" />
 
         <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
           
@@ -450,7 +444,6 @@ export default function AssetsView() {
         </div>
       </div>
 
-      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
       <BottomNav />
     </div>
   );

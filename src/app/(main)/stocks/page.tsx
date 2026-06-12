@@ -2,9 +2,8 @@
 
 import {Suspense, useEffect, useState} from 'react';
 import {useRouter, useSearchParams} from 'next/navigation';
-import {Bell, Search, Star, TrendingDown, TrendingUp} from 'lucide-react';
+import {Search, Star, TrendingDown, TrendingUp} from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import NotificationPanel from '@/components/main/NotificationPanel';
 import {
     addFavorite,
     cancelOrder,
@@ -97,7 +96,6 @@ function StocksContent() {
     const [searching, setSearching] = useState(false);
     const [favoriteMap, setFavoriteMap] = useState<Record<string, number>>({});
     const [loading, setLoading] = useState(true);
-    const [showNotification, setShowNotification] = useState(false);
     const [cancelTargetId, setCancelTargetId] = useState<number | null>(null);
     const [showCancelPin, setShowCancelPin] = useState(false);
     const [cancelPin, setCancelPin] = useState('');
@@ -254,11 +252,9 @@ function StocksContent() {
 
     return (
         <div className="flex flex-col h-screen bg-bg">
-            <div className="flex items-center justify-end px-5 py-3 bg-bg shrink-0">
-                <button className="p-1" onClick={() => setShowNotification(true)}>
-                    <Bell size={22} className="text-gray-800"/>
-                </button>
-            </div>
+
+            {/* 헤더 */}
+            <div className="px-5 py-3 bg-bg shrink-0" />
 
             <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
 
@@ -548,7 +544,6 @@ function StocksContent() {
                     </div>
                 </div>
             )}
-            {showNotification && <NotificationPanel onClose={() => setShowNotification(false)}/>}
             <BottomNav/>
         </div>
     );
