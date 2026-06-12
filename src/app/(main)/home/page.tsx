@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Bell } from "lucide-react";
 import BottomNav from "@/components/main/BottomNav";
 import ContractRegisterView from "@/components/main/ContractRegisterView";
-import NotificationPanel from "@/components/main/NotificationPanel";
 import VirtualSalaryCard from "@/components/home/VirtualSalaryCard";
 import IncomeCalendar from "@/components/home/IncomeCalendar";
 import { getHomeSummary } from "@/api/virtualSalary";
@@ -13,7 +11,6 @@ import type { HomeSummary } from "@/types/virtualSalary";
 
 export default function HomePage() {
   const router = useRouter();
-  const [showNotification, setShowNotification] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
 
   const [summary, setSummary] = useState<HomeSummary | null>(null);
@@ -67,11 +64,7 @@ export default function HomePage() {
     <div className="flex flex-col h-screen bg-bg">
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* 헤더 */}
-        <div className="flex items-center justify-end px-5 py-3 bg-bg shrink-0">
-          <button className="p-1" onClick={() => setShowNotification(true)}>
-            <Bell size={22} className="text-gray-800" />
-          </button>
-        </div>
+        <div className="px-5 py-3 bg-bg shrink-0" />
 
         {/* 스크롤 영역 */}
         <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-5 pb-4 relative">
@@ -124,9 +117,6 @@ export default function HomePage() {
           </div>
         </button>
 
-        {showNotification && (
-          <NotificationPanel onClose={() => setShowNotification(false)} />
-        )}
       </div>
 
       <BottomNav />
