@@ -22,10 +22,6 @@ const nextConfig: NextConfig = {
                 destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/v1/ai/chat/run`,
             },
             {
-                source: "/api/v1/ai/:path*",
-                destination: `${process.env.AI_SERVER_URL ?? "http://service-ai-server:8000"}/api/v1/ai/:path*`,
-            },
-            {
                 source: "/api/:path*",
                 destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/:path*`,
             },
