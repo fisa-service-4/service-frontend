@@ -164,7 +164,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
             const data = await apiRequest<{
                 messageId: number;
                 role: string;
-                content: string;
+                content: string | null;
                 actionRequired: boolean;
                 requirePin?: boolean;
             }>('/ai/chat/run', {
@@ -219,7 +219,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 const data = await apiRequest<{
                     messageId: number;
                     role: string;
-                    content: string;
+                    content: string | null;
                     actionRequired: boolean;
                     requirePin?: boolean;
                 }>('/ai/chat/run', {
