@@ -6,22 +6,6 @@ const nextConfig: NextConfig = {
     async rewrites() {
         return [
             {
-                source: "/api/v1/ai/chat/sessions/:sessionId/messages",
-                destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/v1/ai/chat/sessions/:sessionId/messages`,
-            },
-            {
-                source: "/api/v1/ai/chat/sessions/:sessionId",
-                destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/v1/ai/chat/sessions/:sessionId`,
-            },
-            {
-                source: "/api/v1/ai/chat/sessions",
-                destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/v1/ai/chat/sessions`,
-            },
-            {
-                source: "/api/v1/ai/chat/run",
-                destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/v1/ai/chat/run`,
-            },
-            {
                 source: "/api/:path*",
                 destination: `${process.env.BACKEND_URL ?? "http://service-backend:8080"}/api/:path*`,
             },
