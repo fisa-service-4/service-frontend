@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Pencil, Loader2, ChevronDown, ArrowDownToLine, Wallet, ShieldCheck, TrendingUp, type LucideIcon } from 'lucide-react';
+import { ArrowLeft, Settings, Loader2, ChevronDown, ArrowDownToLine, Wallet, ShieldCheck, TrendingUp, type LucideIcon } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccountsWithRoles, setAccountRole } from '@/api/bank';
 import { getStockAccounts } from '@/api/stock';
@@ -143,10 +143,10 @@ export default function AccountManageView() {
         {mode === 'view' && !loading && !fetchError && (
           <button
             onClick={enterEdit}
-            className="ml-auto flex items-center gap-1 text-xs font-semibold text-sky-500"
+            className="ml-auto p-1"
+            aria-label="계좌 설정"
           >
-            <Pencil size={13} />
-            편집
+            <Settings size={18} className="text-gray-500" />
           </button>
         )}
       </div>
@@ -169,7 +169,7 @@ export default function AccountManageView() {
           ) : (
             <div className="space-y-3">
               <p className="text-xs text-gray-400 px-1 mb-4">
-                각 통장 역할을 설정하면 가상 월급 자동 이체 및 수입 매칭에 활용됩니다.
+                계좌 역할을 설정하면 자동 분배와 수입 관리 기능을 이용할 수 있어요
               </p>
               <div className="bg-white rounded-2xl divide-y divide-gray-100">
                 {ROLE_CONFIG.map(({ role, label, Icon, sub }) => {
@@ -212,51 +212,50 @@ export default function AccountManageView() {
       {/* ── 수정 모드 ── */}
       {mode === 'edit' && (
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-4 py-5 space-y-4">
-            <p className="text-xs text-gray-400 px-1">
+          <div className="flex-1 overflow-y-auto px-4 py-5">
+            <p className="text-xs text-gray-400 px-1 mb-3">
               각 역할에 연동할 계좌를 선택해주세요.
             </p>
             {accounts.length === 0 ? (
               <p className="text-sm text-gray-400 text-center pt-10">연동된 계좌가 없습니다.</p>
             ) : (
-              ROLE_CONFIG.map(({ role, label, Icon, sub }) => (
-                <div key={role} className="bg-white rounded-2xl px-4 py-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
-                      <Icon size={18} className="text-primary-500" />
-                    </div>
-                    <div>
+              <div className="bg-white rounded-2xl divide-y divide-gray-100">
+                {ROLE_CONFIG.map(({ role, label, Icon }) => (
+                  <div key={role} className="px-4 py-3.5">
+                    <div className="flex items-center gap-3 mb-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                        <Icon size={18} className="text-primary-500" />
+                      </div>
                       <p className="text-sm font-semibold text-gray-900">{label}</p>
-                      <p className="text-xs text-gray-400">{sub}</p>
+                    </div>
+                    <div className="relative">
+                      <select
+                        value={selections[role] ?? ''}
+                        onChange={(e) =>
+                          setSelections((prev) => ({
+                            ...prev,
+                            [role]: e.target.value ? Number(e.target.value) : '',
+                          }))
+                        }
+                        className="w-full h-10 bg-gray-50 border border-gray-200 rounded-xl px-3 pr-8 text-sm text-gray-800 outline-none appearance-none cursor-pointer focus:border-primary-400 focus:bg-white transition-colors"
+                      >
+                        <option value="">계좌를 선택해주세요</option>
+                        {availableAccounts(role).map((a) => (
+                          <option key={a.accountId} value={a.accountId}>
+                            {bankName(a.bankCode)} · {a.accountNumber}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     </div>
                   </div>
-                  <div className="relative">
-                    <select
-                      value={selections[role] ?? ''}
-                      onChange={(e) =>
-                        setSelections((prev) => ({
-                          ...prev,
-                          [role]: e.target.value ? Number(e.target.value) : '',
-                        }))
-                      }
-                      className="w-full h-12 bg-gray-50 border border-gray-200 rounded-xl px-4 pr-10 text-sm text-gray-800 outline-none appearance-none cursor-pointer focus:border-sky-400 focus:bg-white transition-colors"
-                    >
-                      <option value="">계좌를 선택해주세요</option>
-                      {availableAccounts(role).map((a) => (
-                        <option key={a.accountId} value={a.accountId}>
-                          {bankName(a.bankCode)} · {a.accountNumber}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
 
           {/* 하단 버튼 */}
-          <div className="px-4 pt-3 pb-6 bg-white border-t border-gray-100 shrink-0">
+          <div className="px-4 pt-3 pb-6 bg-gray-50 border-t border-gray-100 shrink-0">
             {saveError && (
               <p className="text-xs text-red-500 text-center mb-2">{saveError}</p>
             )}
@@ -264,14 +263,14 @@ export default function AccountManageView() {
               <button
                 onClick={cancelEdit}
                 disabled={saving}
-                className="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 text-sm font-semibold text-gray-600 bg-white"
+                className="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-2xl text-sm disabled:opacity-50"
               >
                 취소
               </button>
               <button
                 onClick={handleSaveAll}
                 disabled={saving}
-                className="flex-1 py-3.5 rounded-2xl bg-sky-500 text-sm font-semibold text-white flex items-center justify-center gap-1.5 disabled:bg-sky-300"
+                className="flex-1 py-3 bg-primary-500 text-white font-semibold rounded-2xl text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {saving ? <><Loader2 size={15} className="animate-spin" /> 저장 중</> : '저장'}
               </button>
