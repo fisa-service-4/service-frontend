@@ -424,7 +424,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {msg.role === 'ai' && (
-                                        msg.content?.startsWith('💰') || msg.content?.startsWith('✅') ? (
+                                        msg.content.startsWith('💰') || msg.content.startsWith('✅') ? (
                                             <AiCard content={msg.content}/>
                                         ) : (
                                             <div
