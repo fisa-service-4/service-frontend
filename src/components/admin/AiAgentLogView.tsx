@@ -19,8 +19,6 @@ const SESSION_TYPE_STYLE: Record<SessionType, string> = {
 interface AiChatSession {
   sessionId:       number;
   userId:          number;
-  userName:        string;
-  email:           string;
   sessionType:     string;
   lastUserMessage: string | null;
   updatedAt:       string;
@@ -134,7 +132,7 @@ export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
               <div key={session.sessionId}>
                 <div className="px-4 py-4">
                   {/* 1행: 이름 */}
-                  <p className="text-sm font-semibold text-gray-900 mb-1">{session.userName}</p>
+                  <p className="text-sm font-semibold text-gray-900 mb-1">사용자: {session.userId}</p>
                   {/* 2행: 세션 타입 배지 */}
                   {(() => {
                     const badge = (filter !== '전체' ? filter : session.sessionType) as SessionType;
@@ -154,7 +152,6 @@ export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
                         : ''}
                     </p>
                     <div className="flex flex-col items-end gap-0.5 shrink-0">
-                      <span className="text-xs text-gray-900">{session.email}</span>
                       <span className="text-xs text-gray-900">{formatDate(session.updatedAt)}</span>
                     </div>
                   </div>
