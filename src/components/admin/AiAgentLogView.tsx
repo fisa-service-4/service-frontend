@@ -135,7 +135,7 @@ export default function AiAgentLogView({ onBack }: AiAgentLogViewProps) {
                   <p className="text-sm font-semibold text-gray-900 mb-1">사용자: {session.userId}</p>
                   {/* 2행: 세션 타입 배지 */}
                   {(() => {
-                    const badge = (filter !== '전체' ? filter : session.sessionType) as SessionType;
+                    const badge = session.sessionType as SessionType;
                     return (
                       <span className={`inline-block text-xs px-2 py-0.5 rounded-md font-medium mb-1 ${SESSION_TYPE_STYLE[badge] ?? 'bg-slate-200 text-slate-700'}`}>
                         {badge}
