@@ -59,7 +59,13 @@ export default function AdminPage() {
         </div>
 
         {/* 메인 콘텐츠 */}
-        {activeNav === 'dashboard' && <DashboardView selectedDate={selectedDate} onDateChange={setSelectedDate} />}
+        {activeNav === 'dashboard' && (
+          <DashboardView
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            onNavigateToErrorLog={() => { setActiveNav('logs'); setLogSubView('error'); }}
+          />
+        )}
 
         {activeNav === 'logs' && logSubView === null && (
           <LogsView onSelect={(key) => setLogSubView(key)} />
