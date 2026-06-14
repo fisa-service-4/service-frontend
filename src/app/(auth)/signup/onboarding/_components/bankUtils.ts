@@ -10,6 +10,9 @@ export const BANK_LOGO: Record<string, string> = {
   '092': '/banks/Toss.png',
 };
 
+// 은행 bankCode Set — 이 외의 코드는 증권 계좌로 분류
+export const BANK_CODES = new Set(Object.keys(BANK_LOGO));
+
 export const BANK_NAME: Record<string, string> = {
   '003': 'IBK기업은행',
   '004': 'KB국민은행',

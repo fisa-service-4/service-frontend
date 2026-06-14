@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getConnections } from '@/api/mydata';
-import { setAccountRole } from '@/api/bank';
+import { getAccountsWithRoles, setAccountRole } from '@/api/bank';
 import type { BankAccountSummary, StockAccountSummary } from '@/api/mydata';
+import { BANK_CODES } from './_components/bankUtils';
 import { signupStore } from '@/store/signupStore';
 
 import IntroStep from './_components/IntroStep';
@@ -45,13 +45,33 @@ export default function SignupOnboardingPage() {
     let cancelled = false;
     async function load() {
       try {
-        const [connections] = await Promise.all([
-          getConnections(),
+        const [accounts] = await Promise.all([
+          getAccountsWithRoles(),
           new Promise<void>((r) => setTimeout(r, 1500)),
         ]);
         if (cancelled) return;
-        setBankAccounts(connections.bankAccounts ?? []);
-        setStockAccounts(connections.stockAccounts ?? []);
+        const all = accounts ?? [];
+        setBankAccounts(
+          all
+            .filter((a) => BANK_CODES.has(a.bankCode))
+            .map((a) => ({
+              accountId: a.accountId,
+              accountNumber: a.accountNumber,
+              accountName: a.accountName,
+              bankCode: a.bankCode,
+              balance: a.balance ?? 0,
+            }))
+        );
+        setStockAccounts(
+          all
+            .filter((a) => !BANK_CODES.has(a.bankCode))
+            .map((a) => ({
+              accountId: a.accountId,
+              accountNumber: a.accountNumber,
+              accountName: a.accountName,
+              bankCode: a.bankCode,
+            }))
+        );
         setStep('connected');
       } catch {
         if (cancelled) return;
