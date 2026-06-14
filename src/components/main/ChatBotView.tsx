@@ -370,7 +370,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 </div>
 
                 {/* 대화 뷰어 스트림 및 중앙 안내 대시보드 처리 */}
-                <div className="flex-1 overflow-y-auto bg-bg">
+                <div className="flex-1 overflow-y-auto bg-bg chat-scrollbar">
                     {messages.length === 0 ? (
                         /* 🌟 피드백 반영: 고성능 챗봇 대시보드 무드의 중앙 정렬 홈 화면 구조 */
                         <div className="h-full flex flex-col justify-between py-12 px-6">
