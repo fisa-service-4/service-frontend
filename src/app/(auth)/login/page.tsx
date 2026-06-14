@@ -47,7 +47,7 @@ function LoginForm() {
       // 사용자 상태 체크 후 리다이렉트
       try {
         const connections = await getMydataConnections();
-        const bankAccounts = connections.bankAccounts ?? [];
+        const bankAccounts = connections?.bankAccounts ?? [];
 
         if (bankAccounts.length === 0) {
           router.push('/signup/onboarding');

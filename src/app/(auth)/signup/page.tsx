@@ -124,12 +124,14 @@ export default function SignupPage() {
           {/* 서비스 이용 동의 */}
           <div className="flex flex-col gap-2">
             <label className="text-xs text-gray-500 font-medium">서비스 이용 동의</label>
-            <label className="flex items-start gap-3 cursor-pointer p-4 bg-gray-50 rounded-xl">
+            <label
+              className="flex items-start gap-3 cursor-pointer p-4 bg-gray-50 rounded-xl"
+              onClick={() => setConsent((v) => !v)}
+            >
               <div
                 className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
                   consent ? 'bg-primary-500 border-primary-500' : 'bg-white border-gray-300'
                 }`}
-                onClick={() => setConsent((v) => !v)}
               >
                 {consent && (
                   <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
@@ -137,7 +139,7 @@ export default function SignupPage() {
                   </svg>
                 )}
               </div>
-              <span className="text-sm text-gray-700 leading-snug" onClick={() => setConsent((v) => !v)}>
+              <span className="text-sm text-gray-700 leading-snug">
                 flon 서비스 이용약관 및 개인정보 처리방침에 동의합니다 <span className="text-primary-500 font-medium">(필수)</span>
               </span>
             </label>

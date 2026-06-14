@@ -18,7 +18,7 @@ export default function LandingPage() {
           <div className="text-center mt-2">
             <h1 className="text-white text-3xl font-bold tracking-wide">flon</h1>
             <p className="text-gray-400 text-sm mt-2 leading-relaxed">
-              프리랜서를 위한{'\n'}AI 자산관리 플랫폼
+              프리랜서를 위한<br />AI 자산관리 플랫폼
             </p>
           </div>
         </div>

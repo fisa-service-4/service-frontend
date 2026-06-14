@@ -51,8 +51,8 @@ function SignupOnboardingContent() {
       try {
         const connections = await getMydataConnections();
         if (cancelled) return;
-        setBankAccounts(connections.bankAccounts ?? []);
-        setStockAccounts(connections.stockAccounts ?? []);
+        setBankAccounts(connections?.bankAccounts ?? []);
+        setStockAccounts(connections?.stockAccounts ?? []);
         setStep(initialStep as Step);
       } catch {
         if (!cancelled) setStep('intro');
@@ -75,8 +75,8 @@ function SignupOnboardingContent() {
           new Promise<void>((r) => setTimeout(r, 1500)),
         ]);
         if (cancelled) return;
-        setBankAccounts(connections.bankAccounts ?? []);
-        setStockAccounts(connections.stockAccounts ?? []);
+        setBankAccounts(connections?.bankAccounts ?? []);
+        setStockAccounts(connections?.stockAccounts ?? []);
         setStep('connected');
       } catch {
         if (cancelled) return;

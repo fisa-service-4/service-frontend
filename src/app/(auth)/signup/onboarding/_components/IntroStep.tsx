@@ -37,7 +37,7 @@ export default function IntroStep({ onNext, onBack }: Props) {
 
       <div className="flex-1 flex flex-col px-6 pt-10 pb-4">
         <h1 className="text-2xl font-bold text-gray-900 leading-snug mb-2">
-          더 스마트한 자산 관리를 위해{'\n'}
+          더 스마트한 자산 관리를 위해<br />
           <span className="text-primary-500">마이데이터</span>를 연동해보세요
         </h1>
         <p className="text-sm text-gray-400 mb-10">
