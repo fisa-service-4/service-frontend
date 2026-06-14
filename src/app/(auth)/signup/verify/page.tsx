@@ -23,8 +23,8 @@ export default function SignupVerifyPage() {
   const [error, setError]       = useState('');
   const [loading, setLoading]   = useState(false);
   const [timeLeft, setTimeLeft] = useState(OTP_SECONDS);
+  const [formData]              = useState(() => signupStore.get());
 
-  const formData    = signupStore.get();
   const maskedPhone = maskPhone(formData.phoneNumber ?? '');
 
   // 타이머
