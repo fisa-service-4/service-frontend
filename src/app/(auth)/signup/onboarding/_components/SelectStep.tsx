@@ -50,7 +50,7 @@ export default function SelectStep({ userName, onNext, onBack, loading, error }:
   const [allChecked, setAllChecked] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen bg-bg">
+    <div className="flex flex-col h-screen bg-bg">
       {/* 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
         <button type="button" onClick={onBack} className="text-white p-1">

@@ -187,7 +187,7 @@ function SignupOnboardingContent() {
   function handleBack() {
     setError('');
     switch (step) {
-      case 'intro':      router.push('/signup/verify'); break;
+      case 'intro':      router.push('/home'); break;
       case 'select':     setStep('intro'); break;
       case 'loading':    setStep('select'); break;
       case 'connected':  setStep('select'); break;

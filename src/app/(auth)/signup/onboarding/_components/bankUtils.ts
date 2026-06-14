@@ -27,6 +27,11 @@ export const BANK_NAME: Record<string, string> = {
   '247': 'NH투자증권',
 };
 
+// 로고 이미지가 없는 기관의 축약 표기 (fallback용)
+export const BANK_ABBR: Record<string, string> = {
+  '243': 'KIS',
+};
+
 // 은행 bankCode Set (증권 계좌 코드 243, 247 제외)
 export const BANK_CODES = new Set([
   '003', '004', '011', '020', '023', '080', '081', '088', '090', '092',

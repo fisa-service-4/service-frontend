@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { CheckCircle } from 'lucide-react';
 import type { BankAccountSummary, StockAccountSummary } from '@/api/mydata';
-import { BANK_LOGO, BANK_NAME } from './bankUtils';
+import { BANK_LOGO, BANK_NAME, BANK_ABBR } from './bankUtils';
 
 interface Props {
   bankAccounts: BankAccountSummary[];
@@ -25,6 +25,11 @@ export default function ConnectedStep({ bankAccounts, stockAccounts, onNext }: P
     ...bankCodes.map((code) => ({ code, type: 'bank' as const })),
     ...stockCodes.map((code) => ({ code, type: 'stock' as const })),
   ];
+
+  function getAccountCount(code: string, type: 'bank' | 'stock') {
+    if (type === 'bank') return bankAccounts.filter((a) => a.bankCode === code).length;
+    return stockAccounts.filter((a) => a.bankCode === code).length;
+  }
 
   const totalCount = bankAccounts.length + stockAccounts.length;
 
@@ -60,7 +65,9 @@ export default function ConnectedStep({ bankAccounts, stockAccounts, onNext }: P
                   </div>
                 ) : (
                   <div className="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center shrink-0">
-                    <span className="text-xs text-gray-500 font-bold">{code}</span>
+                    <span className="text-xs text-gray-500 font-bold">
+                      {BANK_ABBR[code] ?? (BANK_NAME[code] ? BANK_NAME[code].slice(0, 2) : code)}
+                    </span>
                   </div>
                 )}
 
@@ -69,7 +76,7 @@ export default function ConnectedStep({ bankAccounts, stockAccounts, onNext }: P
                     {BANK_NAME[code] ?? code}
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {type === 'bank' ? '은행' : '증권'}
+                    {type === 'bank' ? '은행' : '증권'} · 계좌 {getAccountCount(code, type)}개
                   </p>
                 </div>
 

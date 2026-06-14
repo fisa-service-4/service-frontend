@@ -147,7 +147,7 @@ export default function SignupPhonePage() {
               <button
                 type="button"
                 onClick={() => setCarrierOpen((o) => !o)}
-                className="flex items-center gap-1 shrink-0 text-sm font-medium text-gray-700"
+                className="flex items-center justify-between w-16 shrink-0 text-sm font-medium text-gray-700"
               >
                 <span className={carrier ? 'text-gray-900' : 'text-gray-400'}>
                   {carrier ? CARRIERS.find((c) => c.value === carrier)?.label : '통신사'}
