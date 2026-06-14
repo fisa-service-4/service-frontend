@@ -26,7 +26,6 @@ export default function SignupCompletePage() {
             <br />
             완료되었어요
           </h1>
-          <p className="text-white/50 text-sm mt-4">잠시 후 로그인 화면으로 이동해요</p>
         </div>
       </div>
     </div>
