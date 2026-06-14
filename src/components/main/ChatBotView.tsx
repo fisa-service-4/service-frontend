@@ -119,6 +119,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
     const [requirePin, setRequirePin] = useState(false);
     const [pin, setPin] = useState('');
     const bottomRef = useRef<HTMLDivElement>(null);
+    const [stockAccountId, setStockAccountId] = useState<number | null>(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({behavior: 'smooth'});
@@ -137,6 +138,15 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
     useEffect(() => {
         loadSessions();
     }, [loadSessions]);
+
+    useEffect(() => {
+        apiRequest<{ accounts: { accountId: number }[] }>('/stocks/accounts')
+            .then((data) => {
+                const first = data?.accounts?.[0];
+                if (first) setStockAccountId(first.accountId);
+            })
+            .catch(() => {});
+    }, []);
 
     const ensureSession = async (firstMessage: string): Promise<number> => {
         if (currentSessionId !== null) return currentSessionId;
@@ -169,7 +179,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 requirePin?: boolean;
             }>('/ai/chat/run', {
                 method: 'POST',
-                body: JSON.stringify({sessionId, message: text}),
+                body: JSON.stringify({sessionId, message: text, accountId: stockAccountId}),
             });
             setMessages((prev) => [...prev, {id: data.messageId, role: 'ai', content: data.content ?? ''}]);
 
@@ -224,7 +234,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                     requirePin?: boolean;
                 }>('/ai/chat/run', {
                     method: 'POST',
-                    body: JSON.stringify({sessionId, message: next, isPin: true}),
+                    body: JSON.stringify({sessionId, message: next, isPin: true, accountId: stockAccountId}),
                 });
                 setRequirePin(false);
                 setPin('');
