@@ -20,13 +20,15 @@ interface Props {
   userName: string;
   onNext: () => void;
   onBack: () => void;
+  loading?: boolean;
+  error?: string;
 }
 
 function CheckIcon({ filled }: { filled: boolean }) {
   return (
     <div
       className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-        filled ? 'bg-[#131329] border-[#131329]' : 'border-gray-300'
+        filled ? 'bg-primary-500 border-primary-500' : 'border-gray-300'
       }`}
     >
       {filled && (
@@ -44,11 +46,11 @@ function CheckIcon({ filled }: { filled: boolean }) {
   );
 }
 
-export default function SelectStep({ userName, onNext, onBack }: Props) {
+export default function SelectStep({ userName, onNext, onBack, loading, error }: Props) {
   const [allChecked, setAllChecked] = useState(false);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
         <button type="button" onClick={onBack} className="text-white p-1">
@@ -95,13 +97,19 @@ export default function SelectStep({ userName, onNext, onBack }: Props) {
         </div>
       </div>
 
-      <div className="px-6 pb-8 pt-3">
+      <div className="px-6 pb-8 pt-3 flex flex-col gap-3">
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+        )}
         <button
           type="button"
           onClick={onNext}
-          className="w-full h-14 bg-primary-500 text-white rounded-xl text-base font-semibold"
+          disabled={loading}
+          className="w-full h-14 bg-primary-500 text-white rounded-xl text-base font-semibold disabled:opacity-60 transition-opacity"
         >
-          찾아보기
+          {loading ? '연동 중...' : '찾아보기'}
         </button>
       </div>
     </div>

@@ -45,7 +45,7 @@ export default function AccountStep({
   error,
 }: Props) {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
         <button type="button" onClick={onBack} className="text-white p-1">
@@ -60,7 +60,7 @@ export default function AccountStep({
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-colors ${
-                i <= stepIndex ? 'bg-[#131329]' : 'bg-gray-200'
+                i <= stepIndex ? 'bg-primary-500' : 'bg-gray-200'
               }`}
             />
           ))}
@@ -95,7 +95,7 @@ export default function AccountStep({
                   onClick={() => onSelect(isSelected ? '' : account.accountId)}
                   className={`w-full flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${
                     isSelected
-                      ? 'border-[#131329] bg-gray-50'
+                      ? 'border-primary-500 bg-primary-500/5'
                       : isDisabled
                       ? 'border-transparent bg-gray-100 opacity-60 cursor-not-allowed'
                       : 'border-transparent bg-bg-card shadow-md active:bg-gray-50'
@@ -142,7 +142,7 @@ export default function AccountStep({
                     <div
                       className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
-                          ? 'bg-[#131329] border-[#131329]'
+                          ? 'bg-primary-500 border-primary-500'
                           : 'border-gray-200'
                       }`}
                     >
@@ -174,7 +174,7 @@ export default function AccountStep({
       </div>
 
       {/* 하단 버튼 */}
-      <div className="px-6 pb-6 pt-3 flex gap-2">
+      <div className="px-6 pb-8 pt-3 flex gap-2">
         {showSkip && onSkip && (
           <button
             type="button"
@@ -189,13 +189,11 @@ export default function AccountStep({
           type="button"
           onClick={onNext}
           disabled={loading || selected === ''}
-          className="flex-1 h-14 bg-[#131329] text-white rounded-xl text-base font-semibold disabled:opacity-40 transition-opacity"
+          className="flex-1 h-14 bg-primary-500 text-white rounded-xl text-base font-semibold disabled:opacity-40 transition-opacity"
         >
           {loading ? '저장 중...' : nextLabel}
         </button>
       </div>
-
-      <div className="h-2 bg-[#131329]" />
     </div>
   );
 }

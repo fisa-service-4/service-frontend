@@ -6,7 +6,7 @@ interface Props {
 
 export default function LoadingStep({ userName }: Props) {
   return (
-    <div className="flex flex-col min-h-screen bg-white items-center justify-center px-6 gap-0">
+    <div className="flex flex-col min-h-screen bg-bg items-center justify-center px-6 gap-0">
       {/* 로딩 스피너 */}
       <div className="relative w-28 h-28 mb-10">
         {/* 배경 링 */}

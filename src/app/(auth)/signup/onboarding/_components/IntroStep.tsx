@@ -27,7 +27,7 @@ interface Props {
 
 export default function IntroStep({ onNext, onBack }: Props) {
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
         <button type="button" onClick={onBack} className="text-white p-1">

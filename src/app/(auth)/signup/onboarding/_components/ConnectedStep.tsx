@@ -29,7 +29,7 @@ export default function ConnectedStep({ bankAccounts, stockAccounts, onNext }: P
   const totalCount = bankAccounts.length + stockAccounts.length;
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-bg">
       <div className="h-14 bg-[#131329]" />
 
       <div className="flex-1 px-6 pt-8 overflow-y-auto">
@@ -46,7 +46,7 @@ export default function ConnectedStep({ bankAccounts, stockAccounts, onNext }: P
             institutions.map(({ code, type }) => (
               <div
                 key={`${type}-${code}`}
-                className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3.5"
+                className="flex items-center gap-3 bg-bg-card shadow-sm rounded-2xl px-4 py-3.5"
               >
                 {BANK_LOGO[code] ? (
                   <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden shrink-0">
@@ -91,7 +91,7 @@ export default function ConnectedStep({ bankAccounts, stockAccounts, onNext }: P
         <button
           type="button"
           onClick={onNext}
-          className="w-full h-14 bg-[#131329] text-white rounded-xl text-base font-semibold"
+          className="w-full h-14 bg-primary-500 text-white rounded-xl text-base font-semibold"
         >
           확인
         </button>

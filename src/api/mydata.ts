@@ -1,4 +1,5 @@
 import { mydataRequest } from '@/utils/mydataClient';
+import { apiRequest } from '@/utils/apiClient';
 
 export interface AssetDashboard {
   totalAssetAmount: number;
@@ -47,3 +48,9 @@ export const connectMyData = (provider: string) =>
 
 export const getConnections = () =>
   mydataRequest<MyDataConnections>('/connections');
+
+export const connectAllMyData = () =>
+  apiRequest('/mydata/connect', { method: 'POST' });
+
+export const getMydataConnections = () =>
+  apiRequest<MyDataConnections>('/mydata/connections');

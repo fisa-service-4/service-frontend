@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getAccountsWithRoles, setAccountRole } from '@/api/bank';
+import { setAccountRole } from '@/api/bank';
+import { connectAllMyData, getMydataConnections } from '@/api/mydata';
 import type { BankAccountSummary, StockAccountSummary } from '@/api/mydata';
-import { BANK_CODES } from './_components/bankUtils';
 import { signupStore } from '@/store/signupStore';
 
 import IntroStep from './_components/IntroStep';
@@ -39,39 +39,19 @@ export default function SignupOnboardingPage() {
     if (stored.userName) setUserName(stored.userName);
   }, []);
 
-  // loading step: getConnections 호출 후 connected로 전환
+  // loading step: getMydataConnections 호출 후 connected로 전환
   useEffect(() => {
     if (step !== 'loading') return;
     let cancelled = false;
     async function load() {
       try {
-        const [accounts] = await Promise.all([
-          getAccountsWithRoles(),
+        const [connections] = await Promise.all([
+          getMydataConnections(),
           new Promise<void>((r) => setTimeout(r, 1500)),
         ]);
         if (cancelled) return;
-        const all = accounts ?? [];
-        setBankAccounts(
-          all
-            .filter((a) => BANK_CODES.has(a.bankCode))
-            .map((a) => ({
-              accountId: a.accountId,
-              accountNumber: a.accountNumber,
-              accountName: a.accountName,
-              bankCode: a.bankCode,
-              balance: a.balance ?? 0,
-            }))
-        );
-        setStockAccounts(
-          all
-            .filter((a) => !BANK_CODES.has(a.bankCode))
-            .map((a) => ({
-              accountId: a.accountId,
-              accountNumber: a.accountNumber,
-              accountName: a.accountName,
-              bankCode: a.bankCode,
-            }))
-        );
+        setBankAccounts(connections.bankAccounts ?? []);
+        setStockAccounts(connections.stockAccounts ?? []);
         setStep('connected');
       } catch {
         if (cancelled) return;
@@ -97,6 +77,24 @@ export default function SignupOnboardingPage() {
   }
 
   // ── 각 단계 핸들러 ──
+
+  async function handleSelectNext() {
+    setError('');
+    setLoading(true);
+    try {
+      await connectAllMyData();
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code !== 'MYDATA_001') {
+        setError('마이데이터 연동에 실패했습니다. 다시 시도해주세요.');
+        setLoading(false);
+        return;
+      }
+    } finally {
+      setLoading(false);
+    }
+    setStep('loading');
+  }
 
   async function handleDepositNext() {
     if (!depositId) { setError('계좌를 선택해주세요.'); return; }
@@ -182,7 +180,7 @@ export default function SignupOnboardingPage() {
   }
 
   if (step === 'select') {
-    return <SelectStep userName={userName} onNext={() => setStep('loading')} onBack={handleBack} />;
+    return <SelectStep userName={userName} onNext={handleSelectNext} onBack={handleBack} loading={loading} error={error} />;
   }
 
   if (step === 'loading') {
