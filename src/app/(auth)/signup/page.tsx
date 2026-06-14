@@ -16,7 +16,6 @@ const JOB_OPTIONS = [
   { label: '직장인',          value: 'EMPLOYEE',    freelancer: false },
 ];
 
-// 회원가입 3단계: 기본정보(1) / 휴대폰인증(2) / 인증확인(3)
 const STEPS = ['기본 정보', '본인 인증', '인증 확인'];
 
 export default function SignupPage() {
@@ -54,7 +53,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* 상단 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
         <button type="button" onClick={() => router.push('/login')} className="text-white p-1">
@@ -68,7 +67,7 @@ export default function SignupPage() {
           {STEPS.map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-colors ${i === 0 ? 'bg-[#131329]' : 'bg-gray-200'}`}
+              className={`h-1 flex-1 rounded-full transition-colors ${i === 0 ? 'bg-primary-500' : 'bg-gray-200'}`}
             />
           ))}
         </div>
@@ -128,7 +127,7 @@ export default function SignupPage() {
             <label className="flex items-start gap-3 cursor-pointer p-4 bg-gray-50 rounded-xl">
               <div
                 className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
-                  consent ? 'bg-[#131329] border-[#131329]' : 'bg-white border-gray-300'
+                  consent ? 'bg-primary-500 border-primary-500' : 'bg-white border-gray-300'
                 }`}
                 onClick={() => setConsent((v) => !v)}
               >
@@ -139,7 +138,7 @@ export default function SignupPage() {
                 )}
               </div>
               <span className="text-sm text-gray-700 leading-snug" onClick={() => setConsent((v) => !v)}>
-                FISA 서비스 이용약관 및 개인정보 처리방침에 동의합니다 <span className="text-primary-500 font-medium">(필수)</span>
+                flon 서비스 이용약관 및 개인정보 처리방침에 동의합니다 <span className="text-primary-500 font-medium">(필수)</span>
               </span>
             </label>
           </div>
@@ -154,17 +153,15 @@ export default function SignupPage() {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="px-6 pb-4">
+      <div className="px-6 pb-8">
         <button
           type="button"
           onClick={handleNext}
-          className="w-full h-14 bg-[#131329] text-white rounded-xl text-base font-semibold"
+          className="w-full h-14 bg-primary-500 text-white rounded-xl text-base font-semibold"
         >
           다음
         </button>
       </div>
-
-      <div className="h-8 bg-[#131329]" />
     </div>
   );
 }

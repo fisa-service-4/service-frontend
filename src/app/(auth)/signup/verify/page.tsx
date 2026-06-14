@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { authApi } from '@/api/auth';
-import { tokenUtils } from '@/utils/token';
 import { signupStore } from '@/store/signupStore';
 import PinKeypad from '@/components/PinKeypad';
 
@@ -116,28 +115,11 @@ export default function SignupVerifyPage() {
       return;
     }
 
-    // 3. 자동 로그인 (토큰 취득)
-    try {
-      const loginRes = await authApi.login({
-        email:    data.email    ?? '',
-        password: data.password ?? '',
-      });
-      tokenUtils.setTokens(loginRes.accessToken, loginRes.refreshToken);
-      tokenUtils.setUserId(loginRes.userId);
-      tokenUtils.setUserEmail(data.email ?? '');
-      tokenUtils.setUserName(loginRes.userName ?? data.userName ?? '');
-      if (loginRes.firebaseUid) tokenUtils.setFirebaseUid(loginRes.firebaseUid);
-    } catch {
-      setError('계정 생성 후 로그인에 실패했습니다. 로그인 화면에서 다시 시도해주세요.');
-      setLoading(false);
-      return;
-    }
-
-    router.push('/signup/onboarding');
+    router.push('/signup/complete');
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* 상단 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
         <button type="button" onClick={() => router.push('/signup/phone')} className="text-white p-1">
@@ -152,7 +134,7 @@ export default function SignupVerifyPage() {
             {STEPS.map((_, i) => (
               <div
                 key={i}
-                className={`h-1 flex-1 rounded-full transition-colors ${i <= 2 ? 'bg-[#131329]' : 'bg-gray-200'}`}
+                className={`h-1 flex-1 rounded-full transition-colors ${i <= 2 ? 'bg-primary-500' : 'bg-gray-200'}`}
               />
             ))}
           </div>
@@ -167,7 +149,7 @@ export default function SignupVerifyPage() {
               <div
                 key={i}
                 className={`w-4 h-4 rounded-full transition-colors duration-150 ${
-                  i < code.length ? 'bg-[#131329]' : 'bg-gray-200'
+                  i < code.length ? 'bg-primary-500' : 'bg-gray-200'
                 }`}
               />
             ))}
@@ -207,8 +189,6 @@ export default function SignupVerifyPage() {
           <PinKeypad onPress={handleKey} />
         </div>
       </div>
-
-      <div className="h-8 bg-[#131329]" />
     </div>
   );
 }

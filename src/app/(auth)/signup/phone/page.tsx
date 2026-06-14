@@ -64,7 +64,7 @@ export default function SignupPhonePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-bg">
       {/* 상단 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
         <button type="button" onClick={() => router.push('/signup')} className="text-white p-1">
@@ -78,7 +78,7 @@ export default function SignupPhonePage() {
           {STEPS.map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-colors ${i <= 1 ? 'bg-[#131329]' : 'bg-gray-200'}`}
+              className={`h-1 flex-1 rounded-full transition-colors ${i <= 1 ? 'bg-primary-500' : 'bg-gray-200'}`}
             />
           ))}
         </div>
@@ -138,7 +138,7 @@ export default function SignupPhonePage() {
                   onClick={() => setCarrier(c.value)}
                   className={`flex-1 h-12 rounded-xl text-sm font-medium border transition-colors ${
                     carrier === c.value
-                      ? 'bg-[#131329] text-white border-[#131329]'
+                      ? 'bg-primary-500 text-white border-primary-500'
                       : 'bg-gray-100 text-gray-600 border-transparent'
                   }`}
                 >
@@ -181,18 +181,16 @@ export default function SignupPhonePage() {
       </div>
 
       {/* 하단 버튼 */}
-      <div className="px-6 pb-4">
+      <div className="px-6 pb-8">
         <button
           type="button"
           onClick={handleNext}
           disabled={loading}
-          className="w-full h-14 bg-[#131329] text-white rounded-xl text-base font-semibold disabled:opacity-60 transition-opacity"
+          className="w-full h-14 bg-primary-500 text-white rounded-xl text-base font-semibold disabled:opacity-60 transition-opacity"
         >
           {loading ? '전송 중...' : '인증번호 받기'}
         </button>
       </div>
-
-      <div className="h-8 bg-[#131329]" />
     </div>
   );
 }
