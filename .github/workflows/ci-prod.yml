@@ -32,7 +32,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:prod
           build-args: |
-            TRANSACTION_URL=${{ vars.TRANSACTION_URL }}
+            TRANSACTION_URL=${{ vars.AWS_TRANSACTION_URL }}
 
   deploy-app-2a:
     runs-on: ubuntu-latest
