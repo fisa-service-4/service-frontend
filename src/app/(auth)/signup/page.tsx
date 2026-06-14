@@ -2,26 +2,30 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ChevronLeft } from 'lucide-react';
 import { signupStore } from '@/store/signupStore';
 
 const JOB_OPTIONS = [
-  { label: '개발자/IT',       value: 'DEVELOPER',   freelancer: true },
-  { label: '디자이너',         value: 'DESIGNER',    freelancer: true },
-  { label: '마케터',           value: 'MARKETER',    freelancer: true },
-  { label: '작가/크리에이터',  value: 'CREATOR',     freelancer: true },
-  { label: '강사/튜터',        value: 'INSTRUCTOR',  freelancer: true },
-  { label: '컨설턴트',         value: 'CONSULTANT',  freelancer: true },
+  { label: '개발자/IT',      value: 'DEVELOPER',   freelancer: true },
+  { label: '디자이너',        value: 'DESIGNER',    freelancer: true },
+  { label: '마케터',          value: 'MARKETER',    freelancer: true },
+  { label: '작가/크리에이터', value: 'CREATOR',     freelancer: true },
+  { label: '강사/튜터',       value: 'INSTRUCTOR',  freelancer: true },
+  { label: '컨설턴트',        value: 'CONSULTANT',  freelancer: true },
   { label: '프리랜서 (기타)', value: 'FREELANCER',  freelancer: true },
-  { label: '직장인',           value: 'EMPLOYEE',    freelancer: false },
+  { label: '직장인',          value: 'EMPLOYEE',    freelancer: false },
 ];
+
+// 회원가입 3단계: 기본정보(1) / 휴대폰인증(2) / 인증확인(3)
+const STEPS = ['기본 정보', '본인 인증', '인증 확인'];
 
 export default function SignupPage() {
   const router = useRouter();
-  const [email, setEmail]       = useState('');
+  const [email, setEmail]     = useState('');
   const [password, setPassword] = useState('');
-  const [jobType, setJobType]   = useState('');
-  const [consent, setConsent]   = useState<boolean | null>(null);
-  const [error, setError]       = useState('');
+  const [jobType, setJobType] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [error, setError]     = useState('');
 
   function validate() {
     if (!email.trim())  return '이메일을 입력해주세요.';
@@ -50,19 +54,36 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="h-12 bg-[#131329]" />
+    <div className="flex flex-col min-h-screen bg-white">
+      {/* 상단 헤더 */}
+      <div className="h-14 bg-[#131329] flex items-center px-4">
+        <button type="button" onClick={() => router.push('/login')} className="text-white p-1">
+          <ChevronLeft size={24} />
+        </button>
+      </div>
 
-      <div className="flex-1 px-6 pt-8 pb-6 overflow-y-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">회원가입</h1>
+      <div className="flex-1 px-6 pt-6 pb-4 overflow-y-auto">
+        {/* 진행 바 */}
+        <div className="flex gap-1.5 mb-1">
+          {STEPS.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1 flex-1 rounded-full transition-colors ${i === 0 ? 'bg-[#131329]' : 'bg-gray-200'}`}
+            />
+          ))}
+        </div>
+        <p className="text-xs text-gray-400 mb-6">1 / {STEPS.length}</p>
+
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">기본 정보</h1>
+        <p className="text-sm text-gray-400 mb-7">계정에 사용할 정보를 입력해주세요</p>
 
         <div className="flex flex-col gap-5">
           {/* 이메일 */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1.5">ID 설정(이메일)</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-500 font-medium">이메일 (아이디)</label>
             <input
               type="email"
-              placeholder="이메일을 입력하세요."
+              placeholder="이메일을 입력하세요"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
@@ -71,11 +92,11 @@ export default function SignupPage() {
           </div>
 
           {/* 비밀번호 */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1.5">비밀번호</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-500 font-medium">비밀번호</label>
             <input
               type="password"
-              placeholder="영문 대/소문자, 숫자, 특수기호 포함 8~20"
+              placeholder="영문 대/소문자, 숫자, 특수기호 포함 8자 이상"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
@@ -84,8 +105,8 @@ export default function SignupPage() {
           </div>
 
           {/* 직업유형 */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-1.5">직업유형 선택</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-500 font-medium">직업유형</label>
             <div className="relative">
               <select
                 value={jobType}
@@ -97,53 +118,47 @@ export default function SignupPage() {
                   <option key={j.value} value={j.value}>{j.label}</option>
                 ))}
               </select>
-              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 text-xs">▼</span>
+              <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-xs">▼</span>
             </div>
           </div>
 
           {/* 서비스 이용 동의 */}
-          <div>
-            <label className="block text-sm text-gray-600 mb-2">서비스 이용 동의</label>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="consent"
-                  checked={consent === false}
-                  onChange={() => setConsent(false)}
-                  className="w-4 h-4"
-                />
-                <span className="text-sm text-gray-700">동의하지 않음</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="consent"
-                  checked={consent === true}
-                  onChange={() => setConsent(true)}
-                  className="w-4 h-4"
-                />
-                <span className="text-sm text-gray-700">동의</span>
-              </label>
-            </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-xs text-gray-500 font-medium">서비스 이용 동의</label>
+            <label className="flex items-start gap-3 cursor-pointer p-4 bg-gray-50 rounded-xl">
+              <div
+                className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${
+                  consent ? 'bg-[#131329] border-[#131329]' : 'bg-white border-gray-300'
+                }`}
+                onClick={() => setConsent((v) => !v)}
+              >
+                {consent && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
+                    <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <span className="text-sm text-gray-700 leading-snug" onClick={() => setConsent((v) => !v)}>
+                FISA 서비스 이용약관 및 개인정보 처리방침에 동의합니다 <span className="text-primary-500 font-medium">(필수)</span>
+              </span>
+            </label>
           </div>
 
-          {error && <p className="text-red-500 text-xs px-1">{error}</p>}
+          {/* 에러 메시지 */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="px-6 pb-4 flex gap-3">
-        <button
-          type="button"
-          onClick={() => router.push('/login')}
-          className="flex-1 h-14 bg-gray-200 text-gray-700 rounded-xl text-base font-medium"
-        >
-          이전
-        </button>
+      {/* 하단 버튼 */}
+      <div className="px-6 pb-4">
         <button
           type="button"
           onClick={handleNext}
-          className="flex-1 h-14 bg-[#131329] text-white rounded-xl text-base font-medium"
+          className="w-full h-14 bg-[#131329] text-white rounded-xl text-base font-semibold"
         >
           다음
         </button>
