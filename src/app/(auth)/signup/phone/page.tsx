@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { signupStore } from '@/store/signupStore';
 
@@ -20,9 +20,21 @@ export default function SignupPhonePage() {
   const [birthDate, setBirthDate]     = useState('');
   const [genderDigit, setGenderDigit] = useState('');
   const [carrier, setCarrier]         = useState('');
+  const [carrierOpen, setCarrierOpen] = useState(false);
   const [phone, setPhone]             = useState('');
   const [error, setError]             = useState('');
   const [loading, setLoading]         = useState(false);
+  const carrierRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (carrierRef.current && !carrierRef.current.contains(e.target as Node)) {
+        setCarrierOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function validate() {
     if (!userName.trim())                       return '이름을 입력해주세요.';
@@ -127,30 +139,50 @@ export default function SignupPhonePage() {
             </div>
           </div>
 
-          {/* 통신사 + 휴대폰번호 (한 줄) */}
-          <div className="flex flex-col gap-1.5">
+          {/* 통신사 + 휴대폰번호 */}
+          <div className="flex flex-col gap-2">
             <label className="text-xs text-gray-500 font-medium">통신사 · 휴대폰번호</label>
-            <div className="flex items-center h-14 bg-gray-100 rounded-xl px-3 gap-2">
-              <div className="flex gap-1 shrink-0">
-                {CARRIERS.map((c) => (
-                  <button
-                    key={c.value}
-                    type="button"
-                    onClick={() => setCarrier(c.value)}
-                    className={`h-8 px-2.5 rounded-lg text-xs font-medium transition-colors ${
-                      carrier === c.value
-                        ? 'bg-primary-500 text-white'
-                        : 'bg-gray-200 text-gray-600'
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-              <span className="text-gray-300 select-none">|</span>
+            <div className="flex items-center h-14 bg-gray-100 rounded-xl px-4 gap-2 relative" ref={carrierRef}>
+              {/* 통신사 드롭다운 */}
+              <button
+                type="button"
+                onClick={() => setCarrierOpen((o) => !o)}
+                className="flex items-center gap-1 shrink-0 text-sm font-medium text-gray-700"
+              >
+                <span className={carrier ? 'text-gray-900' : 'text-gray-400'}>
+                  {carrier ? CARRIERS.find((c) => c.value === carrier)?.label : '통신사'}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-400 transition-transform ${carrierOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
+              {/* 드롭다운 목록 */}
+              {carrierOpen && (
+                <div className="absolute left-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-10 w-28">
+                  {CARRIERS.map((c) => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => { setCarrier(c.value); setCarrierOpen(false); }}
+                      className={`w-full px-4 py-3 text-sm text-left transition-colors ${
+                        carrier === c.value
+                          ? 'bg-primary-500/10 text-primary-600 font-semibold'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <span className="text-gray-300 font-light">|</span>
+
               <input
                 type="tel"
-                placeholder="숫자만 입력"
+                placeholder="'-' 없이 숫자만 입력"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
                 className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
@@ -159,7 +191,7 @@ export default function SignupPhonePage() {
                 <button
                   type="button"
                   onClick={() => setPhone('')}
-                  className="text-gray-400 text-xl leading-none"
+                  className="text-gray-400 text-xl leading-none shrink-0"
                 >
                   ×
                 </button>

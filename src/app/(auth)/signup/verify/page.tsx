@@ -115,7 +115,7 @@ export default function SignupVerifyPage() {
       return;
     }
 
-    router.push('/signup/complete');
+    router.push('/login?redirect=/signup/onboarding');
   }
 
   return (

@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { TrendingUp } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { tokenUtils } from '@/utils/token';
+import { getMydataConnections } from '@/api/mydata';
+import { getAccountsWithRoles } from '@/api/bank';
 
 function LoginForm() {
   const router = useRouter();
@@ -30,7 +32,46 @@ function LoginForm() {
       tokenUtils.setUserEmail(email.trim());
       tokenUtils.setUserName(res.userName);
       if (res.firebaseUid) tokenUtils.setFirebaseUid(res.firebaseUid);
-      router.push(res.role === 'ADMIN' ? '/admin' : redirectTo);
+
+      if (res.role === 'ADMIN') {
+        router.push('/admin');
+        return;
+      }
+
+      // redirectTo가 명시된 경우 그대로 이동 (회원가입 완료 후 온보딩 등)
+      if (redirectTo !== '/home') {
+        router.push(redirectTo);
+        return;
+      }
+
+      // 사용자 상태 체크 후 리다이렉트
+      try {
+        const connections = await getMydataConnections();
+        const bankAccounts = connections.bankAccounts ?? [];
+
+        if (bankAccounts.length === 0) {
+          router.push('/signup/onboarding');
+          return;
+        }
+
+        const accounts = await getAccountsWithRoles();
+        const roles = new Set(accounts.map((a) => a.accountRole).filter(Boolean) as string[]);
+
+        const REQUIRED: Array<{ role: string; step: string }> = [
+          { role: 'DEPOSIT',   step: 'deposit'   },
+          { role: 'SALARY',    step: 'salary'    },
+          { role: 'EMERGENCY', step: 'emergency' },
+        ];
+        const missing = REQUIRED.find((r) => !roles.has(r.role));
+        if (missing) {
+          router.push(`/signup/onboarding?step=${missing.step}`);
+          return;
+        }
+      } catch {
+        // 상태 체크 실패 시 홈으로 이동
+      }
+
+      router.push('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : '이메일 또는 비밀번호를 확인해주세요.');
     } finally {

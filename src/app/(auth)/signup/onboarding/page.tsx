@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { setAccountRole } from '@/api/bank';
 import { connectAllMyData, getMydataConnections } from '@/api/mydata';
 import type { BankAccountSummary, StockAccountSummary } from '@/api/mydata';
@@ -14,11 +14,15 @@ import ConnectedStep from './_components/ConnectedStep';
 import AccountStep from './_components/AccountStep';
 
 type Step = 'intro' | 'select' | 'loading' | 'connected' | 'deposit' | 'salary' | 'emergency' | 'stock';
+type AccountStep = 'deposit' | 'salary' | 'emergency';
 
 const ACCOUNT_STEP_ORDER: Step[] = ['deposit', 'salary', 'emergency', 'stock'];
+const ACCOUNT_STEPS: AccountStep[] = ['deposit', 'salary', 'emergency'];
 
-export default function SignupOnboardingPage() {
+function SignupOnboardingContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialStep = searchParams.get('step') as AccountStep | null;
 
   const [step, setStep] = useState<Step>('intro');
   const [userName, setUserName] = useState('');
@@ -37,6 +41,27 @@ export default function SignupOnboardingPage() {
   useEffect(() => {
     const stored = signupStore.get();
     if (stored.userName) setUserName(stored.userName);
+  }, []);
+
+  // ?step= 파라미터로 진입 시 계좌 데이터 로드 후 해당 단계로 바로 이동
+  useEffect(() => {
+    if (!initialStep || !ACCOUNT_STEPS.includes(initialStep)) return;
+    let cancelled = false;
+    async function loadAndJump() {
+      try {
+        const connections = await getMydataConnections();
+        if (cancelled) return;
+        setBankAccounts(connections.bankAccounts ?? []);
+        setStockAccounts(connections.stockAccounts ?? []);
+        setStep(initialStep as Step);
+      } catch {
+        if (!cancelled) setStep('intro');
+      }
+    }
+    loadAndJump();
+    return () => { cancelled = true; };
+  // initialStep은 마운트 시 한 번만 읽으면 됨
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // loading step: getMydataConnections 호출 후 connected로 전환
@@ -273,4 +298,12 @@ export default function SignupOnboardingPage() {
   }
 
   return null;
+}
+
+export default function SignupOnboardingPage() {
+  return (
+    <Suspense>
+      <SignupOnboardingContent />
+    </Suspense>
+  );
 }

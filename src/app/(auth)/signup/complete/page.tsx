@@ -16,12 +16,12 @@ export default function SignupCompletePage() {
         <div className="text-center">
           <p className="text-primary-500 text-sm font-medium mb-2">축하해요!</p>
           <h1 className="text-gray-900 text-3xl font-bold leading-snug">
-            회원가입이
+            모든 설정이
             <br />
             완료되었어요
           </h1>
           <p className="text-gray-400 text-sm mt-3">
-            로그인 후 자산을 연동해보세요
+            이제 flon에서 자산을 관리해보세요
           </p>
         </div>
       </div>
@@ -29,10 +29,10 @@ export default function SignupCompletePage() {
       <div className="px-6 pb-10">
         <button
           type="button"
-          onClick={() => router.push('/login?redirect=/signup/onboarding')}
+          onClick={() => router.push('/home')}
           className="w-full h-14 bg-primary-500 text-white rounded-xl text-base font-semibold"
         >
-          확인
+          시작하기
         </button>
       </div>
     </div>
