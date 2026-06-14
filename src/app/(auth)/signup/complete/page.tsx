@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { TrendingUp } from 'lucide-react';
 
 export default function SignupCompletePage() {
   const router = useRouter();
@@ -12,19 +13,22 @@ export default function SignupCompletePage() {
   }, [router]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="h-12 bg-[#131329]" />
+    <div className="flex flex-col min-h-screen bg-[#131329]">
+      <div className="flex-1 flex flex-col items-center justify-center px-8 gap-6">
+        <div className="w-24 h-24 bg-white/10 rounded-3xl flex items-center justify-center">
+          <TrendingUp className="text-white" size={44} />
+        </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <p className="text-sm text-gray-500 mb-2">축하합니다!</p>
-        <h1 className="text-3xl font-bold text-gray-900 text-center leading-snug">
-          회원가입
-          <br />
-          완료
-        </h1>
+        <div className="text-center">
+          <p className="text-primary-300 text-sm font-medium mb-2">축하해요!</p>
+          <h1 className="text-white text-3xl font-bold leading-snug">
+            회원가입이
+            <br />
+            완료되었어요
+          </h1>
+          <p className="text-white/50 text-sm mt-4">잠시 후 로그인 화면으로 이동해요</p>
+        </div>
       </div>
-
-      <div className="h-12 bg-[#131329]" />
     </div>
   );
 }
