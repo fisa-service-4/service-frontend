@@ -56,8 +56,7 @@ export default function AccountStep({
     return map;
   }, [accounts]);
 
-  // 첫 번째 기관 자동 펼침
-  const [openCode, setOpenCode] = useState<string | null>(() => accounts[0]?.bankCode ?? null);
+  const [openCode, setOpenCode] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
@@ -201,11 +200,9 @@ export default function AccountStep({
             })}
           </div>
         )}
-      </div>
 
-      {/* 에러 메시지 - 고정 높이 */}
-      <div className="px-6 h-8 flex items-center">
-        <p className={`text-sm text-red-500 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
+        {/* 에러 메시지 - 아코디언 리스트 바로 아래, 높이 고정으로 버튼 위치 유지 */}
+        <p className={`text-sm text-red-500 mt-3 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
       </div>
 
       {/* 하단 버튼 */}

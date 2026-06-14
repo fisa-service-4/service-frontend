@@ -61,7 +61,7 @@ export default function SignupPage() {
         </button>
       </div>
 
-      <div className="flex-1 px-6 pt-6 pb-4 overflow-y-auto">
+      <div className="flex-1 min-h-0 px-6 pt-6 pb-4 overflow-y-auto">
         {/* 진행 바 */}
         <div className="flex gap-1.5 mb-1">
           {STEPS.map((_, i) => (
@@ -141,14 +141,11 @@ export default function SignupPage() {
                 flon 서비스 이용약관 및 개인정보 처리방침에 동의합니다 <span className="text-primary-500 font-medium">(필수)</span>
               </span>
             </label>
+            {/* 에러 메시지 - 동의 체크박스 바로 아래, 높이 고정으로 버튼 위치 유지 */}
+            <p className={`text-sm text-red-500 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
           </div>
 
         </div>
-      </div>
-
-      {/* 에러 메시지 - 고정 높이 (버튼 위) */}
-      <div className="px-6 h-8 flex items-center">
-        <p className={`text-sm text-red-500 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
       </div>
 
       {/* 하단 버튼 */}
