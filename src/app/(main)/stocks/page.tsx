@@ -526,10 +526,10 @@ function StocksContent() {
 
             {showCancelPin && (
                 <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setShowCancelPin(false)}>
-                    <div className="w-full bg-white rounded-t-2xl p-6" onClick={(e) => e.stopPropagation()}>
+                    <div className="w-full max-w-[393px] mx-auto bg-white rounded-t-2xl p-4" onClick={(e) => e.stopPropagation()}>
                         <p className="text-center text-base font-bold text-gray-900 mb-1">주문 취소</p>
-                        <p className="text-center text-sm text-gray-500 mb-4">PIN번호를 입력해주세요</p>
-                        <div className="flex justify-center gap-3 mb-4">
+                        <p className="text-center text-sm text-gray-500 mb-3">PIN번호를 입력해주세요</p>
+                        <div className="flex justify-center gap-3 mb-3">
                             {Array.from({length: 6}).map((_, i) => (
                                 <div
                                     key={i}
