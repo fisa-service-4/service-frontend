@@ -100,7 +100,7 @@ export default function SignupPinPage() {
             <div
               key={i}
               className={`w-4 h-4 rounded-full transition-colors duration-150 ${
-                i < filled ? 'bg-gray-800' : 'bg-gray-300'
+                i < filled ? 'bg-primary-500' : 'bg-gray-300'
               }`}
             />
           ))}
@@ -117,11 +117,11 @@ export default function SignupPinPage() {
         </div>
       </div>
 
-      <div className="bg-[#131329] flex">
+      <div className="px-6 pb-6 pt-2 flex gap-2">
         <button
           type="button"
           onClick={handleBack}
-          className="flex-1 h-14 text-white text-base font-medium border-r border-white/10"
+          className="flex-1 h-14 bg-gray-100 text-gray-700 rounded-xl text-base font-medium"
         >
           이전
         </button>
@@ -129,11 +129,12 @@ export default function SignupPinPage() {
           type="button"
           onClick={handleAction}
           disabled={loading || current.length < PIN_LENGTH}
-          className="flex-1 h-14 text-white text-base font-medium disabled:opacity-40"
+          className="flex-1 h-14 bg-[#131329] text-white rounded-xl text-base font-semibold disabled:opacity-40 transition-opacity"
         >
           {loading ? '처리 중...' : '완료'}
         </button>
       </div>
+      <div className="h-2 bg-[#131329]" />
     </div>
   );
 }
