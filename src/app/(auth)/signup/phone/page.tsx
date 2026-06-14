@@ -127,34 +127,30 @@ export default function SignupPhonePage() {
             </div>
           </div>
 
-          {/* 통신사 선택 (토글 버튼) */}
+          {/* 통신사 + 휴대폰번호 (한 줄) */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-gray-500 font-medium">통신사</label>
-            <div className="flex gap-2">
-              {CARRIERS.map((c) => (
-                <button
-                  key={c.value}
-                  type="button"
-                  onClick={() => setCarrier(c.value)}
-                  className={`flex-1 h-12 rounded-xl text-sm font-medium border transition-colors ${
-                    carrier === c.value
-                      ? 'bg-primary-500 text-white border-primary-500'
-                      : 'bg-gray-100 text-gray-600 border-transparent'
-                  }`}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 휴대폰번호 */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs text-gray-500 font-medium">휴대폰번호</label>
-            <div className="relative flex items-center h-14 bg-gray-100 rounded-xl px-4">
+            <label className="text-xs text-gray-500 font-medium">통신사 · 휴대폰번호</label>
+            <div className="flex items-center h-14 bg-gray-100 rounded-xl px-3 gap-2">
+              <div className="flex gap-1 shrink-0">
+                {CARRIERS.map((c) => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setCarrier(c.value)}
+                    className={`h-8 px-2.5 rounded-lg text-xs font-medium transition-colors ${
+                      carrier === c.value
+                        ? 'bg-primary-500 text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+              <span className="text-gray-300 select-none">|</span>
               <input
                 type="tel"
-                placeholder="'-' 없이 숫자만 입력"
+                placeholder="숫자만 입력"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
                 className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
@@ -163,7 +159,7 @@ export default function SignupPhonePage() {
                 <button
                   type="button"
                   onClick={() => setPhone('')}
-                  className="text-gray-400 text-xl leading-none ml-2"
+                  className="text-gray-400 text-xl leading-none"
                 >
                   ×
                 </button>
@@ -171,13 +167,12 @@ export default function SignupPhonePage() {
             </div>
           </div>
 
-          {/* 에러 메시지 */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
         </div>
+      </div>
+
+      {/* 에러 메시지 - 고정 높이 */}
+      <div className="px-6 h-8 flex items-center">
+        <p className={`text-sm text-red-500 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
       </div>
 
       {/* 하단 버튼 */}

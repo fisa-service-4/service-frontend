@@ -58,29 +58,34 @@ export default function SelectStep({ userName, onNext, onBack, loading, error }:
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 pt-6 pb-4">
         <h1 className="text-2xl font-bold text-gray-900 leading-snug mb-1">
           {userName ? `${userName}님의 자산` : '내 자산'}
           <br />한 번에 찾아볼게요
         </h1>
-        <p className="text-sm text-gray-400 mb-8">연동할 금융기관을 확인해주세요</p>
+        <p className="text-sm text-gray-400 mb-6">연동할 금융기관을 확인해주세요</p>
 
-        {/* 모든 기관 체크박스 */}
+        {/* 모든 기관 */}
         <button
           type="button"
           onClick={() => setAllChecked((v) => !v)}
-          className="w-full flex items-center justify-between px-5 py-4 bg-gray-50 rounded-2xl mb-2"
+          className="w-full flex items-center justify-between px-4 py-3.5 bg-gray-50 rounded-2xl mb-1"
         >
-          <span className="text-sm font-semibold text-gray-900">모든 기관</span>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gray-200 flex items-center justify-center shrink-0">
+              <span className="text-xs text-gray-500 font-bold">전체</span>
+            </div>
+            <span className="text-sm font-semibold text-gray-900">모든 기관</span>
+          </div>
           <CheckIcon filled={allChecked} />
         </button>
 
-        {/* 개별 기관 목록 — allChecked에 동기화 (UI 전용) */}
-        <div className="flex flex-col divide-y divide-gray-100 px-1">
+        {/* 개별 기관 목록 */}
+        <div className="flex flex-col">
           {PROVIDERS.map((p) => (
-            <div key={p.value} className="flex items-center justify-between py-3.5">
+            <div key={p.value} className="flex items-center justify-between px-4 py-3.5 border-t border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden">
+                <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
                   <Image
                     src={p.logo}
                     alt={p.label}
@@ -97,12 +102,13 @@ export default function SelectStep({ userName, onNext, onBack, loading, error }:
         </div>
       </div>
 
-      <div className="px-6 pb-8 pt-3 flex flex-col gap-3">
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
-        )}
+      {/* 에러 메시지 - 고정 높이 */}
+      <div className="px-6 h-8 flex items-center">
+        <p className={`text-sm text-red-500 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
+      </div>
+
+      {/* 하단 버튼 - 고정 */}
+      <div className="px-6 pb-8">
         <button
           type="button"
           onClick={onNext}

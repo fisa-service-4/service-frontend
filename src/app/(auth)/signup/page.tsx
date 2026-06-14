@@ -56,7 +56,7 @@ export default function SignupPage() {
     <div className="flex flex-col min-h-screen bg-bg">
       {/* 상단 헤더 */}
       <div className="h-14 bg-[#131329] flex items-center px-4">
-        <button type="button" onClick={() => router.push('/login')} className="text-white p-1">
+        <button type="button" onClick={() => router.push('/')} className="text-white p-1">
           <ChevronLeft size={24} />
         </button>
       </div>
@@ -143,13 +143,12 @@ export default function SignupPage() {
             </label>
           </div>
 
-          {/* 에러 메시지 */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
         </div>
+      </div>
+
+      {/* 에러 메시지 - 고정 높이 (버튼 위) */}
+      <div className="px-6 h-8 flex items-center">
+        <p className={`text-sm text-red-500 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
       </div>
 
       {/* 하단 버튼 */}
