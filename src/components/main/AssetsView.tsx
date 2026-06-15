@@ -341,7 +341,7 @@ export default function AssetsView() {
                         <div className="flex items-end justify-between px-4 py-5">
                           <div>
                             <p className="text-sm font-bold text-gray-900">
-                              {BANK_NAME[account.bankCode] ?? account.bankCode}({account.accountName.split(' ').slice(1).join(' ')})
+{BANK_NAME[account.bankCode] ?? account.bankCode}({account.accountName.split(' ').slice(1).join(' ') || account.accountName})
                             </p>
                             <p className="text-xs text-gray-900 mt-0.5">
                               계좌번호: {account.accountNumber}
