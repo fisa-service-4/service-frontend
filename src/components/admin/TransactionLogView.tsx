@@ -1,19 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import { adminApiRequest } from '@/utils/apiClient';
 
 interface TransferLog {
+  senderId:                number | null;
   senderName:              string;
   fromAccountNumberMasked: string;
   transferAmount:          number;
+  receiverId:              number | null;
   receiverName:            string | null;
   toAccountNumberMasked:   string;
   transferredAt:           string;
 }
 
 interface StockOrderLog {
+  userId:                number | null;
   buyerName:             string;
   accountNumberMasked:   string;
   transactionType:       'BUY' | 'SELL';
@@ -31,20 +34,33 @@ interface PagedResponse<T> {
   totalPages:    number;
 }
 
+type CombinedItem =
+  | { kind: 'transfer'; data: TransferLog;    sortKey: number }
+  | { kind: 'stock';    data: StockOrderLog;  sortKey: number };
+
+type FilterType = 'all' | 'transfer' | 'buy' | 'sell';
+
+const FILTERS: { key: FilterType; label: string }[] = [
+  { key: 'all',      label: '전체' },
+  { key: 'transfer', label: '이체' },
+  { key: 'buy',      label: '매수' },
+  { key: 'sell',     label: '매도' },
+];
+
 interface Props {
   onBack: () => void;
 }
 
-type TabType = 'transfer' | 'stock';
+const PAGE_SIZE = 10;
 
-const PAGE_SIZE = 20;
 
-function formatDate(iso: string) {
+function formatDate(iso: string): string {
   const [datePart, timePart] = iso.split('T');
-  return `${datePart.replace(/-/g, '.')} ${timePart ?? ''}`;
+  const time = timePart ? timePart.substring(0, 8) : '';
+  return `${datePart.replace(/-/g, '.')} ${time}`;
 }
 
-function formatAmount(amount: number) {
+function formatAmount(amount: number): string {
   return `${amount.toLocaleString('ko-KR')}원`;
 }
 
@@ -60,57 +76,55 @@ function getPageNumbers(current: number, total: number): number[] {
 }
 
 export default function TransactionLogView({ onBack }: Props) {
-  const [tab,           setTab]           = useState<TabType>('transfer');
-  const [page,          setPage]          = useState(0);
-  const [transferLogs,  setTransferLogs]  = useState<TransferLog[]>([]);
-  const [stockLogs,     setStockLogs]     = useState<StockOrderLog[]>([]);
-  const [totalElements, setTotalElements] = useState(0);
-  const [totalPages,    setTotalPages]    = useState(1);
-  const [loading,       setLoading]       = useState(false);
-
-  const fetchTransferLogs = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) });
-    adminApiRequest<PagedResponse<TransferLog>>(`/admin/logs/transfers?${params}`)
-      .then((data) => {
-        setTransferLogs(data.content);
-        setTotalElements(data.totalElements);
-        setTotalPages(Math.max(1, data.totalPages));
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [page]);
-
-  const fetchStockLogs = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE), sort: 'transactionOccurredAt,desc' });
-    adminApiRequest<PagedResponse<StockOrderLog>>(`/admin/logs/orders?${params}`)
-      .then((data) => {
-        setStockLogs(data.content);
-        setTotalElements(data.totalElements);
-        setTotalPages(Math.max(1, data.totalPages));
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [page]);
+  const [items,   setItems]   = useState<CombinedItem[]>([]);
+  const [filter,  setFilter]  = useState<FilterType>('all');
+  const [page,    setPage]    = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (tab === 'transfer') fetchTransferLogs();
-    else fetchStockLogs();
-  }, [tab, fetchTransferLogs, fetchStockLogs]);
+    setLoading(true);
+    Promise.allSettled([
+      adminApiRequest<PagedResponse<TransferLog>>('/admin/logs/transfers?page=0&size=200'),
+      adminApiRequest<PagedResponse<StockOrderLog>>('/admin/logs/orders?page=0&size=200&sort=transactionOccurredAt,desc'),
+    ]).then(([transferResult, stockResult]) => {
+      const transfers: CombinedItem[] =
+        transferResult.status === 'fulfilled'
+          ? transferResult.value.content.map((d) => ({
+              kind: 'transfer' as const,
+              data: d,
+              sortKey: new Date(d.transferredAt).getTime(),
+            }))
+          : [];
 
-  const handleTabChange = (newTab: TabType) => {
-    setTab(newTab);
-    setPage(0);
-    setTotalElements(0);
-    setTotalPages(1);
-  };
+      const stocks: CombinedItem[] =
+        stockResult.status === 'fulfilled'
+          ? stockResult.value.content.map((d) => ({
+              kind: 'stock' as const,
+              data: d,
+              sortKey: new Date(d.transactionOccurredAt).getTime(),
+            }))
+          : [];
+
+      const merged = [...transfers, ...stocks].sort((a, b) => b.sortKey - a.sortKey);
+      setItems(merged);
+      setPage(0);
+    }).finally(() => setLoading(false));
+  }, []);
+
+  const filtered =
+    filter === 'all'      ? items :
+    filter === 'transfer' ? items.filter((i) => i.kind === 'transfer') :
+    filter === 'buy'      ? items.filter((i) => i.kind === 'stock' && i.data.transactionType === 'BUY') :
+                            items.filter((i) => i.kind === 'stock' && i.data.transactionType === 'SELL');
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageItems  = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
     <div className="flex-1 overflow-y-auto bg-white flex flex-col">
 
       {/* 타이틀 */}
-      <div className="px-5 pt-5 pb-4">
+      <div className="px-5 pt-5 pb-3">
         <div className="flex items-center gap-2">
           <button
             onClick={onBack}
@@ -120,78 +134,39 @@ export default function TransactionLogView({ onBack }: Props) {
           </button>
           <h2 className="text-xl font-bold text-gray-900">거래 이력 조회</h2>
         </div>
-        <p className="text-sm text-gray-500 mt-0.5 pl-7">전체 {totalElements.toLocaleString()}건</p>
       </div>
 
-      {/* 탭 */}
+      {/* 필터 탭 */}
       <div className="flex gap-0 px-5 mb-4 border-b border-slate-200">
-        <button
-          onClick={() => handleTabChange('transfer')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            tab === 'transfer'
-              ? 'border-slate-700 text-slate-900'
-              : 'border-transparent text-gray-400 hover:text-gray-600'
-          }`}
-        >
-          이체
-        </button>
-        <button
-          onClick={() => handleTabChange('stock')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-            tab === 'stock'
-              ? 'border-slate-700 text-slate-900'
-              : 'border-transparent text-gray-400 hover:text-gray-600'
-          }`}
-        >
-          주식거래
-        </button>
+        {FILTERS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => { setFilter(key); setPage(0); }}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              filter === key
+                ? 'border-slate-700 text-slate-900'
+                : 'border-transparent text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* 로그 목록 */}
       <div className="flex-1 px-5">
         {loading ? (
           <div className="flex items-center justify-center h-32 text-sm text-gray-400">불러오는 중...</div>
-        ) : tab === 'transfer' ? (
-          transferLogs.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-sm text-gray-400">데이터 없음</div>
-          ) : (
-            <div className="space-y-3">
-              {transferLogs.map((log, idx) => (
-                <div key={idx} className="bg-slate-100 rounded-2xl px-4 py-4">
-                  <Row label="보낸사람" value={log.senderName} bold />
-                  <Row label="출금계좌" value={log.fromAccountNumberMasked} mono />
-                  <Row label="금액"     value={formatAmount(log.transferAmount)} colored />
-                  <div className="h-px bg-slate-200 my-3" />
-                  <Row label="받은사람" value={log.receiverName ?? '외부 계좌'} bold />
-                  <Row label="입금계좌" value={log.toAccountNumberMasked} mono />
-                  <Row label="금액"     value={formatAmount(log.transferAmount)} />
-                  <div className="h-px bg-slate-200 my-3" />
-                  <Row label="일시" value={formatDate(log.transferredAt)} small />
-                </div>
-              ))}
-            </div>
-          )
+        ) : pageItems.length === 0 ? (
+          <div className="flex items-center justify-center h-32 text-sm text-gray-400">데이터 없음</div>
         ) : (
-          stockLogs.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-sm text-gray-400">데이터 없음</div>
-          ) : (
-            <div className="space-y-3">
-              {stockLogs.map((log, idx) => (
-                <div key={idx} className="bg-slate-100 rounded-2xl px-4 py-4">
-                  <Row label="구매자"   value={log.buyerName} bold />
-                  <Row label="계좌번호" value={log.accountNumberMasked} mono />
-                  <Row
-                    label={log.transactionType === 'BUY' ? '매수 수량' : '매도 수량'}
-                    value={`${log.quantity.toLocaleString('ko-KR')} 주`}
-                  />
-                  <div className="h-px bg-slate-200 my-3" />
-                  <Row label="총 금액" value={formatAmount(log.totalAmount)} colored />
-                  <div className="h-px bg-slate-200 my-3" />
-                  <Row label="일시" value={formatDate(log.transactionOccurredAt)} small />
-                </div>
-              ))}
-            </div>
-          )
+          <div className="space-y-3">
+            {pageItems.map((item, idx) =>
+              item.kind === 'transfer'
+                ? <TransferCard  key={idx} data={item.data} />
+                : <StockCard     key={idx} data={item.data} />
+            )}
+          </div>
         )}
       </div>
 
@@ -226,6 +201,43 @@ export default function TransactionLogView({ onBack }: Props) {
         </button>
       </div>
 
+    </div>
+  );
+}
+
+function TransferCard({ data }: { data: TransferLog }) {
+  return (
+    <div className="bg-slate-100 rounded-2xl px-4 py-4">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-600">이체</span>
+      </div>
+
+      <Row label="보낸사람" value={data.senderId != null ? `사용자: ${data.senderId}` : '외부'} bold />
+      <Row label="계좌번호" value={data.fromAccountNumberMasked}                                mono />
+      <Row label="금액"     value={formatAmount(data.transferAmount)}                           colored />
+      <Row label="시간"     value={formatDate(data.transferredAt)}                              small />
+
+      <div className="h-px bg-slate-200 my-3" />
+
+      <Row label="받는사람" value={data.receiverId != null ? `사용자: ${data.receiverId}` : '외부'} bold />
+      <Row label="계좌번호" value={data.toAccountNumberMasked} mono />
+      <Row label="금액"     value={formatAmount(data.transferAmount)} />
+    </div>
+  );
+}
+
+function StockCard({ data }: { data: StockOrderLog }) {
+  return (
+    <div className="bg-slate-100 rounded-2xl px-4 py-4">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600">주식거래</span>
+      </div>
+
+      <Row label="사용자"   value={data.userId != null ? `사용자: ${data.userId}` : '외부'} bold />
+      <Row label="계좌번호" value={data.accountNumberMasked}      mono />
+      <Row label="수량"     value={`${data.quantity.toLocaleString('ko-KR')} 주`} />
+      <Row label="총 금액"  value={formatAmount(data.totalAmount)} colored />
+      <Row label="시간"     value={formatDate(data.transactionOccurredAt)} small />
     </div>
   );
 }
