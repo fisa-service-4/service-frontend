@@ -34,6 +34,10 @@ const fmtWon = (n: number | null) => {
   if (n === null || n === undefined) return '-';
   return n.toLocaleString('ko-KR') + ' 원';
 };
+const stockColor = (n: number | null | undefined) => {
+  if (n === null || n === undefined || n === 0) return 'text-gray-400';
+  return n > 0 ? 'text-stock-up' : 'text-stock-down';
+};
 
 
 export default function StockOrderPage() {
@@ -109,7 +113,6 @@ function StockOrderContent() {
       .catch(console.error);
   }, [stockCode, urlHoldingQty, accountId]);
 
-  const up = changeRate >= 0;
   const activePrice = orderMethod === 'LIMIT' ? (Number(limitPrice) || 0) : stockPrice;
   const estimate = quantity * activePrice;
 
@@ -227,9 +230,9 @@ function StockOrderContent() {
             </div>
             <div className="text-right">
               <p className="text-base font-bold text-gray-900">{fmtWon(stockPrice)}</p>
-              <p className={`text-xs font-semibold mt-0.5 flex items-center justify-end gap-0.5 ${up ? 'text-error' : 'text-success'}`}>
-                {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                {up ? '+' : ''}{changeRate}%
+              <p className={`text-xs font-semibold mt-0.5 flex items-center justify-end gap-0.5 ${stockColor(changeRate)}`}>
+                {changeRate > 0 ? <TrendingUp size={12} /> : changeRate < 0 ? <TrendingDown size={12} /> : null}
+                {changeRate > 0 ? '+' : ''}{changeRate}%
               </p>
             </div>
           </div>

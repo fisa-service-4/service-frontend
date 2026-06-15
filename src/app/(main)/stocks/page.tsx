@@ -71,6 +71,10 @@ const signRate = (n: number | null) => {
     if (n === null || n === undefined) return '-';
     return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
 };
+const stockColor = (n: number | null | undefined) => {
+    if (n === null || n === undefined || n === 0) return 'text-gray-400';
+    return n > 0 ? 'text-stock-up' : 'text-stock-down';
+};
 
 
 export default function StocksPage() {
@@ -248,7 +252,6 @@ function StocksContent() {
 
     const totalValue = holdings.reduce((sum, h) => sum + (h.evaluationAmount ?? 0), 0);
     const profitLoss = holdings.reduce((sum, h) => sum + (h.unrealizedProfit ?? 0), 0);
-    const profitUp = profitLoss >= 0;
 
     return (
         <div className="flex flex-col h-screen bg-bg">
@@ -281,16 +284,18 @@ function StocksContent() {
                     <div className="flex justify-between">
                         <div>
                             <p className="text-xs text-gray-500">평가손익</p>
-                            <p className={`text-xl font-bold mt-1 ${profitUp ? 'text-error' : 'text-success'}`}>
+                            <p className={`text-xl font-bold mt-1 ${stockColor(profitLoss)}`}>
                                 {loading ? '-' : signWon(profitLoss)}
                             </p>
                         </div>
                         <div className="text-right">
                             <p className="text-xs text-gray-500">수익률 (일간)</p>
-                            <p className={`text-xl font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-error' : 'text-success'}`}>
-                                {returns.dailyReturnRate >= 0
+                            <p className={`text-xl font-bold mt-1 flex items-center justify-end gap-1 ${stockColor(returns.dailyReturnRate)}`}>
+                                {returns.dailyReturnRate > 0
                                     ? <TrendingUp size={14}/>
-                                    : <TrendingDown size={14}/>}
+                                    : returns.dailyReturnRate < 0
+                                    ? <TrendingDown size={14}/>
+                                    : null}
                                 {loading ? '-' : signRate(returns.dailyReturnRate)}
                             </p>
                         </div>
@@ -308,7 +313,6 @@ function StocksContent() {
                         ) : (
                             <div className="space-y-2">
                                 {searchResults.map((s) => {
-                                    const up = s.changeRate >= 0;
                                     return (
                                         <div
                                             key={s.stockCode}
@@ -322,7 +326,7 @@ function StocksContent() {
                                             <div className="flex items-center gap-3">
                                                 <div className="text-right">
                                                     <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
-                                                    <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-error' : 'text-success'}`}>
+                                                    <p className={`text-xs font-semibold mt-0.5 ${stockColor(s.changeRate)}`}>
                                                         {signRate(s.changeRate)}
                                                     </p>
                                                 </div>
@@ -368,7 +372,6 @@ function StocksContent() {
                             ) : (
                                 <div className="space-y-3">
                                     {holdings.map((s) => {
-                                        const up = (s.profitRate ?? 0) >= 0;
                                         return (
                                             <div
                                                 key={s.stockCode}
@@ -391,7 +394,7 @@ function StocksContent() {
                                                 <div className="flex justify-between items-start">
                                                     <div>
                                                         <p className="text-xs text-gray-400">평가손익</p>
-                                                        <p className={`text-sm font-bold mt-1 ${up ? 'text-error' : 'text-success'}`}>
+                                                        <p className={`text-sm font-bold mt-1 ${stockColor(s.unrealizedProfit)}`}>
                                                             {signWon(s.unrealizedProfit)} ({signRate(s.profitRate)})
                                                         </p>
                                                     </div>
@@ -416,7 +419,6 @@ function StocksContent() {
                                     {favorites.map((s) => {
                                         const currentPrice = s.currentPrice ?? 0;
                                         const changeRate = s.changeRate ?? 0;
-                                        const up = changeRate >= 0;
 
                                         return (
                                             <div
@@ -441,7 +443,7 @@ function StocksContent() {
                                                         <p className="text-sm font-bold text-gray-900 tracking-tight">
                                                             {fmtWon(currentPrice)}
                                                         </p>
-                                                        <p className={`text-xs font-bold mt-1 tracking-tight ${up ? 'text-error' : 'text-success'}`}>
+                                                        <p className={`text-xs font-bold mt-1 tracking-tight ${stockColor(changeRate)}`}>
                                                             {signRate(changeRate)}
                                                         </p>
                                                     </div>
