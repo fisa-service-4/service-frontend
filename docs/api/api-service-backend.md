@@ -2496,3 +2496,88 @@
 }
 ```
 ````
+
+---
+
+# MYDATA API
+
+> **Base URL:** `/api/v1/mydata`
+> **Port:** 8080
+> **사용 구간:** 프론트엔드 → service-backend → mydata-server
+
+---
+
+## 19-1. 마이데이터 전체 연동
+
+**POST** `/mydata/connect` | Bearer Token 필요
+
+> 사용자의 Firebase UID를 기반으로 mydata-server에 금융기관 연동을 요청합니다.
+
+**Request Body** 없음
+
+**Response** `200 OK`
+
+```json
+{
+  "success": true,
+  "data": null,
+  "meta": { "traceId": "uuid" }
+}
+```
+
+| 상황               | 코드       | 메시지                                  |
+| ------------------ | ---------- | --------------------------------------- |
+| 사용자 없음        | USER_001   | 사용자를 찾을 수 없습니다               |
+| 토큰 만료          | AUTH_004   | 만료된 토큰입니다                       |
+| 유효하지 않은 토큰 | AUTH_005   | 유효하지 않은 토큰입니다                |
+| 외부 서버 오류     | SERVER_001 | 외부 서버와 통신 중 오류가 발생했습니다 |
+
+---
+
+## 19-2. 연동 계좌 목록 조회
+
+**GET** `/mydata/connections` | Bearer Token 필요
+
+> mydata-server에서 연동된 은행/증권 계좌 목록을 조회합니다.
+
+**Request Body** 없음
+
+**Response** `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "bankAccounts": [
+      {
+        "accountId": 1001,
+        "accountNumber": "110-123-456789",
+        "accountName": "내 급여통장",
+        "bankCode": "088",
+        "balance": 3500000
+      }
+    ],
+    "stockAccounts": [
+      {
+        "accountId": 2001,
+        "accountNumber": "300-123-456789",
+        "accountName": "내 주식 계좌",
+        "bankCode": "039"
+      }
+    ]
+  },
+  "meta": { "traceId": "uuid" }
+}
+```
+
+| 필드          | 타입  | 설명              |
+| ------------- | ----- | ----------------- |
+| bankAccounts  | Array | 연동된 은행 계좌 목록 |
+| stockAccounts | Array | 연동된 증권 계좌 목록 |
+
+| 상황               | 코드       | 메시지                                  |
+| ------------------ | ---------- | --------------------------------------- |
+| 사용자 없음        | USER_001   | 사용자를 찾을 수 없습니다               |
+| 토큰 만료          | AUTH_004   | 만료된 토큰입니다                       |
+| 유효하지 않은 토큰 | AUTH_005   | 유효하지 않은 토큰입니다                |
+| 외부 서버 오류     | SERVER_001 | 외부 서버와 통신 중 오류가 발생했습니다 |

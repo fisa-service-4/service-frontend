@@ -56,7 +56,7 @@ export default function LogsView({ onSelect }: LogsViewProps) {
               {category.items.map((item, idx) => (
                 <div key={item.key}>
                   <button
-                    onClick={() => onSelect(item.key)}
+                    onClick={() => item.key !== 'notification' && onSelect(item.key)}
                     className="w-full flex items-center gap-3 px-4 py-4 hover:bg-slate-200 transition-colors text-left"
                   >
                     <div className={`${item.iconBg} rounded-xl p-2 shrink-0`}>

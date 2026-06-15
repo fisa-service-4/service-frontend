@@ -23,6 +23,10 @@
   --color-success: #00C24A;
   --color-error:   #FF2B2B;
 
+  /* 주식 등락 (한국 증시: 상승=빨간색, 하락=초록색) */
+  --color-stock-up:   #FF2B2B;
+  --color-stock-down: #00C24A;
+
   /* Gray */
   --color-gray-50:  #F8FAFC;
   --color-gray-100: #F1F5F9;
@@ -79,3 +83,6 @@ body {
 .chat-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.text-stock-up   { color: #FF2B2B; }
+.text-stock-down { color: #00C24A; }

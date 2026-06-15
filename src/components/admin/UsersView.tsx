@@ -64,9 +64,12 @@ export default function UsersView() {
   const [totalUsers, setTotalUsers]         = useState<string>('-');
   const [activeSessions, setActiveSessions] = useState<string>('-');
   const [lockedUsers, setLockedUsers]       = useState<string>('-');
+  const [todayNew, setTodayNew]             = useState<string>('-');
   const [showLockedView, setShowLockedView] = useState(false);
 
   useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+
     const fetchStats = () => {
       adminApiRequest<PagedResponse>('/admin/users?page=0&size=1')
         .then((data) => setTotalUsers(data.totalElements.toLocaleString()))
@@ -79,6 +82,10 @@ export default function UsersView() {
       adminApiRequest<PagedResponse>('/admin/users?status=LOCKED&page=0&size=1')
         .then((data) => setLockedUsers(data.totalElements.toLocaleString()))
         .catch(() => {});
+
+      adminApiRequest<PagedResponse>(`/admin/users?startDate=${today}&endDate=${today}&page=0&size=1`)
+        .then((data) => setTodayNew(`${data.totalElements.toLocaleString()}명`))
+        .catch(() => setTodayNew('0명'));
     };
 
     fetchStats();
@@ -151,7 +158,7 @@ export default function UsersView() {
                 {card.label === '전체 사용자' ? totalUsers
                  : card.label === '활성 회원'  ? activeSessions
                  : card.label === '정지 회원'  ? lockedUsers
-                 : '-'}
+                 : todayNew}
               </p>
               {isLocked && (
                 <p className="text-[10px] text-slate-400 mt-1">탭하여 목록 보기</p>
