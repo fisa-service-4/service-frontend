@@ -1,88 +1,112 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+    --background: #ffffff;
+    --foreground: #171717;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
 
-  /* Primary */
-  --color-primary-50:  #ecf6ff;
-  --color-primary-100: #d5ebff;
-  --color-primary-300: #81c7ff;
-  --color-primary-500: #1b85ff;
-  --color-primary-700: #0056f8;
-  --color-primary-900: #0b3a94;
+    /* Primary */
+    --color-primary-50: #ecf6ff;
+    --color-primary-100: #d5ebff;
+    --color-primary-300: #81c7ff;
+    --color-primary-500: #1b85ff;
+    --color-primary-700: #0056f8;
+    --color-primary-900: #0b3a94;
 
-  /* 상태 */
-  --color-success: #00C24A;
-  --color-error:   #FF2B2B;
+    /* 상태 */
+    --color-success: #00C24A;
+    --color-error: #FF2B2B;
 
-  /* 주식 등락 (한국 증시: 상승=빨간색, 하락=초록색) */
-  --color-stock-up:   #FF2B2B;
-  --color-stock-down: #00C24A;
+    /* 주식 등락 (한국 증시: 상승=빨간색, 하락=초록색) */
+    --color-stock-up: #FF2B2B;
+    --color-stock-down: #00C24A;
 
-  /* Gray */
-  --color-gray-50:  #F8FAFC;
-  --color-gray-100: #F1F5F9;
-  --color-gray-200: #E2E8F0;
-  --color-gray-400: #94A3B8;
-  --color-gray-500: #64748B;
-  --color-gray-700: #334155;
-  --color-gray-900: #0F172A;
+    /* Gray */
+    --color-gray-50: #F8FAFC;
+    --color-gray-100: #F1F5F9;
+    --color-gray-200: #E2E8F0;
+    --color-gray-400: #94A3B8;
+    --color-gray-500: #64748B;
+    --color-gray-700: #334155;
+    --color-gray-900: #0F172A;
 
-  /* Background */
-  --color-bg:      #F8FAFC;
-  --color-bg-card: #FFFFFF;
+    /* Background */
+    --color-bg: #F8FAFC;
+    --color-bg-card: #FFFFFF;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+    :root {
+        --background: #0a0a0a;
+        --foreground: #ededed;
+    }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 .custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+    width: 6px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 .chat-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
-}
-.chat-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-.chat-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-}
-.chat-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
-.text-stock-up   { color: #FF2B2B; }
-.text-stock-down { color: #00C24A; }
+.chat-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+.chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.text-stock-up {
+    color: #FF2B2B;
+}
+
+.text-stock-down {
+    color: #00C24A;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@utility animate-float {
+    animation: float 3s ease-in-out infinite;
+}
