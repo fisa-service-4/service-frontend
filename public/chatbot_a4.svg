@@ -1,0 +1,19 @@
+<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="40" cy="72" rx="18" ry="4" fill="#1457C8" opacity="0.15"/>
+  <rect x="18" y="20" width="44" height="38" rx="16" fill="#1457C8"/>
+  <rect x="18" y="20" width="44" height="18" rx="16" fill="#0D3F99" opacity="0.4"/>
+  <rect x="26" y="32" width="11" height="11" rx="4" fill="#fff"/>
+  <circle cx="31" cy="37.5" r="3" fill="#1457C8"/>
+  <circle cx="32" cy="36.5" r="1" fill="#fff"/>
+  <rect x="43" y="32" width="11" height="11" rx="4" fill="#fff"/>
+  <circle cx="48" cy="37.5" r="3" fill="#1457C8"/>
+  <circle cx="49" cy="36.5" r="1" fill="#fff"/>
+  <rect x="31" y="49" width="18" height="4" rx="2" fill="#7FAAEF"/>
+  <rect x="37" y="10" width="6" height="12" rx="3" fill="#1457C8"/>
+  <circle cx="40" cy="9" r="4" fill="#4D9EFF"/>
+  <circle cx="40" cy="9" r="2" fill="#fff"/>
+  <rect x="62" y="30" width="6" height="14" rx="3" fill="#1457C8"/>
+  <rect x="12" y="30" width="6" height="14" rx="3" fill="#1457C8"/>
+  <circle cx="14" cy="44" r="2.5" fill="#4D9EFF"/>
+  <circle cx="66" cy="44" r="2.5" fill="#4D9EFF"/>
+</svg>

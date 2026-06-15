@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Bell } from "lucide-react";
 import BottomNav from "@/components/main/BottomNav";
 import ContractRegisterView from "@/components/main/ContractRegisterView";
@@ -33,9 +34,7 @@ export default function HomePage() {
       .catch((err) => {
         if (!cancelled)
           setError(
-            err instanceof Error
-              ? err.message
-              : "데이터를 불러올 수 없습니다.",
+            err instanceof Error ? err.message : "데이터를 불러올 수 없습니다.",
           );
       })
       .finally(() => {
@@ -104,24 +103,9 @@ export default function HomePage() {
         {/* AI 챗봇 플로팅 버튼 */}
         <button
           onClick={() => router.push("/chat")}
-          className="absolute bottom-6 right-5 z-10 flex flex-col items-center drop-shadow-xl"
+          className="absolute bottom-6 right-5 z-10 drop-shadow-xl animate-float"
         >
-          <div className="relative w-9 h-4 -mb-0.75">
-            <div className="absolute inset-x-1 top-0 h-3 border-t-2 border-l-2 border-r-2 border-primary-300 rounded-t-full" />
-            <div className="absolute left-0 top-2 w-1.5 h-2 bg-primary-300 rounded-sm" />
-            <div className="absolute right-0 top-2 w-1.5 h-2 bg-primary-300 rounded-sm" />
-          </div>
-          <div className="w-11 h-11 rounded-full bg-linear-to-br from-primary-300 to-primary-700 flex flex-col items-center justify-center shadow-lg">
-            <div className="flex gap-2 mb-1">
-              <div className="w-1 h-1.5 bg-white rounded-full" />
-              <div className="w-1 h-1.5 bg-white rounded-full" />
-            </div>
-            <div className="w-4 h-2 border-b-2 border-white rounded-b-full" />
-          </div>
-          <div className="self-end mr-1 -mt-1.25 flex items-center gap-0.5">
-            <div className="w-3 h-0.5 bg-primary-300 rounded-full" />
-            <div className="w-1.5 h-1.5 rounded-full bg-primary-300" />
-          </div>
+          <Image src="/chatbot_a4.svg" alt="AI 챗봇" width={64} height={64} />
         </button>
 
         {showNotification && (

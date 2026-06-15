@@ -17,6 +17,22 @@ import BottomNav from "@/components/main/BottomNav";
 
 const fmt = (n: number) => `${n.toLocaleString()} 원`;
 
+function fmtKST(dateStr: string): string {
+  const utcStr =
+    dateStr.endsWith("Z") || dateStr.includes("+") ? dateStr : dateStr + "Z";
+  const d = new Date(utcStr);
+  return d.toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}
+
 const TAX_RATE: Record<string, number> = {
   BUSINESS: 0.033,
   ETC: 0.033,
@@ -335,7 +351,7 @@ export default function ContractDetailView({ contractId }: Props) {
           {/* 입금일: MATCHED 또는 TBC case 3 (불일치) */}
           {(matching?.matchingStatus === "MATCHED" || tbcMismatch) &&
             matching?.matchedAt && (
-              <Row label="입금일 (거래 시간)" value={matching.matchedAt} />
+              <Row label="입금일 (거래 시간)" value={fmtKST(matching.matchedAt)} />
             )}
 
           {/* 완료일: MANUAL_MATCHED */}
