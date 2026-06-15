@@ -227,7 +227,7 @@ function StockOrderContent() {
             </div>
             <div className="text-right">
               <p className="text-base font-bold text-gray-900">{fmtWon(stockPrice)}</p>
-              <p className={`text-xs font-semibold mt-0.5 flex items-center justify-end gap-0.5 ${up ? 'text-success' : 'text-red-500'}`}>
+              <p className={`text-xs font-semibold mt-0.5 flex items-center justify-end gap-0.5 ${up ? 'text-error' : 'text-success'}`}>
                 {up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {up ? '+' : ''}{changeRate}%
               </p>

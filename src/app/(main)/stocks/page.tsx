@@ -281,13 +281,13 @@ function StocksContent() {
                     <div className="flex justify-between">
                         <div>
                             <p className="text-xs text-gray-500">평가손익</p>
-                            <p className={`text-xl font-bold mt-1 ${profitUp ? 'text-success' : 'text-error'}`}>
+                            <p className={`text-xl font-bold mt-1 ${profitUp ? 'text-error' : 'text-success'}`}>
                                 {loading ? '-' : signWon(profitLoss)}
                             </p>
                         </div>
                         <div className="text-right">
                             <p className="text-xs text-gray-500">수익률 (일간)</p>
-                            <p className={`text-xl font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-success' : 'text-error'}`}>
+                            <p className={`text-xl font-bold mt-1 flex items-center justify-end gap-1 ${returns.dailyReturnRate >= 0 ? 'text-error' : 'text-success'}`}>
                                 {returns.dailyReturnRate >= 0
                                     ? <TrendingUp size={14}/>
                                     : <TrendingDown size={14}/>}
@@ -322,7 +322,7 @@ function StocksContent() {
                                             <div className="flex items-center gap-3">
                                                 <div className="text-right">
                                                     <p className="text-sm font-bold text-gray-900">{fmtWon(s.currentPrice)}</p>
-                                                    <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-success' : 'text-error'}`}>
+                                                    <p className={`text-xs font-semibold mt-0.5 ${up ? 'text-error' : 'text-success'}`}>
                                                         {signRate(s.changeRate)}
                                                     </p>
                                                 </div>
@@ -391,7 +391,7 @@ function StocksContent() {
                                                 <div className="flex justify-between items-start">
                                                     <div>
                                                         <p className="text-xs text-gray-400">평가손익</p>
-                                                        <p className={`text-sm font-bold mt-1 ${up ? 'text-success' : 'text-error'}`}>
+                                                        <p className={`text-sm font-bold mt-1 ${up ? 'text-error' : 'text-success'}`}>
                                                             {signWon(s.unrealizedProfit)} ({signRate(s.profitRate)})
                                                         </p>
                                                     </div>
@@ -441,7 +441,7 @@ function StocksContent() {
                                                         <p className="text-sm font-bold text-gray-900 tracking-tight">
                                                             {fmtWon(currentPrice)}
                                                         </p>
-                                                        <p className={`text-xs font-bold mt-1 tracking-tight ${up ? 'text-success' : 'text-error'}`}>
+                                                        <p className={`text-xs font-bold mt-1 tracking-tight ${up ? 'text-error' : 'text-success'}`}>
                                                             {signRate(changeRate)}
                                                         </p>
                                                     </div>
