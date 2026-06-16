@@ -50,34 +50,33 @@ export default function MypageView() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
-
+    <div className="flex flex-col h-screen bg-bg">
 
       {/* 헤더 */}
-      <div className="px-5 py-3 bg-gray-50 shrink-0" />
+      <div className="px-5 py-3 bg-bg shrink-0" />
 
       <div className="flex-1 overflow-y-auto">
 
         {/* 프로필 섹션 */}
-        <div className="bg-slate-900 px-5 pt-4 pb-4 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-slate-700 border-2 border-primary-500 flex items-center justify-center mb-3">
-            <User size={32} className="text-primary-300" />
+        <div className="bg-bg-card px-5 pt-6 pb-6 flex flex-col items-center border-b border-gray-100">
+          <div className="w-16 h-16 rounded-full bg-primary-50 border border-primary-100 flex items-center justify-center mb-3">
+            <User size={28} className="text-primary-500" />
           </div>
-          <p className="text-white font-bold text-lg mb-1">{user?.userName ?? '-'}</p>
-          <p className="text-slate-400 text-sm mb-3">{user?.email ?? '-'}</p>
+          <p className="text-gray-900 font-bold text-lg mb-0.5">{user?.userName ?? '-'}</p>
+          <p className="text-gray-400 text-sm mb-3">{user?.email ?? '-'}</p>
           {user && (
-            <div className="flex gap-2 mb-5">
+            <div className="flex gap-2">
               {user.jobType && (
-                <span className="bg-primary-500/20 text-primary-300 text-xs px-3 py-1 rounded-full border border-primary-500/30">{user.jobType}</span>
+                <span className="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full">{user.jobType}</span>
               )}
               {user.freelancerYn && (
-                <span className="bg-primary-500/20 text-primary-300 text-xs px-3 py-1 rounded-full border border-primary-500/30">3.3% 적용</span>
+                <span className="bg-primary-50 text-primary-500 text-xs px-3 py-1 rounded-full border border-primary-100">3.3% 적용</span>
               )}
             </div>
           )}
         </div>
 
-        <div className="px-4 py-5 space-y-5">
+        <div className="px-4 py-5 space-y-5 bg-bg">
 
           {/* 계정 관리 */}
           <div>
