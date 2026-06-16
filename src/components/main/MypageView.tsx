@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bell, ChevronRight, User } from 'lucide-react';
+import {
+  Bell, ChevronRight, User,
+  Landmark, KeyRound, Wallet, Sparkles,
+  Megaphone, Info, LogOut, UserX,
+} from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
-import NotificationPanel from '@/components/main/NotificationPanel';
 import { userApi } from '@/api/user';
 import { tokenUtils } from '@/utils/token';
 import { apiRequest } from '@/utils/apiClient';
@@ -14,7 +17,6 @@ export default function MypageView() {
   const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [alarmOn, setAlarmOn] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
@@ -50,35 +52,29 @@ export default function MypageView() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
 
+
       {/* 헤더 */}
-      <div className="flex items-center justify-end px-5 py-3 bg-gray-50 shrink-0">
-        <button className="p-1" onClick={() => setShowNotification(true)}>
-          <Bell size={22} className="text-gray-800" />
-        </button>
-      </div>
+      <div className="px-5 py-3 bg-gray-50 shrink-0" />
 
       <div className="flex-1 overflow-y-auto">
 
         {/* 프로필 섹션 */}
         <div className="bg-slate-900 px-5 pt-4 pb-4 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-slate-700 border-2 border-sky-500 flex items-center justify-center mb-3">
-            <User size={32} className="text-sky-400" />
+          <div className="w-16 h-16 rounded-full bg-slate-700 border-2 border-primary-500 flex items-center justify-center mb-3">
+            <User size={32} className="text-primary-300" />
           </div>
           <p className="text-white font-bold text-lg mb-1">{user?.userName ?? '-'}</p>
           <p className="text-slate-400 text-sm mb-3">{user?.email ?? '-'}</p>
           {user && (
             <div className="flex gap-2 mb-5">
               {user.jobType && (
-                <span className="bg-sky-500/20 text-sky-400 text-xs px-3 py-1 rounded-full border border-sky-500/30">{user.jobType}</span>
+                <span className="bg-primary-500/20 text-primary-300 text-xs px-3 py-1 rounded-full border border-primary-500/30">{user.jobType}</span>
               )}
               {user.freelancerYn && (
-                <span className="bg-sky-500/20 text-sky-400 text-xs px-3 py-1 rounded-full border border-sky-500/30">3.3% 적용</span>
+                <span className="bg-primary-500/20 text-primary-300 text-xs px-3 py-1 rounded-full border border-primary-500/30">3.3% 적용</span>
               )}
             </div>
           )}
-          <button className="w-full py-2.5 bg-sky-500 text-white text-sm font-semibold rounded-xl">
-            프로필 편집
-          </button>
         </div>
 
         <div className="px-4 py-5 space-y-5">
@@ -91,31 +87,31 @@ export default function MypageView() {
                 onClick={() => router.push('/mypage/accounts')}
                 className="w-full flex items-center gap-3 px-4 py-4"
               >
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">🏦</span>
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <Landmark size={18} className="text-primary-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">연동 계좌 관리</p>
                   <p className="text-xs text-gray-400">입금/월급/증권/비상금 통장 계좌 설정</p>
                 </div>
-                <ChevronRight size={18} className="text-sky-500" />
+                <ChevronRight size={18} className="text-primary-500" />
               </button>
               <button
                 onClick={() => router.push('/mypage/pin')}
                 className="w-full flex items-center gap-3 px-4 py-4"
               >
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">🔒</span>
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <KeyRound size={18} className="text-primary-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">PIN 변경</p>
                   <p className="text-xs text-gray-400">6자리 PIN 관리</p>
                 </div>
-                <ChevronRight size={18} className="text-sky-500" />
+                <ChevronRight size={18} className="text-primary-500" />
               </button>
               <div className="w-full flex items-center gap-3 px-4 py-4">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">🔔</span>
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <Bell size={18} className="text-primary-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">알림 설정</p>
@@ -123,7 +119,7 @@ export default function MypageView() {
                 </div>
                 <button
                   onClick={handleAlarmToggle}
-                  className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${alarmOn ? 'bg-sky-500 text-white' : 'bg-gray-200 text-gray-500'}`}
+                  className={`px-3 py-1 rounded-full text-xs font-bold transition-colors ${alarmOn ? 'bg-primary-500 text-white' : 'bg-gray-200 text-gray-500'}`}
                 >
                   {alarmOn ? 'ON' : 'OFF'}
                 </button>
@@ -139,24 +135,24 @@ export default function MypageView() {
                 onClick={() => router.push('/mypage/virtual-salary')}
                 className="w-full flex items-center gap-3 px-4 py-4"
               >
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">💳</span>
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <Wallet size={18} className="text-primary-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">가상 월급 설정</p>
                   <p className="text-xs text-gray-400">목표 금액/이체일/분배 비율</p>
                 </div>
-                <ChevronRight size={18} className="text-sky-500" />
+                <ChevronRight size={18} className="text-primary-500" />
               </button>
               <button className="w-full flex items-center gap-3 px-4 py-4">
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">✨</span>
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <Sparkles size={18} className="text-primary-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">AI 브리핑 설정</p>
                   <p className="text-xs text-gray-400">수신 시간/항목 설정</p>
                 </div>
-                <ChevronRight size={18} className="text-sky-500" />
+                <ChevronRight size={18} className="text-primary-500" />
               </button>
             </div>
           </div>
@@ -165,23 +161,27 @@ export default function MypageView() {
           <div>
             <p className="text-sm font-semibold text-gray-500 mb-2 px-1">고객 지원</p>
             <div className="bg-white rounded-2xl divide-y divide-gray-100">
-              {[
-                { icon: '📢', label: '공지사항', sub: '' },
-                { icon: '❓', label: 'FAQ', sub: '' },
-                { icon: '💬', label: '1:1 문의', sub: '' },
-                { icon: 'ℹ️', label: '앱 정보', sub: '버전 1.0.0' },
-              ].map(({ icon, label, sub }) => (
-                <button key={label} className="w-full flex items-center gap-3 px-4 py-4">
-                  <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                    <span className="text-lg">{icon}</span>
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-semibold text-gray-900">{label}</p>
-                    {sub && <p className="text-xs text-gray-400">{sub}</p>}
-                  </div>
-                  <ChevronRight size={18} className="text-sky-500" />
-                </button>
-              ))}
+              <button
+                onClick={() => router.push('/mypage/notice')}
+                className="w-full flex items-center gap-3 px-4 py-4"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <Megaphone size={18} className="text-primary-500" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-gray-900">공지사항</p>
+                </div>
+                <ChevronRight size={18} className="text-primary-500" />
+              </button>
+              <div className="w-full flex items-center gap-3 px-4 py-4">
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <Info size={18} className="text-primary-500" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-gray-900">앱 정보</p>
+                  <p className="text-xs text-gray-400">버전 1.0.0</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -193,20 +193,20 @@ export default function MypageView() {
                 onClick={() => setShowLogoutModal(true)}
                 className="w-full flex items-center gap-3 px-4 py-4"
               >
-                <div className="w-9 h-9 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center shrink-0">
-                  <span className="text-lg">🚪</span>
+                <div className="w-9 h-9 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
+                  <LogOut size={18} className="text-primary-500" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-gray-900">로그아웃</p>
                 </div>
-                <ChevronRight size={18} className="text-sky-500" />
+                <ChevronRight size={18} className="text-primary-500" />
               </button>
               <button
                 onClick={() => router.push('/mypage/withdraw')}
                 className="w-full flex items-center gap-3 px-4 py-4"
               >
                 <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
-                  <span className="text-lg">🗑️</span>
+                  <UserX size={18} className="text-red-400" />
                 </div>
                 <div className="flex-1 text-left">
                   <p className="text-sm font-semibold text-red-500">회원 탈퇴</p>
@@ -218,8 +218,6 @@ export default function MypageView() {
 
         </div>
       </div>
-
-      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
 
       {showLogoutModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -237,7 +235,7 @@ export default function MypageView() {
               <button
                 onClick={handleLogoutConfirm}
                 disabled={logoutLoading}
-                className="flex-1 py-3 bg-sky-500 text-white text-sm font-semibold rounded-xl disabled:opacity-60"
+                className="flex-1 py-3 bg-primary-500 text-white text-sm font-semibold rounded-xl disabled:opacity-60"
               >
                 {logoutLoading ? '처리 중...' : '네'}
               </button>

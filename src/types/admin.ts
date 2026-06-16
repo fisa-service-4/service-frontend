@@ -9,9 +9,9 @@ export interface StatCard {
 
 export interface ErrorLog {
   id: number;
-  message: string;
-  time: string;
-  severity: 'high' | 'medium' | 'low';
+  errorLevel: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
+  errorMessage: string;
+  createdAt: string;
 }
 
 export interface ApiStatus {

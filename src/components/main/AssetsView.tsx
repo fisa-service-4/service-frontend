@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Bell } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccounts, getAccountsWithRoles } from '@/api/bank';
 import { connectMyData } from '@/api/mydata';
@@ -9,10 +9,18 @@ import type { BankAccount } from '@/types/bank';
 import { getStockAccounts, getCashBalance } from '@/api/stock';
 import type { StockAccount } from '@/api/stock';
 import TransferView from '@/components/main/TransferView';
-import NotificationPanel from '@/components/main/NotificationPanel';
+import BankAccountDetailView from '@/components/main/BankAccountDetailView';
 
 type AssetTab = 'all' | 'bank' | 'stock';
-type SubView = 'overview' | 'transfer' | 'connect';
+type SubView = 'overview' | 'transfer' | 'connect' | 'accountDetail';
+
+interface SelectedBankAccount {
+  accountId: number;
+  accountName: string;
+  bankCode: string;
+  accountNumber: string;
+  balance: number | null;
+}
 
 interface StockAccountWithBalance extends StockAccount {
   cashBalance: number;
@@ -60,9 +68,9 @@ export default function AssetsView() {
   const [subView, setSubView]                   = useState<SubView>('overview');
   const [activeTab, setActiveTab]               = useState<AssetTab>('all');
   const [accounts, setAccounts]                 = useState<BankAccount[]>([]);
+  const [selectedAccount, setSelectedAccount]   = useState<SelectedBankAccount | null>(null);
 
   const [loading, setLoading]                   = useState(true);
-  const [showNotification, setShowNotification] = useState(false);
   const [stockAccounts, setStockAccounts]       = useState<StockAccountWithBalance[]>([]);
   const [connectLoading, setConnectLoading]     = useState(false);
   const [connectError, setConnectError]         = useState('');
@@ -126,6 +134,15 @@ export default function AssetsView() {
     );
   }
 
+  if (subView === 'accountDetail' && selectedAccount) {
+    return (
+      <BankAccountDetailView
+        account={selectedAccount}
+        onBack={() => setSubView('overview')}
+      />
+    );
+  }
+
   if (subView === 'connect') {
     return (
       <div className="flex flex-col h-screen bg-bg">
@@ -173,13 +190,9 @@ export default function AssetsView() {
   return (
     <div className="flex flex-col h-screen bg-bg">
       <div className="flex-1 flex flex-col relative overflow-hidden">
-        
+
         {/* 헤더 */}
-        <div className="flex items-center justify-end px-5 py-4 shrink-0">
-          <button className="p-1" onClick={() => setShowNotification(true)}>
-            <Bell size={22} className="text-gray-800" />
-          </button>
-        </div>
+        <div className="px-5 py-3 shrink-0" />
 
         <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
           
@@ -197,7 +210,7 @@ export default function AssetsView() {
               </div>
             ) : (
               <>
-                <p className="text-xs text-gray-400 mb-1">총 자산</p>
+                <p className="text-xs text-gray-900 mb-1">총 자산</p>
                 <p className="text-3xl font-bold text-gray-900 mb-2">
                   {formatKRW(totalAsset)}
                 </p>
@@ -206,13 +219,13 @@ export default function AssetsView() {
                 </span>
                 <div className="flex gap-3">
                   <div className="flex-1 bg-gray-100 rounded-xl p-3">
-                    <p className="text-xs text-gray-400 mb-1">은행 잔액</p>
+                    <p className="text-xs text-gray-900 mb-1">은행 잔액</p>
                     <p className="text-sm font-bold text-gray-900">
                       {formatKRW(bankTotal)}
                     </p>
                   </div>
                   <div className="flex-1 bg-gray-100 rounded-xl p-3">
-                    <p className="text-xs text-gray-400 mb-1">증권 예수금</p>
+                    <p className="text-xs text-gray-900 mb-1">증권 예수금</p>
                     <p className="text-sm font-bold text-gray-900">
                       {formatKRW(stockTotal)}
                     </p>
@@ -225,32 +238,30 @@ export default function AssetsView() {
           {/* ── 자산 구성 ── */}
           <div>
             <h2 className="text-base font-bold text-gray-900 mb-3">자산 구성</h2>
-            <div className="bg-bg-card shadow-md rounded-2xl p-5 space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-sky-500 shrink-0" />
-                <span className="text-sm text-gray-700 w-8 shrink-0">은행</span>
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-sky-500 rounded-full transition-all duration-500"
-                    style={{ width: `${bankRatio}%` }}
-                  />
-                </div>
-                <span className="text-sm font-semibold text-gray-700 w-10 text-right">
-                  {bankRatio}%
-                </span>
+            <div className="bg-bg-card shadow-md rounded-2xl p-5 space-y-3">
+              {/* 스택 바 */}
+              <div className="flex h-3 rounded-full overflow-hidden bg-gray-200">
+                <div
+                  className="transition-all duration-500"
+                  style={{ width: `${bankRatio}%`, backgroundColor: '#1b85ff' }}
+                />
+                <div
+                  className="transition-all duration-500"
+                  style={{ width: `${stockRatio}%`, backgroundColor: '#d5ebff' }}
+                />
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full bg-sky-200 shrink-0" />
-                <span className="text-sm text-gray-700 w-8 shrink-0">증권</span>
-                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-sky-300 rounded-full transition-all duration-500"
-                    style={{ width: `${stockRatio}%` }}
-                  />
+              {/* 범례 */}
+              <div className="flex items-center gap-5">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: '#1b85ff' }} />
+                  <span className="text-sm text-gray-700">은행</span>
+                  <span className="text-sm font-semibold text-gray-900">{bankRatio}%</span>
                 </div>
-                <span className="text-sm font-semibold text-gray-700 w-10 text-right">
-                  {stockRatio}%
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: '#d5ebff' }} />
+                  <span className="text-sm text-gray-700">증권</span>
+                  <span className="text-sm font-semibold text-gray-900">{stockRatio}%</span>
+                </div>
               </div>
             </div>
           </div>
@@ -286,52 +297,65 @@ export default function AssetsView() {
               </div>
 
               {hasAccounts || stockAccounts.length > 0 || loading ? (
-                <div className="bg-bg-card shadow-md rounded-2xl p-2 space-y-2">
+                <div className="bg-bg-card shadow-md rounded-2xl overflow-hidden">
                   {loading ? (
                     <>
-                      <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
-                      <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
+                      <div className="px-4 py-3 bg-gray-200 h-16 animate-pulse" />
+                      <div className="border-t border-gray-100" />
+                      <div className="px-4 py-3 bg-gray-200 h-16 animate-pulse" />
                     </>
                   ) : (
-                    <>
-                      {bankOnlyAccounts.map((account) => (
+                    [...bankOnlyAccounts.map((account, idx) => (
+                      <div key={`bank-${account.accountId}`}>
                         <div
-                          key={`bank-${account.accountId}`}
-                          className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3"
+                          className="flex items-end justify-between px-4 py-5 cursor-pointer active:bg-gray-50"
+                          onClick={() => {
+                            setSelectedAccount({
+                              accountId: account.accountId,
+                              accountName: account.accountName,
+                              bankCode: account.bankCode,
+                              accountNumber: account.accountNumber,
+                              balance: account.balance,
+                            });
+                            setSubView('accountDetail');
+                          }}
                         >
                           <div>
                             <p className="text-sm font-bold text-gray-900">
-                              {BANK_NAME[account.bankCode] ?? account.bankCode}
+                              {BANK_NAME[account.bankCode] ?? account.bankCode}({ACCOUNT_ROLE_LABEL[account.accountRole ?? ''] ?? '입출금'})
                             </p>
-                            <p className="text-xs font-medium text-gray-900 mt-0.5">
-                              {ACCOUNT_ROLE_LABEL[account.accountRole ?? ''] ?? '입출금'}{' '}
-                              · {account.accountNumber}
+                            <p className="text-xs text-gray-900 mt-0.5">
+                              계좌번호: {account.accountNumber}
                             </p>
                           </div>
                           <p className="text-sm font-bold text-gray-900">
                             {formatKRW(account.balance)}
                           </p>
                         </div>
-                      ))}
-                      {stockAccounts.map((account) => (
-                        <div
-                          key={`stock-${account.accountId}`}
-                          className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3"
-                        >
+                        {(idx < bankOnlyAccounts.length - 1 || stockAccounts.length > 0) && (
+                          <div className="border-t border-gray-100" />
+                        )}
+                      </div>
+                    )), ...stockAccounts.map((account, idx) => (
+                      <div key={`stock-${account.accountId}`}>
+                        <div className="flex items-end justify-between px-4 py-5">
                           <div>
                             <p className="text-sm font-bold text-gray-900">
-                              {BANK_NAME[account.bankCode] ?? account.bankCode}
+{BANK_NAME[account.bankCode] ?? account.bankCode}({account.accountName.split(' ').slice(1).join(' ') || account.accountName})
                             </p>
-                            <p className="text-xs font-medium text-gray-900 mt-0.5">
-                              {account.accountName} · {account.accountNumber}
+                            <p className="text-xs text-gray-900 mt-0.5">
+                              계좌번호: {account.accountNumber}
                             </p>
                           </div>
                           <p className="text-sm font-bold text-gray-900">
                             {formatKRW(account.cashBalance)}
                           </p>
                         </div>
-                      ))}
-                    </>
+                        {idx < stockAccounts.length - 1 && (
+                          <div className="border-t border-gray-100" />
+                        )}
+                      </div>
+                    ))]
                   )}
                 </div>
               ) : (
@@ -356,43 +380,65 @@ export default function AssetsView() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-base font-bold text-gray-900">연동 계좌</h2>
-                <button
-                  onClick={() => setSubView('transfer')}
-                  className="bg-gray-100 text-gray-700 text-sm font-medium px-4 py-1.5 rounded-xl"
-                >
-                  이체
-                </button>
               </div>
 
               {hasAccounts || loading ? (
-                <div className="bg-bg-card shadow-md rounded-2xl p-2 space-y-2">
+                <div className="bg-bg-card shadow-md rounded-2xl overflow-hidden">
                   {loading ? (
                     <>
-                      <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
-                      <div className="bg-gray-200 rounded-xl h-16 animate-pulse" />
+                      <div className="px-4 py-3 bg-gray-200 h-16 animate-pulse" />
+                      <div className="border-t border-gray-100" />
+                      <div className="px-4 py-3 bg-gray-200 h-16 animate-pulse" />
                     </>
                   ) : bankOnlyAccounts.length === 0 ? (
                     <p className="text-center text-sm text-gray-400 py-8">
                       해당 유형의 계좌가 없습니다.
                     </p>
                   ) : (
-                    bankOnlyAccounts.map((account) => (
-                      <div
-                        key={account.accountId}
-                        className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3"
-                      >
-                        <div>
-                          <p className="text-sm font-bold text-gray-900">
-                            {BANK_NAME[account.bankCode] ?? account.bankCode}
-                          </p>
-                          <p className="text-xs font-medium text-gray-900 mt-0.5">
-                            {ACCOUNT_ROLE_LABEL[account.accountRole ?? ''] ?? '입출금'}{' '}
-                            · {account.accountNumber}
-                          </p>
+                    bankOnlyAccounts.map((account, idx) => (
+                      <div key={account.accountId}>
+                        <div
+                          className="px-4 py-5 cursor-pointer active:bg-gray-50"
+                          onClick={() => {
+                            setSelectedAccount({
+                              accountId: account.accountId,
+                              accountName: account.accountName,
+                              bankCode: account.bankCode,
+                              accountNumber: account.accountNumber,
+                              balance: account.balance,
+                            });
+                            setSubView('accountDetail');
+                          }}
+                        >
+                          {/* 1행: 은행이름(역할) 계좌번호 */}
+                          <div className="flex items-center gap-2 mb-2">
+                            <p className="text-sm font-bold text-gray-900">
+                              {BANK_NAME[account.bankCode] ?? account.bankCode}({ACCOUNT_ROLE_LABEL[account.accountRole ?? ''] ?? '입출금'})
+                            </p>
+                            <p className="text-xs text-gray-900">
+                              {account.accountNumber}
+                            </p>
+                          </div>
+                          {/* 2행: 금액 + 이체 버튼 */}
+                          <div className="flex items-center justify-between">
+                            <p className="text-sm font-bold text-gray-900">
+                              {formatKRW(account.balance)}
+                            </p>
+                            <button
+                              className="text-xs font-medium px-3 py-1.5 rounded-lg"
+                              style={{ backgroundColor: '#d5ebff', color: '#000000' }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSubView('transfer');
+                              }}
+                            >
+                              이체
+                            </button>
+                          </div>
                         </div>
-                        <p className="text-sm font-bold text-gray-900">
-                          {formatKRW(account.balance)}
-                        </p>
+                        {idx < bankOnlyAccounts.length - 1 && (
+                          <div className="border-t border-gray-100" />
+                        )}
                       </div>
                     ))
                   )}
@@ -418,28 +464,30 @@ export default function AssetsView() {
           {activeTab === 'stock' && (
             <div>
               <h2 className="text-base font-bold text-gray-900 mb-3">연동계좌</h2>
-              <div className="bg-bg-card shadow-md rounded-2xl p-2 space-y-2">
+              <div className="bg-bg-card shadow-md rounded-2xl overflow-hidden">
                 {stockAccounts.length === 0 ? (
                   <p className="text-center text-sm text-gray-400 py-8">
                     연동된 증권 계좌가 없습니다.
                   </p>
                 ) : (
-                  stockAccounts.map((account) => (
-                    <div
-                      key={account.accountId}
-                      className="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-3"
-                    >
-                      <div>
-                        <p className="text-xs font-semibold text-gray-900">
-                          {BANK_NAME[account.bankCode] ?? account.bankCode}
-                        </p>
-                        <p className="text-sm font-medium text-gray-800 mt-0.5">
-                          {account.accountName} · {account.accountNumber}
+                  stockAccounts.map((account, idx) => (
+                    <div key={account.accountId}>
+                      <div className="flex items-center justify-between px-4 py-3">
+                        <div>
+                          <p className="text-sm font-bold text-gray-900">
+                            {BANK_NAME[account.bankCode] ?? account.bankCode}({account.accountName.split(' ').slice(1).join(' ')})
+                          </p>
+                          <p className="text-xs text-gray-900 mt-0.5">
+                            계좌번호: {account.accountNumber}
+                          </p>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">
+                          {formatKRW(account.cashBalance)}
                         </p>
                       </div>
-                      <p className="text-sm font-bold text-gray-900">
-                        {formatKRW(account.cashBalance)}
-                      </p>
+                      {idx < stockAccounts.length - 1 && (
+                        <div className="border-t border-gray-100" />
+                      )}
                     </div>
                   ))
                 )}
@@ -450,7 +498,6 @@ export default function AssetsView() {
         </div>
       </div>
 
-      {showNotification && <NotificationPanel onClose={() => setShowNotification(false)} />}
       <BottomNav />
     </div>
   );

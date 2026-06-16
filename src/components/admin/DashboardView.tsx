@@ -9,7 +9,6 @@ import ApiStatusList from './ApiStatusList';
 import AdminActivityList from './AdminActivityList';
 import { adminApiRequest } from '@/utils/apiClient';
 
-const recentErrors: ErrorLog[]         = [];
 const adminActivities: AdminActivity[] = [];
 
 const MONTH_NAMES = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
@@ -17,6 +16,17 @@ const DAY_NAMES   = ['일','월','화','수','목','금','토'];
 
 interface PagedResponse {
   totalElements: number;
+}
+
+interface ApiErrorLog {
+  errorLogId: number;
+  errorLevel: 'INFO' | 'WARN' | 'ERROR' | 'CRITICAL';
+  errorMessage: string;
+  createdAt: string;
+}
+
+interface ErrorLogPagedResponse {
+  content: ApiErrorLog[];
 }
 
 interface DashboardStats {
@@ -32,12 +42,14 @@ interface DashboardStats {
 interface DashboardViewProps {
   selectedDate: string;
   onDateChange?: (date: string) => void;
+  onNavigateToErrorLog?: () => void;
 }
 
-export default function DashboardView({ selectedDate, onDateChange }: DashboardViewProps) {
+export default function DashboardView({ selectedDate, onDateChange, onNavigateToErrorLog }: DashboardViewProps) {
   const [totalUsers, setTotalUsers]       = useState<string>('-');
   const [stats, setStats]                 = useState<DashboardStats | null>(null);
   const [apiStatuses, setApiStatuses]     = useState<ApiStatus[]>([]);
+  const [recentErrors, setRecentErrors]   = useState<ErrorLog[]>([]);
   const [showApiDetail, setShowApiDetail] = useState(false);
   const [showCalendar, setShowCalendar]   = useState(false);
   const [calYear, setCalYear]         = useState(() => new Date(selectedDate).getFullYear());
@@ -52,6 +64,19 @@ export default function DashboardView({ selectedDate, onDateChange }: DashboardV
 
       adminApiRequest<DashboardStats>(`/admin/monitoring/dashboard?date=${selectedDate}`)
         .then((data) => setStats(data))
+        .catch(() => {});
+
+      adminApiRequest<ErrorLogPagedResponse>('/admin/logs/error?page=0&size=5')
+        .then((data) =>
+          setRecentErrors(
+            data.content.map((e) => ({
+              id: e.errorLogId,
+              errorLevel: e.errorLevel,
+              errorMessage: e.errorMessage,
+              createdAt: e.createdAt,
+            }))
+          )
+        )
         .catch(() => {});
     };
 
@@ -241,7 +266,7 @@ export default function DashboardView({ selectedDate, onDateChange }: DashboardV
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-5">
-          <ErrorLogList errors={recentErrors} />
+          <ErrorLogList errors={recentErrors} onShowDetail={onNavigateToErrorLog} />
           <ApiStatusList statuses={apiStatuses} onShowDetail={() => setShowApiDetail(true)} />
         </div>
 

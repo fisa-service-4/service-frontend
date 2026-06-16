@@ -1,32 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { signupStore } from '@/store/signupStore';
 
-const CARRIERS: { label: string; value: string }[] = [
-  { label: 'SKT', value: 'SKT' },
-  { label: 'KT',  value: 'KT'  },
-  { label: 'LG U+', value: 'LGU' },
+const CARRIERS = [
+  { label: 'SKT',   value: 'SKT'  },
+  { label: 'KT',    value: 'KT'   },
+  { label: 'LG U+', value: 'LGU'  },
 ];
+
+const STEPS = ['기본 정보', '본인 인증', '인증 확인'];
 
 export default function SignupPhonePage() {
   const router = useRouter();
-  const [userName, setUserName]     = useState('');
-  const [birthDate, setBirthDate]   = useState('');
+  const [userName, setUserName]       = useState('');
+  const [birthDate, setBirthDate]     = useState('');
   const [genderDigit, setGenderDigit] = useState('');
-  const [carrier, setCarrier]       = useState('');
-  const [phone, setPhone]           = useState('');
-  const [error, setError]           = useState('');
-  const [loading, setLoading]       = useState(false);
+  const [carrier, setCarrier]         = useState('');
+  const [carrierOpen, setCarrierOpen] = useState(false);
+  const [phone, setPhone]             = useState('');
+  const [error, setError]             = useState('');
+  const [loading, setLoading]         = useState(false);
+  const carrierRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (carrierRef.current && !carrierRef.current.contains(e.target as Node)) {
+        setCarrierOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function validate() {
-    if (!userName.trim())       return '이름을 입력해주세요.';
-    if (birthDate.length !== 6) return '생년월일 6자리를 입력해주세요.';
-    if (!genderDigit)           return '성별 자리를 입력해주세요.';
-    if (!carrier)               return '통신사를 선택해주세요.';
-    if (phone.replace(/\D/g, '').length < 10) return '올바른 휴대폰번호를 입력해주세요.';
+    if (!userName.trim())                       return '이름을 입력해주세요.';
+    if (birthDate.length !== 6)                 return '생년월일 6자리를 입력해주세요.';
+    if (!genderDigit)                           return '성별 자리(1자리)를 입력해주세요.';
+    if (!carrier)                               return '통신사를 선택해주세요.';
+    if (phone.replace(/\D/g, '').length < 10)  return '올바른 휴대폰번호를 입력해주세요.';
     return '';
   }
 
@@ -37,17 +52,21 @@ export default function SignupPhonePage() {
 
     const phoneNumber    = phone.replace(/\D/g, '');
     const residentNumber = birthDate + genderDigit;
-    const selectedCarrier = CARRIERS.find((c) => c.label === carrier)?.value ?? carrier;
 
     setLoading(true);
     try {
       await authApi.phoneSend({
         name:           userName.trim(),
         residentNumber,
-        telecom:        selectedCarrier,
+        telecom:        carrier,
         phoneNumber,
       });
-      signupStore.save({ userName: userName.trim(), phoneNumber, residentNumber, telecom: selectedCarrier });
+      signupStore.save({
+        userName: userName.trim(),
+        phoneNumber,
+        residentNumber,
+        telecom: carrier,
+      });
       router.push('/signup/verify');
     } catch (err) {
       setError(err instanceof Error ? err.message : '인증번호 전송에 실패했습니다. 다시 시도해주세요.');
@@ -57,86 +76,122 @@ export default function SignupPhonePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="h-12 bg-[#131329]" />
+    <div className="flex flex-col min-h-screen bg-bg">
+      {/* 상단 헤더 */}
+      <div className="h-14 bg-[#131329] flex items-center px-4">
+        <button type="button" onClick={() => router.push('/signup')} className="text-white p-1">
+          <ChevronLeft size={24} />
+        </button>
+      </div>
 
-      <div className="flex-1 px-6 pt-8 pb-6">
-        <h1 className="text-xl font-bold text-gray-900 mb-8">휴대폰 본인 인증</h1>
+      <div className="flex-1 px-6 pt-6 pb-4 overflow-y-auto">
+        {/* 진행 바 */}
+        <div className="flex gap-1.5 mb-1">
+          {STEPS.map((_, i) => (
+            <div
+              key={i}
+              className={`h-1 flex-1 rounded-full transition-colors ${i <= 1 ? 'bg-primary-500' : 'bg-gray-200'}`}
+            />
+          ))}
+        </div>
+        <p className="text-xs text-gray-400 mb-6">2 / {STEPS.length}</p>
+
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">본인 인증</h1>
+        <p className="text-sm text-gray-400 mb-7">휴대폰으로 본인 확인을 진행합니다</p>
 
         <div className="flex flex-col gap-5">
           {/* 이름 */}
-          <div>
-            <label className="block text-xs text-gray-500 mb-1.5">이름</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-500 font-medium">이름</label>
             <input
               type="text"
-              placeholder="이름"
+              placeholder="실명을 입력하세요"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="w-full h-14 border border-gray-200 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none focus:border-gray-400"
+              className="w-full h-14 bg-gray-100 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none"
             />
           </div>
 
           {/* 주민등록번호 앞 7자리 */}
-          <div>
-            <label className="block text-xs text-gray-500 mb-1.5">주민등록번호 앞 7자리</label>
-            <div className="flex items-center h-14 border border-gray-200 rounded-xl px-4 gap-2">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs text-gray-500 font-medium">주민등록번호 앞 7자리</label>
+            <div className="flex items-center h-14 bg-gray-100 rounded-xl px-4 gap-2">
               <input
                 type="text"
                 inputMode="numeric"
-                placeholder="생년월일"
+                placeholder="생년월일 6자리"
                 maxLength={6}
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value.replace(/\D/g, ''))}
-                className="w-24 text-sm text-gray-800 placeholder-gray-400 outline-none"
+                className="w-28 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
               />
-              <span className="text-gray-400">-</span>
+              <span className="text-gray-300 font-light">|</span>
               <input
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
+                placeholder="0"
                 value={genderDigit}
                 onChange={(e) => setGenderDigit(e.target.value.replace(/\D/g, ''))}
-                className="w-5 text-sm text-gray-800 outline-none text-center"
+                className="w-5 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none text-center"
               />
-              <span className="text-gray-400 tracking-widest text-sm">
-                &#42;&#42;&#42;&#42;&#42;&#42;
-              </span>
+              <span className="text-gray-400 tracking-widest text-sm">••••••</span>
             </div>
           </div>
 
-          {/* 휴대폰번호 */}
-          <div>
-            <label className="block text-xs text-gray-500 mb-1.5">휴대폰번호</label>
-            <div className="flex items-center h-14 border border-gray-200 rounded-xl px-3 gap-2">
-              <div className="relative">
-                <select
-                  value={carrier}
-                  onChange={(e) => setCarrier(e.target.value)}
-                  className="text-sm text-gray-700 outline-none appearance-none pr-4 cursor-pointer bg-transparent"
-                >
-                  <option value="">통신사</option>
-                  {CARRIERS.map((c) => (
-                    <option key={c.value} value={c.label}>{c.label}</option>
-                  ))}
-                </select>
-                <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">▼</span>
-              </div>
+          {/* 통신사 + 휴대폰번호 */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs text-gray-500 font-medium">통신사 · 휴대폰번호</label>
+            <div className="flex items-center h-14 bg-gray-100 rounded-xl px-4 gap-2 relative" ref={carrierRef}>
+              {/* 통신사 드롭다운 */}
+              <button
+                type="button"
+                onClick={() => setCarrierOpen((o) => !o)}
+                className="flex items-center justify-between w-16 shrink-0 text-sm font-medium text-gray-700"
+              >
+                <span className={carrier ? 'text-gray-900' : 'text-gray-400'}>
+                  {carrier ? CARRIERS.find((c) => c.value === carrier)?.label : '통신사'}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className={`text-gray-400 transition-transform ${carrierOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
 
-              <div className="w-px h-5 bg-gray-200 mx-1" />
+              {/* 드롭다운 목록 */}
+              {carrierOpen && (
+                <div className="absolute left-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-10 w-28">
+                  {CARRIERS.map((c) => (
+                    <button
+                      key={c.value}
+                      type="button"
+                      onClick={() => { setCarrier(c.value); setCarrierOpen(false); }}
+                      className={`w-full px-4 py-3 text-sm text-left transition-colors ${
+                        carrier === c.value
+                          ? 'bg-primary-500/10 text-primary-600 font-semibold'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <span className="text-gray-300 font-light">|</span>
 
               <input
                 type="tel"
-                placeholder="휴대폰번호 입력"
+                placeholder="'-' 없이 숫자만 입력"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
-                className="flex-1 text-sm text-gray-800 placeholder-gray-400 outline-none"
+                className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none"
               />
-
               {phone && (
                 <button
                   type="button"
                   onClick={() => setPhone('')}
-                  className="text-gray-400 text-xl leading-none"
+                  className="text-gray-400 text-xl leading-none shrink-0"
                 >
                   ×
                 </button>
@@ -144,29 +199,25 @@ export default function SignupPhonePage() {
             </div>
           </div>
 
-          {error && <p className="text-red-500 text-xs px-1">{error}</p>}
         </div>
       </div>
 
-      <div className="px-6 pb-4 flex gap-3">
-        <button
-          type="button"
-          onClick={() => router.push('/signup')}
-          className="flex-1 h-14 bg-gray-200 text-gray-700 rounded-xl text-base font-medium"
-        >
-          이전
-        </button>
+      {/* 에러 메시지 - 고정 높이 */}
+      <div className="px-6 h-8 flex items-center">
+        <p className={`text-sm text-red-500 ${error ? 'visible' : 'invisible'}`}>{error || ' '}</p>
+      </div>
+
+      {/* 하단 버튼 */}
+      <div className="px-6 pb-8">
         <button
           type="button"
           onClick={handleNext}
           disabled={loading}
-          className="flex-1 h-14 bg-[#131329] text-white rounded-xl text-base font-medium disabled:opacity-60"
+          className="w-full h-14 bg-primary-500 text-white rounded-xl text-base font-semibold disabled:opacity-60 transition-opacity"
         >
-          {loading ? '전송 중...' : '다음'}
+          {loading ? '전송 중...' : '인증번호 받기'}
         </button>
       </div>
-
-      <div className="h-8 bg-[#131329]" />
     </div>
   );
 }
