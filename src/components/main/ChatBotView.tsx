@@ -305,15 +305,15 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 {/* 사이드바 역사 내역 패널 오버레이 */}
                 {sidebarOpen && (
                     <div className="absolute inset-0 z-50 flex">
-                        <div className="w-4/5 bg-gray-900 h-full flex flex-col px-5 py-6 shadow-2xl">
+                        <div className="w-4/5 bg-bg h-full flex flex-col px-5 py-6 shadow-2xl border-r border-gray-100">
                             <button onClick={() => setSidebar(false)}
-                                    className="mb-6 self-start p-1 rounded-full hover:bg-gray-700 transition-colors">
-                                <Menu size={22} className="text-gray-100"/>
+                                    className="mb-6 self-start p-1 rounded-full hover:bg-gray-100 transition-colors">
+                                <Menu size={22} className="text-gray-700"/>
                             </button>
 
                             <button
                                 onClick={startNewChat}
-                                className="flex items-center gap-2.5 text-white bg-primary-700 hover:bg-primary-900 rounded-xl px-4 py-3 mb-6 transition-colors shadow-sm font-medium text-sm"
+                                className="flex items-center gap-2.5 text-white bg-primary-500 hover:bg-primary-700 rounded-xl px-4 py-3 mb-6 transition-colors shadow-[0_4px_14px_rgba(27,133,255,0.3)] font-semibold text-sm"
                             >
                                 <PlusCircle size={18} className="text-white"/>
                                 <span>새로운 상담 시작</span>
@@ -329,17 +329,17 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                                             return (
                                                 <div
                                                     key={s.sessionId}
-                                                    className={`flex items-center justify-between group rounded-xl transition-all px-3 py-1 ${isSelected ? 'bg-gray-700 text-primary-300 font-medium' : 'hover:bg-gray-800 text-gray-200'}`}
+                                                    className={`flex items-center justify-between group rounded-xl transition-all px-3 py-1 ${isSelected ? 'bg-primary-50 border border-primary-100' : 'hover:bg-gray-100'}`}
                                                 >
                                                     <button
                                                         onClick={() => loadSession(s)}
-                                                        className="flex-1 text-left text-sm py-2 truncate mr-2"
+                                                        className={`flex-1 text-left text-sm py-2 truncate mr-2 ${isSelected ? 'text-primary-600 font-semibold' : 'text-gray-700'}`}
                                                     >
                                                         {s.title || '이름 없는 대화'}
                                                     </button>
                                                     <button
                                                         onClick={(e) => deleteSession(s.sessionId, e)}
-                                                        className="text-gray-500 hover:text-error p-1 md:opacity-0 group-hover:opacity-100 transition-all rounded-md hover:bg-gray-700 shrink-0"
+                                                        className="text-gray-300 hover:text-red-400 p-1 md:opacity-0 group-hover:opacity-100 transition-all rounded-md hover:bg-red-50 shrink-0"
                                                     >
                                                         <Trash2 size={14}/>
                                                     </button>
@@ -351,7 +351,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                             )}
                         </div>
 
-                        <div className="flex-1 bg-black/40 backdrop-blur-xs" onClick={() => setSidebar(false)}/>
+                        <div className="flex-1 bg-black/30 backdrop-blur-xs" onClick={() => setSidebar(false)}/>
                     </div>
                 )}
 
