@@ -44,6 +44,7 @@ export interface DashboardData {
   targetSalary: number;
   currentBalance: number;
   progressRate: number;
+  payday: number;
   dday: number;
 }
 

@@ -33,10 +33,28 @@ export default function VirtualSalaryCard({
   showSettingButton = true,
 }: Props) {
   const router = useRouter();
-  const dday = dashboard?.dday ?? null;
+  const rawDday = dashboard?.dday ?? null;
+  // 서버는 UTC 기준으로 dday를 계산하므로, KST와 UTC의 날짜 차이만큼 보정
+  const dday = rawDday !== null
+    ? (() => {
+        const utcNow = new Date();
+        const kstNow = new Date(Date.now() + 9 * 3600 * 1000);
+        const utcMidnight = Date.UTC(utcNow.getUTCFullYear(), utcNow.getUTCMonth(), utcNow.getUTCDate());
+        const kstMidnight = Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate());
+        const dayDiff = Math.round((kstMidnight - utcMidnight) / 86_400_000);
+        return rawDday - dayDiff;
+      })()
+    : null;
   const ddayLabel = dday === null ? "-" : dday === 0 ? "D-DAY" : `D-${dday}`;
-  const paydayOfMonth =
-    dday !== null ? new Date(Date.now() + dday * 86_400_000).getDate() : null;
+  const paydayOfMonth = dashboard?.payday ?? (dday !== null
+    ? (() => {
+        const kstNow = new Date(Date.now() + 9 * 3600 * 1000);
+        const target = new Date(
+          Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate() + dday)
+        );
+        return target.getUTCDate();
+      })()
+    : null);
   const remainingRate = dashboard
     ? Math.round(Math.max(0, 100 - (dashboard.progressRate ?? 0)))
     : 0;

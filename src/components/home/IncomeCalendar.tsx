@@ -178,7 +178,7 @@ export default function IncomeCalendar({
         <h2 className="text-base font-bold text-gray-900">계약 캘린더</h2>
         <button
           onClick={() => router.push("/contracts")}
-          className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg"
+          className="text-xs font-medium text-primary-500 bg-bg-card border border-primary-300 px-2.5 py-1.5 rounded-lg"
         >
           전체 보기
         </button>

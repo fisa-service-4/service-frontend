@@ -47,7 +47,7 @@ function FieldInput({
     <div className={`flex flex-col gap-0.5 ${narrow ? 'w-20 shrink-0' : 'flex-1 min-w-0'}`}>
       <span className="text-[10px] text-gray-400 px-0.5">{label}</span>
       <div
-        className={`flex items-center bg-gray-100 rounded-xl px-2.5 py-2 gap-1 ${disabled ? 'opacity-50' : ''}`}
+        className={`flex items-center rounded-xl px-2.5 py-2 gap-1 border transition-colors ${value ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent'} ${disabled ? 'opacity-50' : ''}`}
         onClick={disabled && onDisabledClick ? onDisabledClick : undefined}
       >
         {unit && <span className="text-xs text-gray-400 shrink-0">{unit}</span>}

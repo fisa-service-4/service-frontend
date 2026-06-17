@@ -55,8 +55,8 @@ export default function SignupPage() {
   return (
     <div className="flex flex-col min-h-screen bg-bg">
       {/* 상단 헤더 */}
-      <div className="h-14 bg-[#131329] flex items-center px-4">
-        <button type="button" onClick={() => router.push('/')} className="text-white p-1">
+      <div className="bg-bg flex items-center px-4 py-3">
+        <button type="button" onClick={() => router.push('/')} className="text-gray-800 p-1">
           <ChevronLeft size={24} />
         </button>
       </div>
@@ -86,7 +86,7 @@ export default function SignupPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
-              className="w-full h-14 bg-gray-100 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none"
+              className={`w-full h-14 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none border transition-colors ${email.trim() ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent focus:bg-bg-card focus:border-primary-300'}`}
             />
           </div>
 
@@ -99,7 +99,7 @@ export default function SignupPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
-              className="w-full h-14 bg-gray-100 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none"
+              className={`w-full h-14 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none border transition-colors ${password ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent focus:bg-bg-card focus:border-primary-300'}`}
             />
           </div>
 
@@ -110,7 +110,7 @@ export default function SignupPage() {
               <select
                 value={jobType}
                 onChange={(e) => setJobType(e.target.value)}
-                className="w-full h-14 bg-gray-100 rounded-xl px-4 text-sm text-gray-800 outline-none appearance-none cursor-pointer"
+                className={`w-full h-14 rounded-xl px-4 text-sm text-gray-800 outline-none appearance-none cursor-pointer border transition-colors ${jobType ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent'}`}
               >
                 <option value="" disabled>선택해주세요</option>
                 {JOB_OPTIONS.map((j) => (

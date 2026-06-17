@@ -237,7 +237,11 @@ export default function AccountManageView() {
                             [role]: e.target.value ? Number(e.target.value) : '',
                           }))
                         }
-                        className="w-full h-10 bg-gray-50 border border-gray-200 rounded-xl px-3 pr-8 text-sm text-gray-800 outline-none appearance-none cursor-pointer focus:border-primary-400 focus:bg-white transition-colors"
+                        className={`w-full h-10 rounded-xl px-3 pr-8 text-sm outline-none appearance-none cursor-pointer transition-colors ${
+                          selections[role]
+                            ? 'bg-bg-card border border-primary-300 text-gray-800'
+                            : 'bg-gray-50 border border-gray-200 text-gray-400'
+                        }`}
                       >
                         <option value="">계좌를 선택해주세요</option>
                         {availableAccounts(role).map((a) => (
@@ -246,7 +250,12 @@ export default function AccountManageView() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown size={15} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <ChevronDown
+                        size={15}
+                        className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                          selections[role] ? 'text-primary-500' : 'text-gray-400'
+                        }`}
+                      />
                     </div>
                   </div>
                 ))}
@@ -263,7 +272,7 @@ export default function AccountManageView() {
               <button
                 onClick={cancelEdit}
                 disabled={saving}
-                className="flex-1 py-3 bg-gray-200 text-gray-700 font-semibold rounded-2xl text-sm disabled:opacity-50"
+                className="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold rounded-2xl text-sm disabled:opacity-50"
               >
                 취소
               </button>

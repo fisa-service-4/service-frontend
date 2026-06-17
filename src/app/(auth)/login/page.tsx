@@ -2,7 +2,6 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { TrendingUp } from 'lucide-react';
 import { authApi } from '@/api/auth';
 import { tokenUtils } from '@/utils/token';
 import { getMydataConnections } from '@/api/mydata';
@@ -84,8 +83,9 @@ function LoginForm() {
       <div className="flex-1 flex flex-col justify-center px-6 py-12">
         {/* 브랜드 로고 */}
         <div className="flex items-center gap-2.5 mb-10">
-          <div className="w-10 h-10 bg-primary-500 rounded-2xl flex items-center justify-center shadow-md">
-            <TrendingUp className="text-white" size={20} />
+          <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-[0_4px_16px_rgba(27,133,255,0.35)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/flon_64x64.png" alt="flon" width={28} height={28} />
           </div>
           <span className="text-gray-900 text-xl font-bold">flon</span>
         </div>
@@ -104,7 +104,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
-                className="w-full h-14 bg-gray-100 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-500/30"
+                className={`w-full h-14 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none border transition-colors ${email.trim() ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent focus:bg-bg-card focus:border-primary-300'}`}
               />
             </div>
 
@@ -116,7 +116,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="w-full h-14 bg-gray-100 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary-500/30"
+                className={`w-full h-14 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none border transition-colors ${password ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent focus:bg-bg-card focus:border-primary-300'}`}
               />
             </div>
 

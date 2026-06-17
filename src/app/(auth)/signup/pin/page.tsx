@@ -84,8 +84,8 @@ export default function SignupPinPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <div className="h-12 bg-[#131329]" />
+    <div className="flex flex-col min-h-screen bg-bg">
+      <div className="bg-bg py-3 px-4" />
 
       <div className="flex-1 flex flex-col items-center pt-16 pb-4">
         <p className="text-center text-base text-gray-700 mb-10 leading-loose whitespace-pre-line">
@@ -117,11 +117,11 @@ export default function SignupPinPage() {
         </div>
       </div>
 
-      <div className="bg-[#131329] flex">
+      <div className="bg-bg border-t border-gray-100 flex">
         <button
           type="button"
           onClick={handleBack}
-          className="flex-1 h-14 text-white text-base font-medium border-r border-white/10"
+          className="flex-1 h-14 text-gray-700 text-base font-medium border-r border-gray-100"
         >
           이전
         </button>
@@ -129,7 +129,7 @@ export default function SignupPinPage() {
           type="button"
           onClick={handleAction}
           disabled={loading || current.length < PIN_LENGTH}
-          className="flex-1 h-14 text-white text-base font-medium disabled:opacity-40"
+          className="flex-1 h-14 text-primary-500 text-base font-semibold disabled:opacity-40"
         >
           {loading ? '처리 중...' : '완료'}
         </button>
