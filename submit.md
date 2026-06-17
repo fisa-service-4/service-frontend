@@ -24,7 +24,7 @@
 
 ### 2-2. 소프트웨어 아키텍처
 
-![소프트웨어 아키텍처](./images/software-architecture.png)
+![소프트웨어 아키텍처](./images/flon_system_architecture_alb.png)
 
 ### 설명
 
