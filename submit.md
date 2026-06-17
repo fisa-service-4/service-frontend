@@ -16,7 +16,7 @@
 
 ### 2-1. 시스템 아키텍쳐
 
-![시스템 아키텍처](./images/system-architecture.png)
+![시스템 아키텍처](./images/submit-system-architecture.png)
 
 ### 설명
 
