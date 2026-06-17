@@ -16,7 +16,7 @@
 
 ### 2-1. 시스템 아키텍쳐
 
-**🖼️ 이미지 생성 필요**
+![시스템 아키텍처](./images/system-architecture.png)
 
 ### 설명
 
@@ -24,7 +24,7 @@ service-frontend(Next.js)가 단일 진입점인 service-backend(Spring Boot)와
 
 ### 2-2. 소프트웨어 아키텍처
 
-**🖼️ 이미지 생성 필요**
+![소프트웨어 아키텍처](./images/software-architecture.png)
 
 ### 설명
 
@@ -35,6 +35,8 @@ service-frontend는 페이지·컴포넌트·API 클라이언트의 3계층으�
 ## 3\. 주요 기능 소개
 
 ### 3-1. 핵심 기술 구성
+
+![핵심 기술 구성](./images/core-technologies.png)
 
 #### 1. LangGraph interrupt() 기반 AI 금융 에이전트
 
@@ -81,7 +83,7 @@ bank-server / stock-server / transaction-server 3개 서버에 걸친 이체·�
 
 ### 3-2. 통합 워크플로우 다이어그램
 
-> **🖼️ 이미지 생성 필요**
+![통합 워크플로우](./images/workflow.png)
 
 ---
 
