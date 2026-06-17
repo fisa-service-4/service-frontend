@@ -156,15 +156,15 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
           {/* 총 수입 / 총 지출 요약 */}
           {!loading && !error && (
             <div className="flex gap-3 mb-5">
-              <div className="flex-1 bg-gray-100 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-900 mb-1">총 수입</p>
-                <p className={`text-sm font-bold ${totalIncome > 0 ? 'text-blue-500' : 'text-gray-900'}`}>
+              <div className="flex-1 bg-primary-50 border border-primary-100 rounded-xl px-4 py-3">
+                <p className="text-xs text-slate-500 mb-1">총 수입</p>
+                <p className={`text-sm font-bold ${totalIncome > 0 ? 'text-primary-500' : 'text-slate-800'}`}>
                   {totalIncome > 0 ? `${formatKRW(totalIncome)} 원` : '0 원'}
                 </p>
               </div>
-              <div className="flex-1 bg-gray-100 rounded-xl px-4 py-3">
-                <p className="text-xs text-gray-900 mb-1">총 지출</p>
-                <p className={`text-sm font-bold ${totalExpense > 0 ? 'text-red-500' : 'text-gray-900'}`}>
+              <div className="flex-1 bg-primary-50 border border-primary-100 rounded-xl px-4 py-3">
+                <p className="text-xs text-slate-500 mb-1">총 지출</p>
+                <p className={`text-sm font-bold ${totalExpense > 0 ? 'text-red-500' : 'text-slate-800'}`}>
                   {totalExpense > 0 ? `${formatKRW(totalExpense)} 원` : '0 원'}
                 </p>
               </div>

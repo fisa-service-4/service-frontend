@@ -31,7 +31,7 @@ function getContractBadge(contract: Contract): { label: string; style: string } 
   const tbcStart = new Date(pay); tbcStart.setDate(pay.getDate() - 2);
   const tbcEnd   = new Date(pay); tbcEnd.setDate(pay.getDate() + 2);
 
-  if (today > tbcEnd)    return { label: '지연',    style: 'bg-red-100 text-red-600'     };
+  if (today > tbcEnd)    return { label: '실패',    style: 'bg-red-100 text-red-600'     };
   if (today >= tbcStart) return { label: '확인 중', style: 'bg-amber-100 text-amber-600' };
   if (contract.contractStatus === 'DELAYED') return { label: '지연', style: 'bg-red-100 text-red-600' };
   return { label: '입금 대기', style: 'bg-primary-100 text-primary-700' };

@@ -35,7 +35,7 @@ export default function ConnectedStep({ bankAccounts, stockAccounts, onNext }: P
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">
-      <div className="h-14 bg-[#131329]" />
+      <div className="bg-bg py-3 px-4" />
 
       <div className="flex-1 px-6 pt-8 overflow-y-auto">
         <div className="flex items-center gap-2 mb-1">

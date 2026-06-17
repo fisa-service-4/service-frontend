@@ -257,12 +257,15 @@ function StocksContent() {
         <div className="flex flex-col h-screen bg-bg">
 
             {/* 헤더 */}
-            <div className="px-5 py-3 bg-bg shrink-0" />
+            <div className="px-5 py-3 bg-bg shrink-0 flex items-center">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/flon_wordmark_v2_transparent.svg" alt="flon" className="h-7 w-auto" />
+            </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pt-4 pb-4">
+            <div className="flex-1 overflow-y-auto px-4 pb-4">
 
                 {/* 검색창 */}
-                <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-3 mb-4">
+                <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-3 mb-4 border border-transparent focus-within:bg-bg-card focus-within:border-primary-300 transition-all">
                     <Search size={18} className="text-gray-400 shrink-0"/>
                     <input
                         className="flex-1 bg-transparent outline-none text-gray-900 text-sm placeholder:text-gray-400"

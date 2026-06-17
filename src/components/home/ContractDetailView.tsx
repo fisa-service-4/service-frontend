@@ -17,6 +17,22 @@ import BottomNav from "@/components/main/BottomNav";
 
 const fmt = (n: number) => `${n.toLocaleString()} 원`;
 
+function fmtKST(dateStr: string): string {
+  const utcStr =
+    dateStr.endsWith("Z") || dateStr.includes("+") ? dateStr : dateStr + "Z";
+  const d = new Date(utcStr);
+  return d.toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}
+
 const TAX_RATE: Record<string, number> = {
   BUSINESS: 0.033,
   ETC: 0.033,
@@ -63,11 +79,15 @@ function getDetailBadge(
         todayTbc.setHours(0, 0, 0, 0);
         const payTbc = new Date(contract.expectedPaymentDate);
         payTbc.setHours(0, 0, 0, 0);
-        const tbcEnd = new Date(payTbc);
-        tbcEnd.setDate(payTbc.getDate() + 2);
-        return todayTbc > tbcEnd
-          ? { label: "실패", style: "text-red-600 bg-red-100" }
-          : { label: "확인 중", style: "text-amber-600 bg-amber-100" };
+        const tbcStartTbc = new Date(payTbc);
+        tbcStartTbc.setDate(payTbc.getDate() - 2);
+        const tbcEndTbc = new Date(payTbc);
+        tbcEndTbc.setDate(payTbc.getDate() + 2);
+        if (todayTbc > tbcEndTbc)
+          return { label: "실패", style: "text-red-600 bg-red-100" };
+        if (todayTbc >= tbcStartTbc)
+          return { label: "확인 중", style: "text-amber-600 bg-amber-100" };
+        return { label: "입금 전", style: "text-primary-700 bg-primary-100" };
       }
     }
   }
@@ -106,7 +126,7 @@ function Row({
 }) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-      <span className="text-sm text-gray-400">{label}</span>
+      <span className="text-sm text-gray-600">{label}</span>
       <span className={`text-sm font-medium ${valueClass}`}>{value}</span>
     </div>
   );
@@ -188,8 +208,8 @@ export default function ContractDetailView({ contractId }: Props) {
 
   if (loading) {
     return (
-      <div className="flex flex-col h-screen bg-bg">
-        <div className="flex items-center px-5 py-3 bg-bg shrink-0">
+      <div className="flex flex-col h-screen bg-bg-card">
+        <div className="flex items-center px-5 py-3 bg-bg-card shrink-0">
           <button onClick={() => router.back()}>
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
@@ -204,8 +224,8 @@ export default function ContractDetailView({ contractId }: Props) {
 
   if (!contract) {
     return (
-      <div className="flex flex-col h-screen bg-bg">
-        <div className="flex items-center px-5 py-3 bg-bg shrink-0">
+      <div className="flex flex-col h-screen bg-bg-card">
+        <div className="flex items-center px-5 py-3 bg-bg-card shrink-0">
           <button onClick={() => router.back()}>
             <ArrowLeft size={22} className="text-gray-800" />
           </button>
@@ -252,6 +272,7 @@ export default function ContractDetailView({ contractId }: Props) {
     if (!matching) return null;
     if (matching.matchingStatus === "TBC") {
       if (todayMs > tbcEndMs) return { text: "실패", color: "text-red-600" };
+      if (todayMs < tbcStartMs) return { text: "입금 예정", color: "text-primary-700" };
       return tbcMismatch
         ? { text: "불일치", color: "text-amber-600" }
         : { text: "확인 중", color: "text-amber-600" };
@@ -260,7 +281,7 @@ export default function ContractDetailView({ contractId }: Props) {
       matching.matchingStatus === "MATCHED" &&
       matching.matchedBy === "USER"
     ) {
-      return { text: "완료", color: "text-primary-700" };
+      return { text: "완료", color: "text-gray-500" };
     }
     return MATCHING_LABEL[matching.matchingStatus];
   })();
@@ -290,9 +311,9 @@ export default function ContractDetailView({ contractId }: Props) {
     : null;
 
   return (
-    <div className="flex flex-col h-screen bg-bg">
+    <div className="flex flex-col h-screen bg-bg-card">
       {/* 헤더 */}
-      <div className="px-5 py-3 bg-bg shrink-0">
+      <div className="px-5 py-3 bg-bg-card shrink-0">
         <button onClick={() => router.back()}>
           <ArrowLeft size={22} className="text-gray-800" />
         </button>
@@ -311,7 +332,7 @@ export default function ContractDetailView({ contractId }: Props) {
             {badge.label}
           </span>
         </div>
-        <div className="h-px bg-gray-200 mb-4" />
+        <div className="h-px bg-gray-300 mb-4" />
 
         {/* 상세 정보 */}
         <div className="mb-5">
@@ -335,7 +356,7 @@ export default function ContractDetailView({ contractId }: Props) {
           {/* 입금일: MATCHED 또는 TBC case 3 (불일치) */}
           {(matching?.matchingStatus === "MATCHED" || tbcMismatch) &&
             matching?.matchedAt && (
-              <Row label="입금일 (거래 시간)" value={matching.matchedAt} />
+              <Row label="입금일 (거래 시간)" value={fmtKST(matching.matchedAt)} />
             )}
 
           {/* 완료일: MANUAL_MATCHED */}
@@ -360,23 +381,23 @@ export default function ContractDetailView({ contractId }: Props) {
           <Row label="예상 금액" value={fmt(actualIncome)} />
         </div>
 
-        <div className="bg-gray-100 rounded-2xl px-4 py-3 space-y-2 mb-5">
+        <div className="bg-primary-50 border border-gray-100 rounded-2xl px-4 py-3 space-y-2 mb-5">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">계약 금액</span>
-            <span className="text-sm text-gray-700">
+            <span className="text-sm text-slate-500">계약 금액</span>
+            <span className="text-sm text-slate-800">
               {fmt(contract.contractAmount)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">공제율 ({taxLabel})</span>
-            <span className="text-sm text-gray-700">- {fmt(deducted)}</span>
+            <span className="text-sm text-slate-500">공제율 ({taxLabel})</span>
+            <span className="text-sm text-slate-800">- {fmt(deducted)}</span>
           </div>
-          <div className="h-px bg-gray-300" />
+          <div className="h-px bg-primary-100" />
           <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-gray-700">
+            <span className="text-sm font-semibold text-slate-700">
               예상 금액
             </span>
-            <span className="text-sm font-semibold text-gray-900">
+            <span className="text-sm font-semibold text-slate-800">
               {fmt(actualIncome)}
             </span>
           </div>
@@ -399,7 +420,7 @@ export default function ContractDetailView({ contractId }: Props) {
 
         {/* 확인 패널 */}
         {showConfirm && (
-          <div className="mb-4 bg-primary-50 border border-primary-100 rounded-2xl px-4 py-4">
+          <div className="mb-4 bg-primary-50 border border-gray-100 rounded-2xl px-4 py-4">
             <p className="text-sm font-semibold text-gray-900 mb-1">
               완료 처리하시겠습니까?
             </p>

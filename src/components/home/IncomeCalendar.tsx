@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getContracts } from "@/api/virtualSalary";
@@ -71,6 +71,7 @@ export default function IncomeCalendar({
   onRegisterClick,
 }: Props) {
   const router = useRouter();
+  const calendarRef = useRef<HTMLDivElement>(null);
   const [year, setYear] = useState(TODAY_YEAR);
   const [month, setMonth] = useState(TODAY_MONTH);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
@@ -155,8 +156,15 @@ export default function IncomeCalendar({
     }
   };
 
-  const handleDayClick = (day: number) =>
+  const handleDayClick = (day: number) => {
+    const isDeselecting = selectedDay === day;
     setSelectedDay((prev) => (prev === day ? null : day));
+    if (!isDeselecting) {
+      setTimeout(() => {
+        calendarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 0);
+    }
+  };
 
   const listTitle =
     selectedDay !== null
@@ -164,13 +172,13 @@ export default function IncomeCalendar({
       : `${month}월 계약 목록`;
 
   return (
-    <div>
+    <div ref={calendarRef} className="min-h-[calc(100dvh-7.25rem)]">
       {/* 섹션 헤더 — 제목 + 전체 보기 */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-base font-bold text-gray-900">계약 캘린더</h2>
         <button
           onClick={() => router.push("/contracts")}
-          className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg"
+          className="text-xs font-medium text-primary-500 bg-bg-card border border-primary-300 px-2.5 py-1.5 rounded-lg"
         >
           전체 보기
         </button>
@@ -209,7 +217,7 @@ export default function IncomeCalendar({
           {["일", "월", "화", "수", "목", "금", "토"].map((d, i) => (
             <p
               key={d}
-              className={`text-center text-xs font-medium ${i === 0 ? "text-red-400" : i === 6 ? "text-primary-500" : "text-gray-400"}`}
+              className={`text-center text-xs font-medium ${i === 0 ? "text-red-600" : i === 6 ? "text-primary-500" : "text-gray-400"}`}
             >
               {d}
             </p>
@@ -251,7 +259,7 @@ export default function IncomeCalendar({
                     ${
                       !isPrev && !isNext && !isToday && !isSelected
                         ? isSun
-                          ? "text-red-400"
+                          ? "text-red-600"
                           : isSat
                             ? "text-primary-500"
                             : "text-gray-800"
@@ -263,7 +271,7 @@ export default function IncomeCalendar({
                   </div>
                   <div className="h-2 flex justify-center items-center gap-0.5 mt-0.5">
                     {!isPrev && !isNext && isPayday && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary-700" />
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "#F59E0B" }} />
                     )}
                     {!isPrev && !isNext && isIncome && (
                       <div className="w-1.5 h-1.5 rounded-full bg-primary-500" />
@@ -278,20 +286,12 @@ export default function IncomeCalendar({
         {/* 범례 */}
         <div className="flex items-center gap-4 mt-3 pt-3 border-t border-gray-100">
           <div className="flex items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-primary-700" />
+            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#F59E0B" }} />
             <span className="text-xs text-gray-400">가상 월급</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-primary-500" />
             <span className="text-xs text-gray-400">입금 예정</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded-full bg-primary-500 flex items-center justify-center shrink-0">
-              <span className="text-[9px] text-white font-bold">
-                {TODAY_DAY}
-              </span>
-            </div>
-            <span className="text-xs text-gray-400">오늘</span>
           </div>
         </div>
 
@@ -301,7 +301,12 @@ export default function IncomeCalendar({
             <h3 className="text-sm font-bold text-gray-900">{listTitle}</h3>
             {selectedDay !== null && (
               <button
-                onClick={() => setSelectedDay(null)}
+                onClick={() => {
+                  setSelectedDay(null);
+                  setTimeout(() => {
+                    calendarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 0);
+                }}
                 className="text-xs text-primary-500"
               >
                 전체 보기

@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {ArrowRight, Bot, Menu, PlusCircle, ReceiptText, Sparkles, Trash2, TrendingUp, X} from 'lucide-react';
+import {ArrowRight, Menu, PlusCircle, ReceiptText, Sparkles, Trash2, TrendingUp, X} from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import PinKeypad from '@/components/PinKeypad';
 import {apiRequest} from '@/utils/apiClient';
@@ -21,7 +21,7 @@ interface SessionSummary {
 
 const GREETING_TEXT = {
     title: '무엇을 도와드릴까요?',
-    description: '스마트한 금융 비서가 자산 분석부터 맞춤 투자 제안까지 실시간으로 안내해 드립니다.'
+    description: '스마트한 금융 비서가 자산 분석부터 맞춤 투자 제안까지\n실시간으로 안내해 드립니다.'
 };
 
 // 💡 사용자 경험(UX)을 높이는 금융 추천 질문 리스트
@@ -305,15 +305,15 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 {/* 사이드바 역사 내역 패널 오버레이 */}
                 {sidebarOpen && (
                     <div className="absolute inset-0 z-50 flex">
-                        <div className="w-4/5 bg-gray-900 h-full flex flex-col px-5 py-6 shadow-2xl">
+                        <div className="w-4/5 bg-bg h-full flex flex-col px-5 py-6 shadow-2xl border-r border-gray-100">
                             <button onClick={() => setSidebar(false)}
-                                    className="mb-6 self-start p-1 rounded-full hover:bg-gray-700 transition-colors">
-                                <Menu size={22} className="text-gray-100"/>
+                                    className="mb-6 self-start p-1 rounded-full hover:bg-gray-100 transition-colors">
+                                <Menu size={22} className="text-gray-700"/>
                             </button>
 
                             <button
                                 onClick={startNewChat}
-                                className="flex items-center gap-2.5 text-white bg-primary-700 hover:bg-primary-900 rounded-xl px-4 py-3 mb-6 transition-colors shadow-sm font-medium text-sm"
+                                className="flex items-center gap-2.5 text-white bg-primary-500 hover:bg-primary-700 rounded-xl px-4 py-3 mb-6 transition-colors shadow-[0_4px_14px_rgba(27,133,255,0.3)] font-semibold text-sm"
                             >
                                 <PlusCircle size={18} className="text-white"/>
                                 <span>새로운 상담 시작</span>
@@ -329,17 +329,17 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                                             return (
                                                 <div
                                                     key={s.sessionId}
-                                                    className={`flex items-center justify-between group rounded-xl transition-all px-3 py-1 ${isSelected ? 'bg-gray-700 text-primary-300 font-medium' : 'hover:bg-gray-800 text-gray-200'}`}
+                                                    className={`flex items-center justify-between group rounded-xl transition-all px-3 py-1 ${isSelected ? 'bg-primary-50 border border-primary-100' : 'hover:bg-gray-100'}`}
                                                 >
                                                     <button
                                                         onClick={() => loadSession(s)}
-                                                        className="flex-1 text-left text-sm py-2 truncate mr-2"
+                                                        className={`flex-1 text-left text-sm py-2 truncate mr-2 ${isSelected ? 'text-primary-600 font-semibold' : 'text-gray-700'}`}
                                                     >
                                                         {s.title || '이름 없는 대화'}
                                                     </button>
                                                     <button
                                                         onClick={(e) => deleteSession(s.sessionId, e)}
-                                                        className="text-gray-500 hover:text-error p-1 md:opacity-0 group-hover:opacity-100 transition-all rounded-md hover:bg-gray-700 shrink-0"
+                                                        className="text-gray-300 hover:text-red-400 p-1 md:opacity-0 group-hover:opacity-100 transition-all rounded-md hover:bg-red-50 shrink-0"
                                                     >
                                                         <Trash2 size={14}/>
                                                     </button>
@@ -351,7 +351,7 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                             )}
                         </div>
 
-                        <div className="flex-1 bg-black/40 backdrop-blur-xs" onClick={() => setSidebar(false)}/>
+                        <div className="flex-1 bg-black/30 backdrop-blur-xs" onClick={() => setSidebar(false)}/>
                     </div>
                 )}
 
@@ -373,24 +373,47 @@ export default function ChatBotView({onClose}: ChatBotViewProps) {
                 <div className="flex-1 overflow-y-auto bg-bg chat-scrollbar">
                     {messages.length === 0 ? (
                         /* 🌟 피드백 반영: 고성능 챗봇 대시보드 무드의 중앙 정렬 홈 화면 구조 */
-                        <div className="h-full flex flex-col justify-between py-12 px-6">
+                        <div className="h-full flex flex-col pt-4 pb-6 px-6">
 
                             {/* 상단 타이틀 및 로봇 그래픽 노출 */}
                             <div
-                                className="flex-1 flex flex-col items-center justify-center text-center max-w-sm mx-auto">
-                                <div
-                                    className="w-16 h-16 bg-primary-500 rounded-2xl flex items-center justify-center text-white mb-6 shadow-md shadow-primary-500/20 border border-primary-400 relative">
-                                    <Bot size={32} strokeWidth={2}/>
-                                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                                        <span
-                                            className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-success"></span>
+                                className="flex-1 flex flex-col items-center justify-center text-center max-w-sm mx-auto mb-6">
+                                <div className="mb-6 relative">
+                                    <svg
+                                        viewBox="0 0 200 200"
+                                        width="80"
+                                        height="80"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        style={{ filter: 'drop-shadow(0 6px 18px rgba(27,133,255,0.45))' }}
+                                    >
+                                        <defs>
+                                            <linearGradient id="faceGradChat" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stopColor="#c2deff" />
+                                                <stop offset="100%" stopColor="#a8cfff" />
+                                            </linearGradient>
+                                        </defs>
+                                        <rect x="96" y="34" width="8" height="18" rx="4" fill="#81c7ff" />
+                                        <circle cx="100" cy="30" r="7" fill="#1b85ff" />
+                                        <circle cx="100" cy="30" r="3.5" fill="white" fillOpacity="0.9" />
+                                        <rect x="40" y="52" width="120" height="100" rx="20" ry="20" fill="url(#faceGradChat)" stroke="#81c7ff" strokeWidth="2" />
+                                        <rect x="30" y="80" width="12" height="22" rx="5" fill="#81c7ff" />
+                                        <rect x="158" y="80" width="12" height="22" rx="5" fill="#81c7ff" />
+                                        <rect x="60" y="74" width="30" height="22" rx="7" fill="#1b85ff" />
+                                        <rect x="66" y="79" width="10" height="10" rx="3" fill="white" fillOpacity="0.9" />
+                                        <rect x="110" y="74" width="30" height="22" rx="7" fill="#1b85ff" />
+                                        <rect x="116" y="79" width="10" height="10" rx="3" fill="white" fillOpacity="0.9" />
+                                        <path d="M74 114 Q100 132 126 114" stroke="#1b85ff" strokeWidth="4" strokeLinecap="round" fill="none" />
+                                        <rect x="82" y="152" width="36" height="14" rx="6" fill="white" fillOpacity="0.25" />
+                                    </svg>
+                                    <span className="absolute top-0 right-0 flex h-3.5 w-3.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                                        <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-success border-2 border-white" />
                                     </span>
                                 </div>
                                 <h2 className="text-xl font-black text-gray-900 mb-3 tracking-tight">
                                     {GREETING_TEXT.title}
                                 </h2>
-                                <p className="text-sm text-gray-500 leading-relaxed font-normal">
+                                <p className="text-sm text-gray-500 leading-relaxed font-normal whitespace-pre-line">
                                     {GREETING_TEXT.description}
                                 </p>
                             </div>
