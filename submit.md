@@ -20,7 +20,7 @@
 
 ### 설명
 
-service-frontend(Next.js)가 단일 진입점인 service-backend(Spring Boot)와 JWT 기반으로 통신합니다. service-backend는 API Gateway 겸 BFF 역할로, AI 응답은 service-ai-server에, 금융 원장 접근은 transaction-server를 통해 bank-server·stock-server에 위임합니다. 마이데이터 연동은 mydata-server가 담당합니다. 데이터 저장은 운영·분석·로그·벡터 4개의 PostgreSQL과 Redis(세션 캐시), Oracle XE(은행·증권 원장)로 분리됩니다. 서버 간 비동기 이벤트는 Kafka로 처리합니다.
+사용자는 ALB를 통해 AWS 서비스망에 접근하며, service-frontend(Next.js)와 service-backend(Spring Boot)가 사용자 서비스와 인증·비즈니스 로직을 처리합니다. AI 분석 및 챗봇 기능은 service-ai-server에서 수행하고, 외부 금융기관은 별도 영역의 mydata-server에서 담당합니다. 중요한 운영 데이터는 Amazon RDS에 저장하고, 분석/로그/벡터 데이터와 Redis 캐시는 Data Layer에 분리하여 관리합니다. 금융 원장 시스템은 보안성과 독립성을 위해 온프레미스 계정계망에 분리 배치하였으며, bank-server / stock-server / transaction-server(채널계) Oracle 기반 원장을 관리합니다. AWS와 온프레미스는 Site-to-Site VPN으로 연결되며, 은행 서버와 증권 서버 사이의 이체와 같은 분산 금융 거래는 Saga 패턴과 Reconciliation으로 정합성과 장애 복구를 보장합니다.
 
 ### 2-2. 소프트웨어 아키텍처
 
