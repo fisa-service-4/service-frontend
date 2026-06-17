@@ -9,6 +9,7 @@ export const BANK_LOGO: Record<string, string> = {
   '088': '/banks/Shinhan.png',
   '090': '/banks/Kakao.png',
   '092': '/banks/Toss.png',
+  '243': '/banks/KIS.png',
   '247': '/banks/NH.png',
 };
 

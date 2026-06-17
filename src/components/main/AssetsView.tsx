@@ -192,7 +192,10 @@ export default function AssetsView() {
       <div className="flex-1 flex flex-col relative overflow-hidden">
 
         {/* 헤더 */}
-        <div className="px-5 py-3 shrink-0" />
+        <div className="px-5 py-3 shrink-0 flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/flon_wordmark_v2_transparent.svg" alt="flon" className="h-7 w-auto" />
+        </div>
 
         <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-6">
           
@@ -218,15 +221,15 @@ export default function AssetsView() {
                   지난달 대비 -
                 </span>
                 <div className="flex gap-3">
-                  <div className="flex-1 bg-gray-100 rounded-xl p-3">
-                    <p className="text-xs text-gray-900 mb-1">은행 잔액</p>
-                    <p className="text-sm font-bold text-gray-900">
+                  <div className="flex-1 bg-primary-50 border border-primary-100 rounded-xl p-3">
+                    <p className="text-xs text-slate-500 mb-1">은행 잔액</p>
+                    <p className="text-sm font-bold text-slate-800">
                       {formatKRW(bankTotal)}
                     </p>
                   </div>
-                  <div className="flex-1 bg-gray-100 rounded-xl p-3">
-                    <p className="text-xs text-gray-900 mb-1">증권 예수금</p>
-                    <p className="text-sm font-bold text-gray-900">
+                  <div className="flex-1 bg-primary-50 border border-primary-100 rounded-xl p-3">
+                    <p className="text-xs text-slate-500 mb-1">증권 예수금</p>
+                    <p className="text-sm font-bold text-slate-800">
                       {formatKRW(stockTotal)}
                     </p>
                   </div>

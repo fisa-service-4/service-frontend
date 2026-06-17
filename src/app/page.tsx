@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { TrendingUp } from 'lucide-react';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -12,8 +11,9 @@ export default function LandingPage() {
 
         {/* 중앙 로고 영역 */}
         <div className="flex-1 flex flex-col items-center justify-center px-8 gap-4">
-          <div className="w-20 h-20 bg-primary-500 rounded-3xl flex items-center justify-center shadow-[0_8px_32px_rgba(27,133,255,0.35)]">
-            <TrendingUp className="text-white" size={40} />
+          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-[0_8px_32px_rgba(27,133,255,0.35)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/flon_64x64.png" alt="flon" width={48} height={48} />
           </div>
           <div className="text-center mt-2">
             <h1 className="text-gray-900 text-3xl font-bold tracking-wide">flon</h1>

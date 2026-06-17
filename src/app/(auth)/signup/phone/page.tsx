@@ -78,8 +78,8 @@ export default function SignupPhonePage() {
   return (
     <div className="flex flex-col min-h-screen bg-bg">
       {/* 상단 헤더 */}
-      <div className="h-14 bg-[#131329] flex items-center px-4">
-        <button type="button" onClick={() => router.push('/signup')} className="text-white p-1">
+      <div className="bg-bg flex items-center px-4 py-3">
+        <button type="button" onClick={() => router.push('/signup')} className="text-gray-800 p-1">
           <ChevronLeft size={24} />
         </button>
       </div>
@@ -108,14 +108,14 @@ export default function SignupPhonePage() {
               placeholder="실명을 입력하세요"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              className="w-full h-14 bg-gray-100 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none"
+              className={`w-full h-14 rounded-xl px-4 text-sm text-gray-800 placeholder-gray-400 outline-none border transition-colors ${userName.trim() ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent focus:bg-bg-card focus:border-primary-300'}`}
             />
           </div>
 
           {/* 주민등록번호 앞 7자리 */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs text-gray-500 font-medium">주민등록번호 앞 7자리</label>
-            <div className="flex items-center h-14 bg-gray-100 rounded-xl px-4 gap-2">
+            <div className={`flex items-center h-14 rounded-xl px-4 gap-2 border transition-colors ${birthDate.length === 6 && genderDigit ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent focus-within:bg-bg-card focus-within:border-primary-300'}`}>
               <input
                 type="text"
                 inputMode="numeric"
@@ -142,7 +142,7 @@ export default function SignupPhonePage() {
           {/* 통신사 + 휴대폰번호 */}
           <div className="flex flex-col gap-2">
             <label className="text-xs text-gray-500 font-medium">통신사 · 휴대폰번호</label>
-            <div className="flex items-center h-14 bg-gray-100 rounded-xl px-4 gap-2 relative" ref={carrierRef}>
+            <div className={`flex items-center h-14 rounded-xl px-4 gap-2 relative border transition-colors ${carrier && phone ? 'bg-bg-card border-primary-300' : 'bg-gray-100 border-transparent focus-within:bg-bg-card focus-within:border-primary-300'}`} ref={carrierRef}>
               {/* 통신사 드롭다운 */}
               <button
                 type="button"

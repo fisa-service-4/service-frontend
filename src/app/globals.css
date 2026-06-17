@@ -110,3 +110,8 @@ body {
 @utility animate-float {
     animation: float 3s ease-in-out infinite;
 }
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(37%) sepia(97%) saturate(1200%) hue-rotate(207deg) brightness(102%) contrast(104%);
+    cursor: pointer;
+}

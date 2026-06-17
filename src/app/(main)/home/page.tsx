@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Bell } from "lucide-react";
 import BottomNav from "@/components/main/BottomNav";
 import ContractRegisterView from "@/components/main/ContractRegisterView";
 import VirtualSalaryCard from "@/components/home/VirtualSalaryCard";
@@ -30,9 +31,7 @@ export default function HomePage() {
       .catch((err) => {
         if (!cancelled)
           setError(
-            err instanceof Error
-              ? err.message
-              : "데이터를 불러올 수 없습니다.",
+            err instanceof Error ? err.message : "데이터를 불러올 수 없습니다.",
           );
       })
       .finally(() => {
@@ -64,10 +63,13 @@ export default function HomePage() {
     <div className="flex flex-col h-screen bg-bg">
       <div className="flex-1 flex flex-col relative overflow-hidden">
         {/* 헤더 */}
-        <div className="px-5 py-3 bg-bg shrink-0" />
+        <div className="px-5 py-3 bg-bg shrink-0 flex items-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/flon_wordmark_v2_transparent.svg" alt="flon" className="h-7 w-auto" />
+        </div>
 
         {/* 스크롤 영역 */}
-        <div className="flex-1 overflow-y-auto px-4 pt-4 space-y-5 pb-4 relative">
+        <div className="flex-1 overflow-y-auto px-4 space-y-5 pb-4 relative">
           {/* 오류 메시지 */}
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">
@@ -135,7 +137,6 @@ export default function HomePage() {
             </span>
           </div>
         </button>
-
       </div>
 
       <BottomNav />

@@ -52,8 +52,8 @@ export default function SelectStep({ userName, onNext, onBack, loading, error }:
   return (
     <div className="flex flex-col h-screen bg-bg">
       {/* 헤더 */}
-      <div className="h-14 bg-[#131329] flex items-center px-4">
-        <button type="button" onClick={onBack} className="text-white p-1">
+      <div className="bg-bg flex items-center px-4 py-3">
+        <button type="button" onClick={onBack} className="text-gray-800 p-1">
           <ChevronLeft size={24} />
         </button>
       </div>
