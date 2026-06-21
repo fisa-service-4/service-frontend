@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
 import { getAccountTransactions } from '@/api/bank';
 import type { AccountTransaction } from '@/types/bank';
@@ -69,18 +69,47 @@ function groupByDate(
   return map;
 }
 
+function getMonthRange(year: number, month: number) {
+  const fromDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const lastDay  = new Date(year, month + 1, 0).getDate();
+  const toDate   = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  return { fromDate, toDate };
+}
+
 export default function BankAccountDetailView({ account, onBack }: Props) {
+  const today = new Date();
+
+  const [viewYear,  setViewYear]  = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed
+
   const [transactions, setTransactions] = useState<AccountTransaction[]>([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
 
-  const now        = new Date();
-  const year       = now.getFullYear();
-  const month      = now.getMonth();
-  const fromDate   = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-  const lastDay    = new Date(year, month + 1, 0).getDate();
-  const toDate     = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-  const monthLabel = `${month + 1}월`;
+  const isCurrentMonth =
+    viewYear === today.getFullYear() && viewMonth === today.getMonth();
+
+  const { fromDate, toDate } = getMonthRange(viewYear, viewMonth);
+  const monthLabel = `${viewYear}년 ${viewMonth + 1}월`;
+
+  function prevMonth() {
+    if (viewMonth === 0) {
+      setViewYear((y) => y - 1);
+      setViewMonth(11);
+    } else {
+      setViewMonth((m) => m - 1);
+    }
+  }
+
+  function nextMonth() {
+    if (isCurrentMonth) return;
+    if (viewMonth === 11) {
+      setViewYear((y) => y + 1);
+      setViewMonth(0);
+    } else {
+      setViewMonth((m) => m + 1);
+    }
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -90,9 +119,9 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account.accountId]);
+  }, [account.accountId, fromDate, toDate]);
 
-  const bankName = BANK_NAME[account.bankCode] ?? account.bankCode;
+  const bankName   = BANK_NAME[account.bankCode] ?? account.bankCode;
   const headerName = account.accountName.replace(bankName, '').trim() || account.accountName;
 
   const totalIncome  = transactions.filter((t) => t.transactionType === 'INCOME').reduce((s, t) => s + t.amount, 0);
@@ -125,11 +154,21 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
           </p>
         </div>
 
-        {/* 이번 달 내역 */}
+        {/* 거래 내역 */}
         <div className="bg-bg-card shadow-md rounded-2xl p-4">
+          {/* 월 네비게이션 */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-gray-900">이번 달 내역</h2>
-            <span className="text-xs text-gray-400">{monthLabel}</span>
+            <button onClick={prevMonth} className="p-1 text-gray-500 hover:text-gray-800">
+              <ChevronLeft size={20} />
+            </button>
+            <span className="text-base font-bold text-gray-900">{monthLabel}</span>
+            <button
+              onClick={nextMonth}
+              disabled={isCurrentMonth}
+              className={`p-1 ${isCurrentMonth ? 'text-gray-200 cursor-default' : 'text-gray-500 hover:text-gray-800'}`}
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
 
           {/* 총 수입 / 총 지출 요약 */}
@@ -179,7 +218,7 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
 
           {/* 거래 없음 */}
           {!loading && !error && transactions.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">이번 달 거래 내역이 없습니다.</p>
+            <p className="text-sm text-gray-400 text-center py-4">해당 월 거래 내역이 없습니다.</p>
           )}
 
           {/* 거래 목록 */}
