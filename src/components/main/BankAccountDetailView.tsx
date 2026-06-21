@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import { getAccountTransactions } from '@/api/bank';
+import type { AccountTransaction } from '@/types/bank';
 
 const BANK_NAME: Record<string, string> = {
   '004': 'KB국민은행',
@@ -16,26 +18,9 @@ const BANK_NAME: Record<string, string> = {
 };
 
 const TRANSACTION_TYPE_LABEL: Record<string, string> = {
-  DEPOSIT:       '입금',
-  WITHDRAW:      '출금',
-  TRANSFER_IN:   '이체입금',
-  TRANSFER_OUT:  '이체출금',
-  AUTO_TRANSFER: '자동이체',
+  INCOME:  '수입',
+  EXPENSE: '지출',
 };
-
-const INCOME_TYPES = new Set(['DEPOSIT', 'TRANSFER_IN']);
-
-interface Transaction {
-  transactionId: number;
-  transactionDateTime: string;
-  transactionType: string;
-  amount: number;
-  balanceAfter: number;
-  description: string | null;
-  merchantName: string | null;
-  merchantCategory: string | null;
-  maskedCardNumber: string | null;
-}
 
 interface BankAccount {
   accountId: number;
@@ -54,8 +39,8 @@ function formatKRW(amount: number): string {
   return amount.toLocaleString('ko-KR');
 }
 
-function toKST(utcStr: string): string {
-  return new Date(utcStr).toLocaleString('ko-KR', {
+function toKST(isoStr: string): string {
+  return new Date(isoStr).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     hour: '2-digit',
     minute: '2-digit',
@@ -63,8 +48,8 @@ function toKST(utcStr: string): string {
   });
 }
 
-function toKSTDate(utcStr: string): string {
-  return new Date(utcStr).toLocaleDateString('ko-KR', {
+function toKSTDate(isoStr: string): string {
+  return new Date(isoStr).toLocaleDateString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
@@ -72,10 +57,12 @@ function toKSTDate(utcStr: string): string {
   });
 }
 
-function groupByDate(transactions: Transaction[]): Map<string, Transaction[]> {
-  const map = new Map<string, Transaction[]>();
+function groupByDate(
+  transactions: AccountTransaction[],
+): Map<string, AccountTransaction[]> {
+  const map = new Map<string, AccountTransaction[]>();
   for (const tx of transactions) {
-    const dateKey = toKSTDate(tx.transactionDateTime);
+    const dateKey = toKSTDate(tx.transactionOccurredAt);
     if (!map.has(dateKey)) map.set(dateKey, []);
     map.get(dateKey)!.push(tx);
   }
@@ -83,7 +70,7 @@ function groupByDate(transactions: Transaction[]): Map<string, Transaction[]> {
 }
 
 export default function BankAccountDetailView({ account, onBack }: Props) {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [transactions, setTransactions] = useState<AccountTransaction[]>([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
 
@@ -98,26 +85,18 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
   useEffect(() => {
     setLoading(true);
     setError('');
-    fetch(
-      `/mydata/v1/bank/accounts/${account.accountId}/transactions?fromDate=${fromDate}&toDate=${toDate}`
-    )
-      .then(async (res) => {
-        if (!res.ok) throw new Error('거래 내역을 불러오지 못했습니다.');
-        const json = await res.json();
-        setTransactions(Array.isArray(json.data) ? json.data : []);
-      })
+    getAccountTransactions(account.accountId, fromDate, toDate)
+      .then((data) => setTransactions(Array.isArray(data) ? data : []))
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account.accountId]);
 
   const bankName = BANK_NAME[account.bankCode] ?? account.bankCode;
-
-  // 헤더 표시용: accountName에서 은행명 제거
   const headerName = account.accountName.replace(bankName, '').trim() || account.accountName;
 
-  const totalIncome  = transactions.filter((t) => INCOME_TYPES.has(t.transactionType)).reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter((t) => !INCOME_TYPES.has(t.transactionType)).reduce((s, t) => s + t.amount, 0);
+  const totalIncome  = transactions.filter((t) => t.transactionType === 'INCOME').reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions.filter((t) => t.transactionType === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
 
   const grouped = groupByDate(transactions);
 
@@ -211,9 +190,9 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
                   <p className="text-xs text-gray-400 mb-2">{date}</p>
                   <div>
                     {txList.map((tx, idx) => {
-                      const isIncome = INCOME_TYPES.has(tx.transactionType);
-                      const label    = tx.merchantName ?? tx.description ?? TRANSACTION_TYPE_LABEL[tx.transactionType] ?? tx.transactionType;
-                      const timeStr  = toKST(tx.transactionDateTime);
+                      const isIncome = tx.transactionType === 'INCOME';
+                      const label    = tx.merchantName ?? TRANSACTION_TYPE_LABEL[tx.transactionType] ?? tx.transactionType;
+                      const timeStr  = toKST(tx.transactionOccurredAt);
                       return (
                         <div key={tx.transactionId}>
                           <div className="flex items-center justify-between py-3">

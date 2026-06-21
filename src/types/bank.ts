@@ -33,6 +33,16 @@ export interface BankTransaction {
   transactionAt: string;
 }
 
+export interface AccountTransaction {
+  transactionId: number;
+  transactionType: 'INCOME' | 'EXPENSE';
+  transactionCategory: string | null;
+  amount: number;
+  balanceAfter: number;
+  merchantName: string | null;
+  transactionOccurredAt: string;
+}
+
 export interface TransactionPage {
   content: BankTransaction[];
   page: number;
