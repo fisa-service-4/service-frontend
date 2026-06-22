@@ -17,9 +17,14 @@ const BANK_NAME: Record<string, string> = {
   '092': '토스뱅크',
 };
 
+const INCOME_TYPES = new Set(['DEPOSIT', 'TRANSFER_IN']);
+
 const TRANSACTION_TYPE_LABEL: Record<string, string> = {
-  INCOME:  '수입',
-  EXPENSE: '지출',
+  DEPOSIT:       '입금',
+  WITHDRAW:      '출금',
+  TRANSFER_IN:   '이체입금',
+  TRANSFER_OUT:  '이체출금',
+  AUTO_TRANSFER: '자동이체',
 };
 
 interface BankAccount {
@@ -124,8 +129,8 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
   const bankName   = BANK_NAME[account.bankCode] ?? account.bankCode;
   const headerName = account.accountName.replace(bankName, '').trim() || account.accountName;
 
-  const totalIncome  = transactions.filter((t) => t.transactionType === 'INCOME').reduce((s, t) => s + t.amount, 0);
-  const totalExpense = transactions.filter((t) => t.transactionType === 'EXPENSE').reduce((s, t) => s + t.amount, 0);
+  const totalIncome  = transactions.filter((t) => INCOME_TYPES.has(t.transactionType)).reduce((s, t) => s + t.amount, 0);
+  const totalExpense = transactions.filter((t) => !INCOME_TYPES.has(t.transactionType)).reduce((s, t) => s + t.amount, 0);
 
   const grouped = groupByDate(transactions);
 
@@ -229,7 +234,7 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
                   <p className="text-xs text-gray-400 mb-2">{date}</p>
                   <div>
                     {txList.map((tx, idx) => {
-                      const isIncome = tx.transactionType === 'INCOME';
+                      const isIncome = INCOME_TYPES.has(tx.transactionType);
                       const label    = tx.merchantName ?? TRANSACTION_TYPE_LABEL[tx.transactionType] ?? tx.transactionType;
                       const timeStr  = toKST(tx.transactionOccurredAt);
                       return (

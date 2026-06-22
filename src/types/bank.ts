@@ -35,7 +35,7 @@ export interface BankTransaction {
 
 export interface AccountTransaction {
   transactionId: number;
-  transactionType: 'INCOME' | 'EXPENSE';
+  transactionType: 'DEPOSIT' | 'WITHDRAW' | 'TRANSFER_IN' | 'TRANSFER_OUT' | 'AUTO_TRANSFER';
   transactionCategory: string | null;
   amount: number;
   balanceAfter: number;
