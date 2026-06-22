@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import BottomNav from '@/components/main/BottomNav';
+import { getAccountTransactions } from '@/api/bank';
+import type { AccountTransaction } from '@/types/bank';
 
 const BANK_NAME: Record<string, string> = {
   '004': 'KB국민은행',
@@ -15,6 +17,8 @@ const BANK_NAME: Record<string, string> = {
   '092': '토스뱅크',
 };
 
+const INCOME_TYPES = new Set(['DEPOSIT', 'TRANSFER_IN']);
+
 const TRANSACTION_TYPE_LABEL: Record<string, string> = {
   DEPOSIT:       '입금',
   WITHDRAW:      '출금',
@@ -22,20 +26,6 @@ const TRANSACTION_TYPE_LABEL: Record<string, string> = {
   TRANSFER_OUT:  '이체출금',
   AUTO_TRANSFER: '자동이체',
 };
-
-const INCOME_TYPES = new Set(['DEPOSIT', 'TRANSFER_IN']);
-
-interface Transaction {
-  transactionId: number;
-  transactionDateTime: string;
-  transactionType: string;
-  amount: number;
-  balanceAfter: number;
-  description: string | null;
-  merchantName: string | null;
-  merchantCategory: string | null;
-  maskedCardNumber: string | null;
-}
 
 interface BankAccount {
   accountId: number;
@@ -54,8 +44,8 @@ function formatKRW(amount: number): string {
   return amount.toLocaleString('ko-KR');
 }
 
-function toKST(utcStr: string): string {
-  return new Date(utcStr).toLocaleString('ko-KR', {
+function toKST(isoStr: string): string {
+  return new Date(isoStr).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
     hour: '2-digit',
     minute: '2-digit',
@@ -63,8 +53,8 @@ function toKST(utcStr: string): string {
   });
 }
 
-function toKSTDate(utcStr: string): string {
-  return new Date(utcStr).toLocaleDateString('ko-KR', {
+function toKSTDate(isoStr: string): string {
+  return new Date(isoStr).toLocaleDateString('ko-KR', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
     month: '2-digit',
@@ -72,48 +62,71 @@ function toKSTDate(utcStr: string): string {
   });
 }
 
-function groupByDate(transactions: Transaction[]): Map<string, Transaction[]> {
-  const map = new Map<string, Transaction[]>();
+function groupByDate(
+  transactions: AccountTransaction[],
+): Map<string, AccountTransaction[]> {
+  const map = new Map<string, AccountTransaction[]>();
   for (const tx of transactions) {
-    const dateKey = toKSTDate(tx.transactionDateTime);
+    const dateKey = toKSTDate(tx.transactionOccurredAt);
     if (!map.has(dateKey)) map.set(dateKey, []);
     map.get(dateKey)!.push(tx);
   }
   return map;
 }
 
+function getMonthRange(year: number, month: number) {
+  const fromDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+  const lastDay  = new Date(year, month + 1, 0).getDate();
+  const toDate   = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+  return { fromDate, toDate };
+}
+
 export default function BankAccountDetailView({ account, onBack }: Props) {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const today = new Date();
+
+  const [viewYear,  setViewYear]  = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed
+
+  const [transactions, setTransactions] = useState<AccountTransaction[]>([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState('');
 
-  const now        = new Date();
-  const year       = now.getFullYear();
-  const month      = now.getMonth();
-  const fromDate   = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-  const lastDay    = new Date(year, month + 1, 0).getDate();
-  const toDate     = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-  const monthLabel = `${month + 1}월`;
+  const isCurrentMonth =
+    viewYear === today.getFullYear() && viewMonth === today.getMonth();
+
+  const { fromDate, toDate } = getMonthRange(viewYear, viewMonth);
+  const monthLabel = `${viewYear}년 ${viewMonth + 1}월`;
+
+  function prevMonth() {
+    if (viewMonth === 0) {
+      setViewYear((y) => y - 1);
+      setViewMonth(11);
+    } else {
+      setViewMonth((m) => m - 1);
+    }
+  }
+
+  function nextMonth() {
+    if (isCurrentMonth) return;
+    if (viewMonth === 11) {
+      setViewYear((y) => y + 1);
+      setViewMonth(0);
+    } else {
+      setViewMonth((m) => m + 1);
+    }
+  }
 
   useEffect(() => {
     setLoading(true);
     setError('');
-    fetch(
-      `/mydata/v1/bank/accounts/${account.accountId}/transactions?fromDate=${fromDate}&toDate=${toDate}`
-    )
-      .then(async (res) => {
-        if (!res.ok) throw new Error('거래 내역을 불러오지 못했습니다.');
-        const json = await res.json();
-        setTransactions(Array.isArray(json.data) ? json.data : []);
-      })
+    getAccountTransactions(account.accountId, fromDate, toDate)
+      .then((data) => setTransactions(Array.isArray(data) ? data : []))
       .catch((e: Error) => setError(e.message))
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account.accountId]);
+  }, [account.accountId, fromDate, toDate]);
 
-  const bankName = BANK_NAME[account.bankCode] ?? account.bankCode;
-
-  // 헤더 표시용: accountName에서 은행명 제거
+  const bankName   = BANK_NAME[account.bankCode] ?? account.bankCode;
   const headerName = account.accountName.replace(bankName, '').trim() || account.accountName;
 
   const totalIncome  = transactions.filter((t) => INCOME_TYPES.has(t.transactionType)).reduce((s, t) => s + t.amount, 0);
@@ -146,11 +159,21 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
           </p>
         </div>
 
-        {/* 이번 달 내역 */}
+        {/* 거래 내역 */}
         <div className="bg-bg-card shadow-md rounded-2xl p-4">
+          {/* 월 네비게이션 */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-bold text-gray-900">이번 달 내역</h2>
-            <span className="text-xs text-gray-400">{monthLabel}</span>
+            <button onClick={prevMonth} className="p-1 text-gray-500 hover:text-gray-800">
+              <ChevronLeft size={20} />
+            </button>
+            <span className="text-base font-bold text-gray-900">{monthLabel}</span>
+            <button
+              onClick={nextMonth}
+              disabled={isCurrentMonth}
+              className={`p-1 ${isCurrentMonth ? 'text-gray-200 cursor-default' : 'text-gray-500 hover:text-gray-800'}`}
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
 
           {/* 총 수입 / 총 지출 요약 */}
@@ -200,7 +223,7 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
 
           {/* 거래 없음 */}
           {!loading && !error && transactions.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">이번 달 거래 내역이 없습니다.</p>
+            <p className="text-sm text-gray-400 text-center py-4">해당 월 거래 내역이 없습니다.</p>
           )}
 
           {/* 거래 목록 */}
@@ -212,8 +235,8 @@ export default function BankAccountDetailView({ account, onBack }: Props) {
                   <div>
                     {txList.map((tx, idx) => {
                       const isIncome = INCOME_TYPES.has(tx.transactionType);
-                      const label    = tx.merchantName ?? tx.description ?? TRANSACTION_TYPE_LABEL[tx.transactionType] ?? tx.transactionType;
-                      const timeStr  = toKST(tx.transactionDateTime);
+                      const label    = tx.merchantName ?? TRANSACTION_TYPE_LABEL[tx.transactionType] ?? tx.transactionType;
+                      const timeStr  = toKST(tx.transactionOccurredAt);
                       return (
                         <div key={tx.transactionId}>
                           <div className="flex items-center justify-between py-3">
