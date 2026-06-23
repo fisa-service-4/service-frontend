@@ -3,6 +3,7 @@ import { apiRequest } from "@/utils/apiClient";
 import type {
   AccountRole,
   AccountRoleUpdateResponse,
+  AccountTransaction,
   BankAccount,
   AccountBalance,
   TransactionPage,
@@ -41,6 +42,20 @@ export const getTransactions = (
   const qs = query.toString();
   return baasRequest<TransactionPage>(
     `/bank/accounts/${accountId}/transactions${qs ? `?${qs}` : ""}`,
+  );
+};
+
+export const getAccountTransactions = (
+  accountId: number,
+  fromDate?: string,
+  toDate?: string,
+) => {
+  const query = new URLSearchParams();
+  if (fromDate) query.set("fromDate", fromDate);
+  if (toDate) query.set("toDate", toDate);
+  const qs = query.toString();
+  return apiRequest<AccountTransaction[]>(
+    `/accounts/${accountId}/transactions${qs ? `?${qs}` : ""}`,
   );
 };
 
